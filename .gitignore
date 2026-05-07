@@ -1,0 +1,60 @@
+# Local secrets
+.env
+.env.*
+!.env.example
+!.env.production.example
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+
+# BMad and local agent workspace
+.agent/
+.agents/
+_bmad/
+_bmad-output/
+_reference/
+
+# Local runtime data and uploads
+test_uploads/
+uploads/
+storage/
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+.uv-cache/
+.uv-python/
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Logs
+*.log
+*.err
+*.out
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local-only tests
+backend/test_*.py
+backend/*_test.py

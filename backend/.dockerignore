@@ -1,0 +1,11 @@
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.env
+.env.*
+test_*.py
+*_test.py
+*.pyc
+*.log
+*.err
+*.out
