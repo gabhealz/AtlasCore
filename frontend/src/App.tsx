@@ -1,17 +1,26 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import OnboardingDetail from './pages/OnboardingDetail';
 import NewOnboarding from './pages/NewOnboarding';
 import DeliveryPage from './pages/DeliveryPage';
 import AuthGuard from './components/AuthGuard';
+import AppErrorBoundary from './components/AppErrorBoundary';
 
-function App() {
+function AppRoutes() {
+  const location = useLocation();
+
   return (
-    <BrowserRouter>
+    <AppErrorBoundary resetKey={location.pathname}>
       <Routes>
         <Route path="/login" element={<Login />} />
-        
+
         <Route element={<AuthGuard />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/onboarding/new" element={<NewOnboarding />} />
@@ -21,8 +30,14 @@ function App() {
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
-    </BrowserRouter>
+    </AppErrorBoundary>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
+}

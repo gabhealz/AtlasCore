@@ -8,9 +8,30 @@ import { useAuthStore } from '../store/auth';
 
 interface Onboarding {
   id: number;
-  doctor_name: string;
-  status: string;
-  created_at: string;
+  doctor_name?: string | null;
+  status?: string | null;
+  created_at?: string | null;
+}
+
+type OnboardingListResponse = {
+  data?: Onboarding[];
+};
+
+function getDoctorName(project: Onboarding) {
+  return project.doctor_name?.trim() || `Projeto #${project.id}`;
+}
+
+function formatCreatedAt(value: string | null | undefined) {
+  if (!value) {
+    return 'Data indisponivel';
+  }
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return 'Data indisponivel';
+  }
+
+  return parsedDate.toLocaleDateString('pt-BR');
 }
 
 export default function Dashboard() {
@@ -23,8 +44,8 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchOnboardings = async () => {
       try {
-        const response = await api.get('/onboardings');
-        setOnboardings(response.data.data);
+        const response = await api.get<OnboardingListResponse>('/onboardings');
+        setOnboardings(Array.isArray(response.data.data) ? response.data.data : []);
       } catch (error) {
         const axiosError = error as AxiosError;
         if (axiosError.response?.status !== 401) {
@@ -39,7 +60,7 @@ export default function Dashboard() {
   }, []);
 
   const filteredOnboardings = onboardings.filter((project) =>
-    project.doctor_name.toLowerCase().includes(query.toLowerCase().trim())
+    getDoctorName(project).toLowerCase().includes(query.toLowerCase().trim())
   );
 
   const getStatusBadgeColor = (status: string) => {
@@ -150,12 +171,12 @@ export default function Dashboard() {
                         <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                           <div>
                             <p className="truncate text-sm font-medium text-blue-600">
-                              {project.doctor_name}
+                              {getDoctorName(project)}
                             </p>
                             <p className="mt-2 flex items-center text-sm text-gray-500">
                               <span className="truncate">
                                 Criado em:{' '}
-                                {new Date(project.created_at).toLocaleDateString('pt-BR')}
+                                {formatCreatedAt(project.created_at)}
                               </span>
                             </p>
                           </div>
@@ -163,9 +184,9 @@ export default function Dashboard() {
                             <p className="text-sm text-gray-900">ID do Projeto: #{project.id}</p>
                             <p className="mt-2 flex items-center text-sm text-gray-500">
                               <span
-                                className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusBadgeColor(project.status)}`}
+                                className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusBadgeColor(project.status ?? '')}`}
                               >
-                                {getStatusLabel(project.status)}
+                                {getStatusLabel(project.status ?? '')}
                               </span>
                             </p>
                           </div>
