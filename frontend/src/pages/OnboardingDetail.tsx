@@ -124,6 +124,10 @@ type ApiErrorResponse = {
       }>;
 };
 
+function getEnvelopeArray<T>(data: T[] | undefined) {
+  return Array.isArray(data) ? data : [];
+}
+
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
 const ALLOWED_EXTENSIONS = ['.pdf', '.txt', '.docx'];
 const IMAGE_ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif'];
@@ -490,7 +494,7 @@ export default function OnboardingDetail() {
           return;
         }
 
-        setCtaButtons(response.data.data);
+        setCtaButtons(getEnvelopeArray(response.data.data));
       } catch (error) {
         if (isCancelled) {
           return;
@@ -540,7 +544,7 @@ export default function OnboardingDetail() {
           return;
         }
 
-        setOnboardingAssets(response.data.data);
+        setOnboardingAssets(getEnvelopeArray(response.data.data));
       } catch (error) {
         if (isCancelled) {
           return;

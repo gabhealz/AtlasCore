@@ -58,6 +58,10 @@ type ApiErrorResponse = {
       }>;
 };
 
+function getEnvelopeArray<T>(data: T[] | undefined) {
+  return Array.isArray(data) ? data : [];
+}
+
 function getApiErrorMessage(
   error: AxiosError<ApiErrorResponse>,
   fallbackMessage: string,
@@ -241,7 +245,7 @@ export default function DeliveryPage() {
           return;
         }
 
-        setDeliverables(response.data.data);
+        setDeliverables(getEnvelopeArray(response.data.data));
       } catch (error) {
         if (isCancelled) {
           return;
@@ -294,7 +298,7 @@ export default function DeliveryPage() {
           return;
         }
 
-        setTrackingSheetRows(response.data.data);
+        setTrackingSheetRows(getEnvelopeArray(response.data.data));
       } catch (error) {
         if (isCancelled) {
           return;

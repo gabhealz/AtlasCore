@@ -139,7 +139,12 @@ function buildStreamUrl(onboardingId: number, token: string) {
     return null;
   }
 
-  const streamUrl = new URL(`${baseUrl}/onboardings/${onboardingId}/stream`);
+  const browserOrigin =
+    typeof window !== 'undefined' ? window.location.origin : 'http://localhost';
+  const streamUrl = new URL(
+    `${baseUrl}/onboardings/${onboardingId}/stream`,
+    browserOrigin,
+  );
   streamUrl.searchParams.set('access_token', token);
   return streamUrl.toString();
 }
