@@ -129,6 +129,158 @@ RESEARCHER_RETRY_SKELETON = "\n".join(
         ),
     )
 )
+RESEARCHER_MISSING_SECTION_TEMPLATES = {
+    "Resumo Executivo": (
+        "Pesquisa externa parcial. O documento ainda depende de validacao "
+        "humana e fontes complementares; dados sem fonte foram rebaixados "
+        "para Dado pendente de validacao externa."
+    ),
+    "Perfil do Projeto": "\n".join(
+        (
+            "| KPI | Situacao atual | Meta 3 ou 6 meses | Fonte | Status |",
+            "|---|---|---|---|---|",
+            (
+                "| Consultas | Dado pendente de validacao externa | Dado pendente "
+                "de validacao externa | Briefing/anexos | Dado pendente de "
+                "validacao externa |"
+            ),
+        )
+    ),
+    "Publico e Personas": (
+        "Personas pendentes por falta de dados rastreaveis. Fonte principal: "
+        "Extraido do briefing; validacao externa ainda pendente."
+    ),
+    "Analise de Demanda Google": "\n".join(
+        (
+            (
+                "| Tipo | Palavra-chave | Intencao | Regiao | Volume | CPC | "
+                "Fonte | URL/consulta | Data | Status |"
+            ),
+            "|---|---|---|---|---|---|---|---|---|---|",
+            (
+                "| Pesquisa | Dado pendente de validacao externa | Dado pendente de "
+                "validacao externa | Dado pendente de validacao externa | "
+                "Dado indisponivel apos pesquisa | Dado indisponivel apos "
+                "pesquisa | Google Keyword Planner | Consulta sugerida por "
+                "especialidade + cidade | Dado pendente de validacao externa | "
+                "Dado pendente de validacao externa |"
+            ),
+        )
+    ),
+    "Benchmark de Concorrentes": "\n".join(
+        (
+            (
+                "| Concorrente | Instagram | Meta | Destino | Copy | Funil | "
+                "Fonte | URL/consulta | Data | Status |"
+            ),
+            "|---|---|---|---|---|---|---|---|---|---|",
+            (
+                "| Dado pendente de validacao externa | Dado pendente de validacao "
+                "externa | Dado pendente de validacao externa | Dado pendente "
+                "de validacao externa | Dado pendente de validacao externa | "
+                "Dado pendente de validacao externa | Google Search | Consulta "
+                "sugerida por especialidade + cidade | Dado pendente de "
+                "validacao externa | Dado pendente de validacao externa |"
+            ),
+        )
+    ),
+    "Matriz de Benchmark Competitivo": "\n".join(
+        (
+            (
+                "| Concorrente | URL | Consulta que encontrou | Especialidade/foco | "
+                "Oferta | Promessa/copy | CTA | Funil | Provas | Pontos fortes | "
+                "Lacunas | Oportunidade | Status |"
+            ),
+            "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+            (
+                "| Dado pendente de validacao externa | Dado pendente de validacao "
+                "externa | Consulta sugerida por especialidade + cidade | "
+                "Dado pendente de validacao externa | Dado pendente de validacao "
+                "externa | Dado pendente de validacao externa | Dado pendente "
+                "de validacao externa | Dado pendente de validacao externa | "
+                "Nao encontrado nas fontes consultadas | Dado pendente de "
+                "validacao externa | Dado pendente de validacao externa | "
+                "Dado pendente de validacao externa | Dado pendente de "
+                "validacao externa |"
+            ),
+        )
+    ),
+    "Analise Meta": "\n".join(
+        (
+            "| Anuncio | Captacao | Autoridade | Fonte | Link/consulta | Data | Status |",
+            "|---|---|---|---|---|---|---|",
+            (
+                "| Dado pendente de validacao externa | Dado pendente de validacao "
+                "externa | Dado pendente de validacao externa | Meta Ads "
+                "Library | Consulta sugerida por especialidade/cidade | Dado "
+                "pendente de validacao externa | Dado pendente de validacao "
+                "externa |"
+            ),
+        )
+    ),
+    "Conteudo Organico": "\n".join(
+        (
+            (
+                "| Perfil | Seguidores | Formato | Tema | Tom | Frequencia | "
+                "Fonte | Link/consulta | Data | Status |"
+            ),
+            "|---|---|---|---|---|---|---|---|---|---|",
+            (
+                "| Dado pendente de validacao externa | Dado pendente de validacao "
+                "externa | Dado pendente de validacao externa | Dado pendente "
+                "de validacao externa | Dado pendente de validacao externa | "
+                "Dado pendente de validacao externa | Instagram | Consulta "
+                "sugerida por perfil/concorrente | Dado pendente de validacao "
+                "externa | Dado pendente de validacao externa |"
+            ),
+        )
+    ),
+    "Benchmarks e Viabilidade": (
+        "CPL, CAC, CPC e conversoes devem ser tratados como Benchmark interno "
+        "Healz ou Benchmark publico de mercado somente quando houver fonte; "
+        "dados locais permanecem como Dado pendente de validacao externa."
+    ),
+    "Oportunidades e Diferenciais": (
+        "Sem concorrentes verificados suficientes, registrar lacuna de dados "
+        "competitivos e hipoteses a validar, sem afirmar oportunidade definitiva."
+    ),
+    "Recomendacao Preliminar": (
+        "Hipotese de canais a validar apos pesquisa externa complementar. Sem "
+        "base suficiente para recomendar canal definitivo."
+    ),
+    "Dados Extraidos dos Anexos": "\n".join(
+        (
+            "| Campo | Valor | Fonte | Confianca |",
+            "|---|---|---|---|",
+            (
+                "| Especialidade | Dado pendente de validacao externa | Extraido do "
+                "briefing | Media |"
+            ),
+        )
+    ),
+    "Pendencias para Preenchimento Humano": (
+        "Confirmar metas, ticket medio, procedimentos foco, raio de atendimento, "
+        "orcamento de midia, links oficiais, concorrentes conhecidos e acesso a "
+        "fontes externas."
+    ),
+    "Log de Consultas Externas": "\n".join(
+        (
+            (
+                "| Consulta executada | Fonte/ferramenta | Data | Titulo da pagina | "
+                "URL | Resultado principal | Aproveitamento/descarte | Motivo | "
+                "Status |"
+            ),
+            "|---|---|---|---|---|---|---|---|---|",
+            (
+                "| Consulta sugerida por especialidade + cidade | Google Search | "
+                "Dado pendente de validacao externa | Dado pendente de validacao "
+                "externa | Dado pendente de validacao externa | Dado pendente "
+                "de validacao externa | Descartado | Pesquisa nao executada "
+                "ou nao verificavel no documento gerado | Pesquisa nao verificavel |"
+            ),
+        )
+    ),
+}
 RESEARCHER_GENERIC_PATTERNS = (
     "diversas especialidades",
     "procedimentos especificos que a clinica deseja destacar",
@@ -538,10 +690,20 @@ def _build_output_instruction(step: MakerStep) -> str:
             "`<body>` e CSS interno, pronto para uso sem dependencias externas."
         )
 
-    return (
+    instruction = (
         "Responda em portugues do Brasil, com conteudo objetivo, acionavel e "
         "pronto para revisao humana. O campo `markdown_content` deve conter "
         "Markdown valido e completo."
+    )
+    if step.step_name != "researcher":
+        return instruction
+
+    return (
+        f"{instruction}\n\n"
+        "Para esta etapa, o campo `markdown_content` deve seguir exatamente "
+        "este esqueleto minimo de headings e tabelas; complete dados ausentes "
+        "com pendencias rastreaveis, nunca omitindo secoes:\n"
+        f"{RESEARCHER_RETRY_SKELETON}"
     )
 
 
@@ -1226,7 +1388,54 @@ def _repair_researcher_markdown_content(markdown_content: str) -> str:
 
         repaired_lines.append(repaired_line)
 
-    return "\n".join(repaired_lines)
+    repaired_content = "\n".join(repaired_lines).strip()
+    heading_names = _extract_markdown_heading_names(repaired_content)
+    missing_sections = [
+        section
+        for section in RESEARCHER_REQUIRED_SECTIONS
+        if not any(
+            _canonical_heading_name(section) in _canonical_heading_name(heading)
+            for heading in heading_names
+        )
+    ]
+
+    if missing_sections:
+        appended_sections = []
+        for section in missing_sections:
+            section_body = RESEARCHER_MISSING_SECTION_TEMPLATES[section]
+            appended_sections.append(f"## {section}\n{section_body}")
+        repaired_content = (
+            f"{repaired_content}\n\n"
+            "## Complemento automatico de pendencias\n"
+            "As secoes abaixo foram completadas com pendencias rastreaveis "
+            "porque o agente nao retornou todos os blocos obrigatorios.\n\n"
+            + "\n\n".join(appended_sections)
+        )
+
+    normalized_content = _normalize_for_quality_checks(repaired_content)
+    has_external_url = any(
+        _is_valid_external_url(url) for url in _extract_urls(repaired_content)
+    )
+    has_external_failure = (
+        "falha de pesquisa externa" in normalized_content
+        and "consulta" in normalized_content
+    )
+    if not has_external_url and not has_external_failure:
+        repaired_content = (
+            f"{repaired_content}\n\n"
+            "## Falha de Pesquisa Externa\n"
+            "| Consulta executada | Fonte/ferramenta | Data | Titulo da pagina | "
+            "URL | Resultado principal | Aproveitamento/descarte | Motivo | "
+            "Status |\n"
+            "|---|---|---|---|---|---|---|---|---|\n"
+            "| Consulta sugerida por especialidade + cidade | Google Search | "
+            "Dado pendente de validacao externa | Dado pendente de validacao "
+            "externa | Dado pendente de validacao externa | Dado pendente de "
+            "validacao externa | Descartado | Sem URL verificavel no documento "
+            "gerado | Pesquisa nao verificavel |"
+        )
+
+    return repaired_content
 
 
 def _build_human_review_escalation_feedback(

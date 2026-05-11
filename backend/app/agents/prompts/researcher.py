@@ -419,12 +419,12 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
    e oportunidade para a Healz/cliente. Se nao houver concorrentes verificados,
    ainda assim entregue tabela de pendencias com as mesmas colunas, sem deixar
    a secao apenas em texto.
-7. Analise Meta - Captacao e Autoridade (Etapa 4): anuncios encontrados,
+7. Analise Meta (Etapa 4): anuncios encontrados,
    classificados como captacao ou autoridade, com fonte, link ou consulta, data,
    hook,
    duracao quando video, presenca do medico, tom, roteiro, CTA, destino, formato,
    promessa, funil, oportunidade comprovada e status da fonte.
-8. Conteudo Organico e Autoridade (Etapa 4): perfis relevantes, seguidores,
+8. Conteudo Organico (Etapa 4): perfis relevantes, seguidores,
    formatos, temas, tom, frequencia e padroes que funcionam.
 9. Benchmarks e Viabilidade: aplique ranges internos Healz e benchmarks
    publicos de mercado para CPC, CPL, conversao de site, mensagem real,
@@ -494,13 +494,13 @@ Templates minimos obrigatorios:
   "-", "—", "–", celula vazia ou travessao em qualquer coluna da matriz.
   O proprio medico/cliente nunca deve ser listado como concorrente; use dados
   dele apenas em Dados Extraidos dos Anexos e Log de Consultas Externas.
-- A secao "Analise Meta - Captacao e Autoridade" sempre deve conter uma tabela
+- A secao "Analise Meta" sempre deve conter uma tabela
   Markdown com estes cabecalhos literais, mesmo quando Meta Ads Library estiver
   indisponivel: `| Anuncio | Captacao | Autoridade | Fonte | Link/consulta |`
   ` Data | Status |`. Se nenhum anuncio real for encontrado, preencha Anuncio,
   Captacao e Autoridade com "Dado pendente de validacao externa" ou
   "Nao encontrado nas fontes consultadas"; nunca remova esses campos.
-- A secao "Conteudo Organico e Autoridade" sempre deve conter uma tabela
+- A secao "Conteudo Organico" sempre deve conter uma tabela
   Markdown com estes cabecalhos literais, mesmo quando nenhum perfil tiver sido
   analisado: `| Perfil | Seguidores | Formato | Tema | Tom | Frequencia |`
   ` Fonte | Link/consulta | Data | Status |`. Se a pesquisa estiver pendente,

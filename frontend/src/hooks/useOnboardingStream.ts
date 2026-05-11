@@ -38,6 +38,8 @@ type UseOnboardingStreamOptions = {
 
 type StreamProbeResult = 'ok' | 'terminal' | 'network_error' | 'aborted';
 
+const STREAM_PROBE_TIMEOUT_MS = 8000;
+
 function parsePipelineStreamEvent(rawData: string): PipelineStreamEvent | null {
   try {
     const parsedData = JSON.parse(rawData) as Partial<PipelineStreamEvent>;
@@ -153,14 +155,28 @@ async function probeStreamAvailability(
   streamUrl: string,
   signal: AbortSignal,
 ): Promise<StreamProbeResult> {
+  if (signal.aborted) {
+    return 'aborted';
+  }
+
+  const probeController = new AbortController();
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const abortProbe = () => {
+    probeController.abort();
+  };
+  signal.addEventListener('abort', abortProbe, { once: true });
+
   try {
+    timeoutId = setTimeout(() => {
+      probeController.abort();
+    }, STREAM_PROBE_TIMEOUT_MS);
     const response = await fetch(streamUrl, {
       headers: {
         Accept: 'text/event-stream',
         Authorization: `Bearer ${useAuthStore.getState().token ?? ''}`,
       },
       credentials: 'include',
-      signal,
+      signal: probeController.signal,
     });
     const contentType = response.headers.get('content-type') ?? '';
     const isEventStream =
@@ -174,6 +190,11 @@ async function probeStreamAvailability(
     }
 
     return 'network_error';
+  } finally {
+    signal.removeEventListener('abort', abortProbe);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
   }
 }
 

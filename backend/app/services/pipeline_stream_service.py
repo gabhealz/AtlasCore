@@ -119,9 +119,6 @@ class PipelineStreamService:
         pubsub = None
 
         try:
-            redis_client = self._redis_client_factory()
-            pubsub = redis_client.pubsub()
-            await pubsub.subscribe(channel)
             latest_initial_payload = await self._get_latest_payload_with_fresh_session(
                 onboarding_id=onboarding_id
             )
@@ -129,6 +126,35 @@ class PipelineStreamService:
             last_emitted_payload_key = self._payload_key(stream_initial_payload)
 
             yield self._format_event(PIPELINE_STATUS_EVENT, stream_initial_payload)
+
+            redis_client = self._redis_client_factory()
+            pubsub = redis_client.pubsub()
+            try:
+                await pubsub.subscribe(channel)
+            except Exception:
+                logger.exception(
+                    "Failed to subscribe pipeline stream channel.",
+                    extra={"onboarding_id": onboarding_id},
+                )
+                while True:
+                    if await request.is_disconnected():
+                        break
+
+                    yield self._format_keepalive()
+                    await asyncio.sleep(self._ping_interval_seconds)
+                return
+
+            latest_after_subscribe = await self._get_latest_payload_with_fresh_session(
+                onboarding_id=onboarding_id
+            )
+            if latest_after_subscribe is not None:
+                latest_after_subscribe_key = self._payload_key(latest_after_subscribe)
+                if latest_after_subscribe_key != last_emitted_payload_key:
+                    last_emitted_payload_key = latest_after_subscribe_key
+                    yield self._format_event(
+                        PIPELINE_STATUS_EVENT,
+                        latest_after_subscribe,
+                    )
 
             while True:
                 if await request.is_disconnected():
