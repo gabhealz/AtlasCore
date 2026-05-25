@@ -19,6 +19,7 @@ import {
   type StreamConnectionStatus,
 } from '../hooks/useOnboardingStream';
 import { api } from '../lib/api';
+import { ClientConversionForm } from '../components/onboarding/ClientConversionForm';
 
 type UploadedAsset = {
   id: number;
@@ -1312,6 +1313,12 @@ export default function OnboardingDetail() {
               : 'Este onboarding ja existe. O fluxo de detalhe completo ainda sera expandido nas proximas historias.'}
           </p>
         </div>
+
+        {resolvedPipelineStatus === 'PENDING_CLIENT_CREATION' && (
+          <div className="mb-6">
+            <ClientConversionForm onboardingId={onboardingId} />
+          </div>
+        )}
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-lg bg-white p-6 shadow">

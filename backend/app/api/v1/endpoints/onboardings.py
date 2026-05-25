@@ -457,7 +457,7 @@ async def approve_onboarding_review(
     next_step_name = get_next_step_name(approved_document.step_name)
 
     if next_step_name is None:
-        final_status = "APPROVED"
+        final_status = "PENDING_CLIENT_CREATION"
         await _apply_human_review_transition(
             db=db,
             onboarding_id=onboarding_id,
@@ -573,3 +573,61 @@ async def reject_onboarding_review(
             next_step_name=rejected_document.step_name,
         )
     }
+
+
+from app.schemas.onboarding import OnboardingActivateClient
+from app.models.client import Client
+
+@router.post(
+    "/{onboarding_id}/activate_client",
+    status_code=status.HTTP_200_OK,
+)
+async def activate_client_from_onboarding(
+    onboarding_id: int,
+    activation_data: OnboardingActivateClient,
+    current_user: User = Depends(allow_write),
+    db: AsyncSession = Depends(deps.get_db),
+):
+    onboarding = await _get_onboarding_or_404(
+        db=db,
+        onboarding_id=onboarding_id,
+        for_update=True,
+    )
+    
+    if onboarding.status != "PENDING_CLIENT_CREATION":
+        _raise_api_error(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            error_code="INVALID_ONBOARDING_STATE",
+            message="O onboarding não está aguardando a criação do cliente.",
+            extra_detail={"current_status": onboarding.status},
+        )
+        
+    # Check if a client already exists for this onboarding
+    existing_client = await db.execute(select(Client).where(Client.onboarding_id == onboarding_id))
+    if existing_client.scalars().first():
+        _raise_api_error(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            error_code="CLIENT_ALREADY_EXISTS",
+            message="Este onboarding já foi convertido em um cliente.",
+        )
+
+    # Create the client
+    new_client = Client(
+        name=onboarding.doctor_name,
+        specialty=onboarding.specialty,
+        email=activation_data.email,
+        phone=activation_data.phone,
+        city=activation_data.city,
+        state=activation_data.state,
+        monthly_fee=activation_data.monthly_fee,
+        onboarding_id=onboarding.id,
+        is_active=True
+    )
+    db.add(new_client)
+    
+    # Update onboarding status
+    onboarding.status = "COMPLETED"
+    
+    await db.commit()
+    
+    return {"status": "success", "client_id": new_client.id}

@@ -3,6 +3,8 @@
 .env.*
 !.env.example
 !.env.production.example
+# Claude Code local (per-user) settings
+.claude/settings.local.json
 backend/.env
 backend/.env.*
 frontend/.env

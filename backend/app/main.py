@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.api import api_router
 from app.core.config import settings
+import app.db.base  # noqa: F401 (Ensures all models are loaded and mappers configured)
 
 app = FastAPI(
     title="Atlas-Core API",

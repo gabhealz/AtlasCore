@@ -34,6 +34,7 @@ from app.services.html_validation_service import (
     HTMLValidationError,
     validate_generated_html,
 )
+from app.services.market_research import collect_market_data
 from app.services.pipeline_service import (
     PIPELINE_AWAITING_REVIEW_STATUS,
     PipelineService,
@@ -492,6 +493,44 @@ async def _build_transcription_context(
     return "\n\n".join(sections)
 
 
+def _build_market_seed_keywords(onboarding: Onboarding) -> list[str]:
+    """Deriva palavras-chave-semente do briefing para as APIs de volume/CPC."""
+    specialty = (onboarding.specialty or "").strip()
+    if not specialty:
+        return []
+
+    return [
+        specialty,
+        f"{specialty} preço",
+        f"{specialty} perto de mim",
+        f"consulta {specialty}",
+        f"clínica {specialty}",
+    ]
+
+
+async def _build_market_data_context(onboarding: Onboarding) -> str | None:
+    """Coleta dados de mercado reais e os renderiza para injetar no prompt.
+
+    Nunca propaga excecao: qualquer falha resulta em contexto vazio (None) e o
+    pipeline segue apenas com web_search.
+    """
+    try:
+        collected = await collect_market_data(
+            specialty=onboarding.specialty,
+            keywords=_build_market_seed_keywords(onboarding),
+            meta_search_terms=onboarding.specialty,
+        )
+    except Exception:  # noqa: BLE001 - coleta e best-effort, nunca bloqueia
+        logger.exception(
+            "Market data collection failed unexpectedly; continuing web-only.",
+            extra={"onboarding_id": onboarding.id},
+        )
+        return None
+
+    context = collected.to_prompt_context()
+    return context or None
+
+
 def _select_documents_for_step(
     *,
     step: MakerStep,
@@ -881,46 +920,27 @@ def _build_rewrite_feedback(
     return "\n".join(parts)
 
 
+_ACCENT_REPLACEMENTS = {
+    "á": "a",
+    "à": "a",
+    "ã": "a",
+    "â": "a",
+    "é": "e",
+    "ê": "e",
+    "í": "i",
+    "ó": "o",
+    "ô": "o",
+    "õ": "o",
+    "ú": "u",
+    "ç": "c",
+}
+
+
 def _normalize_for_quality_checks(content: str) -> str:
-    return (
-        content.lower()
-        .replace("á", "a")
-        .replace("à", "a")
-        .replace("ã", "a")
-        .replace("â", "a")
-        .replace("é", "e")
-        .replace("ê", "e")
-        .replace("í", "i")
-        .replace("ó", "o")
-        .replace("ô", "o")
-        .replace("õ", "o")
-        .replace("ú", "u")
-        .replace("ç", "c")
-        .replace("á", "a")
-        .replace("à", "a")
-        .replace("ã", "a")
-        .replace("â", "a")
-        .replace("é", "e")
-        .replace("ê", "e")
-        .replace("í", "i")
-        .replace("ó", "o")
-        .replace("ô", "o")
-        .replace("õ", "o")
-        .replace("ú", "u")
-        .replace("ç", "c")
-        .replace("á", "a")
-        .replace("à", "a")
-        .replace("ã", "a")
-        .replace("â", "a")
-        .replace("é", "e")
-        .replace("ê", "e")
-        .replace("í", "i")
-        .replace("ó", "o")
-        .replace("ô", "o")
-        .replace("õ", "o")
-        .replace("ú", "u")
-        .replace("ç", "c")
-    )
+    normalized = content.lower()
+    for accented, plain in _ACCENT_REPLACEMENTS.items():
+        normalized = normalized.replace(accented, plain)
+    return normalized
 
 
 def _extract_markdown_heading_names(markdown_content: str) -> set[str]:
@@ -1254,6 +1274,7 @@ def _validate_researcher_mvp_quality(
         has_metric_guardrail = (
             "benchmark interno healz" in normalized_content
             or "benchmark publico de mercado" in normalized_content
+            or "fonte externa verificada" in normalized_content
             or "dado pendente de validacao externa" in normalized_content
             or "nao encontrado nas fontes consultadas" in normalized_content
         )
@@ -1304,7 +1325,15 @@ def _validate_researcher_mvp_quality(
             or "dado pendente de validacao externa" in normalized_line
         )
         is_unverifiable_declared = "pesquisa nao verificavel" in normalized_line
-        if looks_like_log_row and not is_suggested_query and not has_absolute_date:
+        # Um achado real com URL valida nao deve ser descartado so porque a data
+        # ficou ausente: o achado entra no documento e apenas a celula de data
+        # permanece como pendencia. So bloqueamos linhas sem data E sem URL.
+        if (
+            looks_like_log_row
+            and not is_suggested_query
+            and not has_absolute_date
+            and not has_url
+        ):
             undated_google_lines.append(raw_line.strip())
 
         if (
@@ -1658,6 +1687,9 @@ async def bootstrap_pipeline(
                 step=current_step,
                 approved_documents=approved_documents,
             )
+            market_data_context: str | None = None
+            if current_step.step_name == "researcher":
+                market_data_context = await _build_market_data_context(onboarding)
             rewrite_feedback: str | None = None
 
             for review_round in range(1, REVIEWER_MAX_REWRITE_ATTEMPTS + 1):
@@ -1682,7 +1714,7 @@ async def bootstrap_pipeline(
                         previous_documents=previous_documents,
                         review_feedback=rewrite_feedback,
                         human_feedback=human_feedback,
-                        step_specific_context=None,
+                        step_specific_context=market_data_context,
                     ),
                     response_format=_build_step_response_format(current_step),
                     enable_web_search=current_step.step_name == "researcher",

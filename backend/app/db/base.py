@@ -1,7 +1,12 @@
 from app.db.base_class import Base  # noqa: F401
+from app.models.campaign_snapshot import CampaignSnapshot  # noqa: F401
+from app.models.client import Client  # noqa: F401
 from app.models.cta_button import CTAButton  # noqa: F401
 from app.models.generated_document import GeneratedDocument  # noqa: F401
+from app.models.integration_setting import IntegrationSetting  # noqa: F401
+from app.models.metric_snapshot import MetricSnapshot  # noqa: F401
 from app.models.onboarding import Onboarding  # noqa: F401
 from app.models.pipeline_event import PipelineEvent  # noqa: F401
+from app.models.sync_log import SyncLog  # noqa: F401
 from app.models.uploaded_asset import UploadedAsset  # noqa: F401
 from app.models.user import User  # noqa: F401

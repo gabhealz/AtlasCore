@@ -137,13 +137,21 @@ export default function Dashboard() {
             />
           </div>
 
-          <button
-            className="flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-            onClick={() => navigate('/onboarding/new')}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Projeto
-          </button>
+          <div className="flex gap-2">
+            <button
+              className="flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+              onClick={() => navigate('/ops')}
+            >
+              Ops Dashboard
+            </button>
+            <button
+              className="flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+              onClick={() => navigate('/onboarding/new')}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Projeto
+            </button>
+          </div>
         </div>
 
         <div className="overflow-hidden rounded-md bg-white shadow">

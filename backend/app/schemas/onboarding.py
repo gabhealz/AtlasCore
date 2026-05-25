@@ -58,6 +58,14 @@ class OnboardingListResponse(BaseModel):
     data: list[OnboardingListItem]
 
 
+class OnboardingActivateClient(BaseModel):
+    email: str
+    phone: str
+    city: str
+    state: str
+    monthly_fee: float
+
+
 class OnboardingDetailResponse(OnboardingBase):
     id: int
     status: str

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str = ""
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 8  # 8 hours
+    COOKIE_SECURE: bool = False
 
     DATABASE_URL: str = "postgresql://postgres:postgres@db:5432/atlas_core"
 
@@ -21,13 +22,46 @@ class Settings(BaseSettings):
     ALLOWED_EMAIL_DOMAIN: str = "healz.com.br"
     BACKEND_CORS_ORIGINS: str = "http://localhost:5173"
     OPENAI_API_KEY: str = ""
+    # Modelo padrao para etapas baratas (ex.: reviewer de compliance).
     OPENAI_MODEL: str = "gpt-4.1-mini"
-    OPENAI_RESEARCH_MODEL: str = ""
+    # Modelo da etapa de pesquisa (researcher). O mini nao da conta de fazer
+    # multiplas buscas web + consolidar 14 secoes; por isso a pesquisa usa um
+    # modelo mais capaz por padrao. Ajustavel por OPENAI_RESEARCH_MODEL no .env.
+    OPENAI_RESEARCH_MODEL: str = "gpt-4.1"
     OPENAI_ENABLE_WEB_SEARCH: bool = True
     OPENAI_WEB_SEARCH_CONTEXT_SIZE: str = "high"
     OPENAI_TIMEOUT_SECONDS: float = 180
     OPENAI_MAX_RETRIES: int = 3
+    # Limite de tokens de saida da etapa de pesquisa. O documento tem 14 secoes
+    # com tabelas; sem um teto alto, a resposta TRUNCA no meio (ex.: corta na
+    # Analise de Demanda Google) e as secoes seguintes nunca sao geradas.
+    OPENAI_MAX_OUTPUT_TOKENS: int = 16000
     OPENAI_ZERO_DATA_RETENTION_CONFIRMED: bool = False
+
+    # --- Coleta de dados de mercado para o onboarding (fontes externas reais) ---
+    # Estas sao credenciais GLOBAIS da agencia (nao por cliente). Quando vazias,
+    # o coletor simplesmente nao usa a fonte e o pipeline segue so com web_search.
+    # Meta Ad Library: anuncios ativos de concorrentes. Token do app da agencia.
+    META_AD_LIBRARY_TOKEN: str = ""
+    META_AD_LIBRARY_COUNTRY: str = "BR"
+    # DataForSEO: volume de busca + CPC reais. Login/senha da API.
+    DATAFORSEO_LOGIN: str = ""
+    DATAFORSEO_PASSWORD: str = ""
+    # Codigo de localizacao do DataForSEO (2076 = Brasil) e idioma.
+    DATAFORSEO_LOCATION_CODE: int = 2076
+    DATAFORSEO_LANGUAGE_CODE: str = "pt"
+    # Google Ads Keyword Planner: alternativa gratuita ao DataForSEO p/ volume+CPC.
+    GOOGLE_ADS_DEVELOPER_TOKEN: str = ""
+    GOOGLE_ADS_CLIENT_ID: str = ""
+    GOOGLE_ADS_CLIENT_SECRET: str = ""
+    GOOGLE_ADS_REFRESH_TOKEN: str = ""
+    GOOGLE_ADS_LOGIN_CUSTOMER_ID: str = ""
+    GOOGLE_ADS_CUSTOMER_ID: str = ""
+    # Limite de itens coletados por fonte (evita prompt gigante / custo alto).
+    MARKET_DATA_MAX_ITEMS: int = 15
+    # Timeout das chamadas HTTP de coleta de mercado.
+    MARKET_DATA_TIMEOUT_SECONDS: float = 30
+
     REDIS_URL: str = "redis://redis:6379/0"
     MINIO_URL: str = "http://minio:9000"
     MINIO_PUBLIC_URL: str = "http://localhost:9000"
@@ -67,6 +101,26 @@ class Settings(BaseSettings):
             for origin in self.BACKEND_CORS_ORIGINS.split(",")
             if origin.strip()
         ]
+
+    @property
+    def meta_ad_library_enabled(self) -> bool:
+        return bool(self.META_AD_LIBRARY_TOKEN.strip())
+
+    @property
+    def dataforseo_enabled(self) -> bool:
+        return bool(
+            self.DATAFORSEO_LOGIN.strip() and self.DATAFORSEO_PASSWORD.strip()
+        )
+
+    @property
+    def google_ads_keywords_enabled(self) -> bool:
+        return bool(
+            self.GOOGLE_ADS_DEVELOPER_TOKEN.strip()
+            and self.GOOGLE_ADS_CLIENT_ID.strip()
+            and self.GOOGLE_ADS_CLIENT_SECRET.strip()
+            and self.GOOGLE_ADS_REFRESH_TOKEN.strip()
+            and self.GOOGLE_ADS_CUSTOMER_ID.strip()
+        )
 
     def is_allowed_email(self, email: str) -> bool:
         normalized_email = email.strip().lower()

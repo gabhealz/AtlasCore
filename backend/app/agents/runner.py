@@ -188,6 +188,33 @@ class AgentRunner:
                     user_prompt=user_prompt,
                     response_format=response_format,
                 )
+                incomplete_reason = self._incomplete_reason(response)
+                if incomplete_reason is not None:
+                    # A resposta truncou (ex.: estourou max_output_tokens). Nao
+                    # salvar documento parcial: tratar como retriavel para tentar
+                    # de novo em vez de mascarar com placeholders.
+                    runner_error = self._build_retryable_error(
+                        error_code="OPENAI_RESPONSE_INCOMPLETE",
+                        attempt_count=attempt_count,
+                        agent_name=agent_name,
+                        step_name=step_name,
+                    )
+                    if attempt_count < self._max_attempts:
+                        await self._sleep_fn(self._calculate_delay(attempt_count))
+                        continue
+                    raise AgentRunnerError(
+                        error_code="OPENAI_RESPONSE_INCOMPLETE",
+                        message=(
+                            "A pesquisa com IA retornou um documento incompleto "
+                            f"(motivo: {incomplete_reason}). Aumente "
+                            "OPENAI_MAX_OUTPUT_TOKENS ou reduza o escopo da etapa."
+                        ),
+                        attempt_count=attempt_count,
+                        retriable=False,
+                        agent_name=agent_name,
+                        step_name=step_name,
+                        model=self._research_model,
+                    )
                 content = self._extract_responses_content(response)
                 if not content:
                     raise AgentRunnerError(
@@ -256,16 +283,20 @@ class AgentRunner:
             "model": self._research_model,
             "instructions": system_prompt,
             "input": user_prompt,
+            # Teto alto para o documento de 14 secoes nao truncar no meio.
+            "max_output_tokens": settings.OPENAI_MAX_OUTPUT_TOKENS,
             "tools": [
                 {
                     "type": "web_search",
                     "search_context_size": settings.OPENAI_WEB_SEARCH_CONTEXT_SIZE,
+                    # Localizacao apenas em nivel de pais. NAO fixar cidade/regiao:
+                    # a clinica pode ser de qualquer cidade do Brasil e fixar Sao
+                    # Paulo enviesava a busca local para a cidade errada. A
+                    # localidade real vem das consultas que o modelo monta com a
+                    # cidade extraida do briefing (ex.: "dermatologista Curitiba").
                     "user_location": {
                         "type": "approximate",
                         "country": "BR",
-                        "city": "Sao Paulo",
-                        "region": "SP",
-                        "timezone": "America/Sao_Paulo",
                     },
                 }
             ],
@@ -510,6 +541,29 @@ class AgentRunner:
             return content if isinstance(content, str) else ""
 
         return ""
+
+    @staticmethod
+    def _incomplete_reason(response: Any) -> str | None:
+        """Retorna o motivo se a Responses API truncou a saida, senao None.
+
+        A Responses API marca `status == "incomplete"` com
+        `incomplete_details.reason` (ex.: "max_output_tokens") quando a resposta
+        nao foi concluida. Funciona tanto para objeto quanto para dict.
+        """
+        if isinstance(response, dict):
+            status = response.get("status")
+            details = response.get("incomplete_details") or {}
+            reason = (
+                details.get("reason") if isinstance(details, dict) else None
+            )
+        else:
+            status = getattr(response, "status", None)
+            details = getattr(response, "incomplete_details", None)
+            reason = getattr(details, "reason", None) if details else None
+
+        if status == "incomplete":
+            return str(reason) if reason else "incomplete"
+        return None
 
     @staticmethod
     def _extract_responses_content(response: Any) -> str:
