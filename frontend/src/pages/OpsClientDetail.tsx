@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import { fetchClientDashboard } from '../lib/opsApi';
-import type { ClientDashboard } from '../types/ops';
+import type { ClientDashboard, CampaignSnapshot } from '../types/ops';
 import { formatCurrency, formatNumber, formatPct } from '../lib/formatters';
 import { KPICard } from '../components/ui/KPICard';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { DataTable } from '../components/ui/DataTable';
+import type { Column } from '../components/ui/DataTable';
 import {
   AreaChart,
   Area,
@@ -56,7 +57,7 @@ export function OpsClientDetail() {
     spend: h.ad_spend || 0,
   }));
 
-  const campaignColumns = [
+  const campaignColumns: Column<CampaignSnapshot>[] = [
     { header: 'Campanha', accessor: 'campaign_name', className: 'font-medium text-gray-900' },
     { 
       header: 'Plataforma', 

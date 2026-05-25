@@ -3,7 +3,6 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
 } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -11,7 +10,6 @@ import OnboardingDetail from './pages/OnboardingDetail';
 import NewOnboarding from './pages/NewOnboarding';
 import DeliveryPage from './pages/DeliveryPage';
 import AuthGuard from './components/AuthGuard';
-import AppErrorBoundary from './components/AppErrorBoundary';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { OpsDashboard } from './pages/OpsDashboard';
 import { OpsClientDetail } from './pages/OpsClientDetail';
@@ -19,8 +17,6 @@ import { OpsClientSettings } from './pages/OpsClientSettings';
 import { Layout } from './components/Layout';
 
 function AppRoutes() {
-  const location = useLocation();
-
   return (
     <ErrorBoundary>
       <Routes>

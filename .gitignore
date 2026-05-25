@@ -23,6 +23,8 @@ uploads/
 storage/
 *.sqlite
 *.sqlite3
+# Celery beat runtime schedule (regenerado em runtime, nao versionar)
+backend/celerybeat-schedule
 
 # Python
 __pycache__/

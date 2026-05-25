@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Search, DollarSign, Calendar, Activity, ChevronRight, TrendingUp } from 'lucide-react';
 import { fetchOpsDashboard } from '../lib/opsApi';
 import type { ClientDashboard } from '../types/ops';
-import { formatCurrency, formatNumber, formatPct } from '../lib/formatters';
+import { formatCurrency, formatNumber } from '../lib/formatters';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { DataTable } from '../components/ui/DataTable';
 import { KPICard } from '../components/ui/KPICard';

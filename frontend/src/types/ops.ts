@@ -1,6 +1,11 @@
 export interface Client {
   id: number;
   name: string;
+  specialty?: string;
+  city?: string;
+  state?: string;
+  phone?: string;
+  email?: string;
   monthly_fee: number;
   meta_account_id?: string;
   google_account_id?: string;

@@ -17,7 +17,7 @@ export async function fetchClientDashboard(clientId: number): Promise<ClientDash
 export interface IntegrationSetting {
   id: number;
   client_id: number;
-  platform: 'meta' | 'google' | 'tintim';
+  platform: 'meta' | 'google' | 'ga4' | 'tintim';
   account_id: string | null;
   is_active: boolean;
   has_access_token: boolean;
