@@ -12,9 +12,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.prompts import (
+    build_copywriter_system_prompt,
+    build_html_developer_system_prompt,
     build_researcher_system_prompt,
     build_reviewer_system_prompt,
+    build_script_writer_system_prompt,
+    build_strategist_system_prompt,
 )
+from app.models.cta_button import CTAButton
 from app.agents.runner import AgentRunner, AgentRunnerError, AgentRunResult
 from app.core.config import settings
 from app.db.session import AsyncSessionLocal
@@ -328,12 +333,39 @@ class ResearcherQualityError(ValueError):
         super().__init__("\n".join(issues))
 
 
+LANDING_PAGE_HTML_KIND = "landing_page_html"
+
 MAKER_STEPS: tuple[MakerStep, ...] = (
     MakerStep(
         step_name="researcher",
         agent_name="researcher",
         document_kind="research_report",
         prompt_builder=build_researcher_system_prompt,
+    ),
+    MakerStep(
+        step_name="strategist",
+        agent_name="strategist",
+        document_kind="strategy_plan",
+        prompt_builder=build_strategist_system_prompt,
+    ),
+    MakerStep(
+        step_name="copywriter",
+        agent_name="copywriter",
+        document_kind="copy_deck",
+        prompt_builder=build_copywriter_system_prompt,
+    ),
+    MakerStep(
+        step_name="script_writer",
+        agent_name="script_writer",
+        document_kind="secretary_script",
+        prompt_builder=build_script_writer_system_prompt,
+    ),
+    MakerStep(
+        step_name="html_developer",
+        agent_name="html_developer",
+        document_kind=LANDING_PAGE_HTML_KIND,
+        prompt_builder=build_html_developer_system_prompt,
+        output_kind="html",
     ),
 )
 
@@ -529,6 +561,110 @@ async def _build_market_data_context(onboarding: Onboarding) -> str | None:
 
     context = collected.to_prompt_context()
     return context or None
+
+
+async def _load_image_assets(
+    *,
+    db: AsyncSession,
+    onboarding_id: int,
+) -> list[UploadedAsset]:
+    result = await db.execute(
+        select(UploadedAsset)
+        .where(
+            UploadedAsset.onboarding_id == onboarding_id,
+            UploadedAsset.asset_kind == "image",
+        )
+        .order_by(UploadedAsset.created_at.asc(), UploadedAsset.id.asc())
+    )
+    return list(result.scalars().all())
+
+
+async def _load_cta_buttons(
+    *,
+    db: AsyncSession,
+    onboarding_id: int,
+) -> list[CTAButton]:
+    result = await db.execute(
+        select(CTAButton)
+        .where(CTAButton.onboarding_id == onboarding_id)
+        .order_by(CTAButton.created_at.asc(), CTAButton.id.asc())
+    )
+    return list(result.scalars().all())
+
+
+async def _build_html_step_context(
+    *,
+    db: AsyncSession,
+    onboarding_id: int,
+    asset_service: AssetService,
+) -> tuple[str | None, list[str]]:
+    """Monta o contexto do agente HTML (assets reais + matriz de CTAs).
+
+    Retorna (contexto_para_prompt, css_ids_obrigatorios). Nunca propaga excecao:
+    falhas de leitura resultam em contexto parcial, jamais bloqueiam o pipeline.
+    """
+    sections: list[str] = []
+
+    try:
+        images = await _load_image_assets(db=db, onboarding_id=onboarding_id)
+    except Exception:  # noqa: BLE001 - melhor esforco, nunca bloqueia o HTML
+        logger.exception(
+            "Falha ao carregar imagens para o agente HTML.",
+            extra={"onboarding_id": onboarding_id},
+        )
+        images = []
+
+    if images:
+        image_lines = []
+        for asset in images:
+            category = asset.asset_category or "sem_categoria"
+            url = asset.storage_url or asset_service.build_storage_url(
+                asset.object_key
+            )
+            image_lines.append(
+                f"- categoria `{category}` | URL real: {url} | "
+                f"arquivo: {asset.original_filename}"
+            )
+        sections.append(
+            "IMAGENS REAIS DISPONIVEIS (use estas URLs exatas nas tags <img>, "
+            "nunca invente placeholders):\n" + "\n".join(image_lines)
+        )
+    else:
+        sections.append(
+            "Nenhuma imagem real foi anexada a este onboarding. Crie blocos "
+            "visuais neutros e marque com comentario HTML qual asset faltou."
+        )
+
+    required_css_ids: list[str] = []
+    try:
+        cta_buttons = await _load_cta_buttons(db=db, onboarding_id=onboarding_id)
+    except Exception:  # noqa: BLE001 - melhor esforco, nunca bloqueia o HTML
+        logger.exception(
+            "Falha ao carregar botoes CTA para o agente HTML.",
+            extra={"onboarding_id": onboarding_id},
+        )
+        cta_buttons = []
+
+    if cta_buttons:
+        cta_lines = []
+        for button in cta_buttons:
+            required_css_ids.append(button.css_id)
+            cta_lines.append(
+                f"- nome: {button.name} | texto do botao: \"{button.button_text}\" "
+                f"| id obrigatorio (atributo HTML `id`): {button.css_id}"
+            )
+        sections.append(
+            "MATRIZ DE CTAs (cada botao/link correspondente DEVE usar exatamente "
+            "o `id` informado, sem alterar):\n" + "\n".join(cta_lines)
+        )
+    else:
+        sections.append(
+            "Nenhum botao CTA foi configurado. Use CTAs de WhatsApp/contato "
+            "coerentes, sem inventar IDs de rastreamento."
+        )
+
+    context = "\n\n".join(sections)
+    return (context or None), required_css_ids
 
 
 def _select_documents_for_step(
@@ -1482,6 +1618,28 @@ def _build_human_review_escalation_feedback(
     )
 
 
+def _build_html_validation_feedback(
+    error: HTMLValidationError,
+    *,
+    required_css_ids: list[str],
+) -> str:
+    parts = [
+        "A landing page anterior foi reprovada na validacao de integridade do "
+        "HTML. Reescreva corrigindo o problema abaixo sem recomecar do zero, "
+        "preservando o conteudo ja bom.",
+        f"Motivo ({error.error_code}): {error.message}",
+        "Garanta: documento iniciando com `<!DOCTYPE html>`, com `<html>`, "
+        "`<head>`, `<body>` e todas as tags devidamente fechadas; nada truncado.",
+    ]
+    if required_css_ids:
+        ids = ", ".join(required_css_ids)
+        parts.append(
+            "Cada um destes IDs de tracking DEVE aparecer como atributo `id` em "
+            f"um botao ou link clicavel real: {ids}."
+        )
+    return "\n".join(parts)
+
+
 def _validate_step_output(
     *,
     step: MakerStep,
@@ -1687,9 +1845,17 @@ async def bootstrap_pipeline(
                 step=current_step,
                 approved_documents=approved_documents,
             )
-            market_data_context: str | None = None
+            step_specific_context: str | None = None
             if current_step.step_name == "researcher":
-                market_data_context = await _build_market_data_context(onboarding)
+                step_specific_context = await _build_market_data_context(onboarding)
+            elif current_step.output_kind == "html":
+                step_specific_context, required_css_ids = (
+                    await _build_html_step_context(
+                        db=db,
+                        onboarding_id=onboarding_id,
+                        asset_service=asset_service,
+                    )
+                )
             rewrite_feedback: str | None = None
 
             for review_round in range(1, REVIEWER_MAX_REWRITE_ATTEMPTS + 1):
@@ -1714,7 +1880,7 @@ async def bootstrap_pipeline(
                         previous_documents=previous_documents,
                         review_feedback=rewrite_feedback,
                         human_feedback=human_feedback,
-                        step_specific_context=market_data_context,
+                        step_specific_context=step_specific_context,
                     ),
                     response_format=_build_step_response_format(current_step),
                     enable_web_search=current_step.step_name == "researcher",
@@ -1787,6 +1953,34 @@ async def bootstrap_pipeline(
                             "document_title": generated_draft.title,
                             "review_round": review_round,
                             "issues": error.issues,
+                        },
+                    )
+                    continue
+                except HTMLValidationError as error:
+                    # HTML invalido (estrutura quebrada ou css_id de tracking
+                    # ausente): em vez de falhar de imediato, devolve o problema
+                    # para o agente HTML reescrever dentro do limite de rodadas.
+                    if review_round == REVIEWER_MAX_REWRITE_ATTEMPTS:
+                        raise
+
+                    rewrite_feedback = _build_html_validation_feedback(
+                        error,
+                        required_css_ids=required_css_ids,
+                    )
+                    await pipeline_service.record_progress(
+                        db=db,
+                        onboarding_id=onboarding_id,
+                        step_name=current_step.step_name,
+                        trigger="html_validation_rejected",
+                        to_status="RUNNING",
+                        extra_payload={
+                            "attempt_count": run_result.attempt_count,
+                            "agent_name": current_step.agent_name,
+                            "model": run_result.model,
+                            "document_kind": current_step.document_kind,
+                            "document_title": generated_draft.title,
+                            "review_round": review_round,
+                            "error_code": error.error_code,
                         },
                     )
                     continue
