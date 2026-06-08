@@ -14,6 +14,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { OpsDashboard } from './pages/OpsDashboard';
 import { OpsClientDetail } from './pages/OpsClientDetail';
 import { OpsClientSettings } from './pages/OpsClientSettings';
+import { SeoResearch } from './pages/SeoResearch';
 import { Layout } from './components/Layout';
 
 function AppRoutes() {
@@ -30,6 +31,7 @@ function AppRoutes() {
           <Route path="/ops" element={<Layout><OpsDashboard /></Layout>} />
           <Route path="/ops/:clientId" element={<Layout><OpsClientDetail /></Layout>} />
           <Route path="/ops/:clientId/settings" element={<Layout><OpsClientSettings /></Layout>} />
+          <Route path="/seo" element={<Layout><SeoResearch /></Layout>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

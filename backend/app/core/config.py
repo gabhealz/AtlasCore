@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     # Codigo de localizacao do DataForSEO (2076 = Brasil) e idioma.
     DATAFORSEO_LOCATION_CODE: int = 2076
     DATAFORSEO_LANGUAGE_CODE: str = "pt"
+    # Validade do cache de keywords SEO (dias). Consultas mais novas que isso sao
+    # reaproveitadas do banco em vez de chamar a API paga de novo.
+    SEO_CACHE_TTL_DAYS: int = 30
     # Google Ads Keyword Planner: alternativa gratuita ao DataForSEO p/ volume+CPC.
     GOOGLE_ADS_DEVELOPER_TOKEN: str = ""
     GOOGLE_ADS_CLIENT_ID: str = ""

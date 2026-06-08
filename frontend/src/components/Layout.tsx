@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  BarChart3, 
-  Settings, 
+import {
+  LayoutDashboard,
+  BarChart3,
+  Settings,
   LogOut,
-  Bot
+  Bot,
+  Search
 } from 'lucide-react';
 import { useAuthStore } from '../store/auth';
 
@@ -19,6 +20,7 @@ export function Layout({ children }: LayoutProps) {
   const navigation = [
     { name: 'IA & Onboarding', href: '/dashboard', icon: Bot },
     { name: 'Ops Dashboard', href: '/ops', icon: BarChart3 },
+    { name: 'Pesquisa SEO', href: '/seo', icon: Search },
     { name: 'Configurações', href: '#', icon: Settings },
   ];
 
