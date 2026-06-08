@@ -86,6 +86,9 @@ RESEARCHER_RETRY_SKELETON = "\n".join(
         "## Perfil do Projeto",
         "| KPI | Situacao atual | Meta 3 ou 6 meses | Fonte | Status |",
         "",
+        "## Dados Extraidos dos Anexos",
+        "| Campo | Valor | Fonte | Confianca |",
+        "",
         "## Publico e Personas",
         "",
         "## Analise de Demanda Google",
@@ -102,7 +105,7 @@ RESEARCHER_RETRY_SKELETON = "\n".join(
         "",
         "## Matriz de Benchmark Competitivo",
         (
-            "| Concorrente | URL | Consulta que encontrou | Especialidade/foco | "
+            "| Concorrente | URL | Palavra-chave que encontrou | Especialidade/foco | "
             "Oferta | Promessa/copy | CTA | Funil | Provas | Pontos fortes | "
             "Lacunas | Oportunidade | Status |"
         ),
@@ -121,9 +124,6 @@ RESEARCHER_RETRY_SKELETON = "\n".join(
         "## Oportunidades e Diferenciais",
         "",
         "## Recomendacao Preliminar",
-        "",
-        "## Dados Extraidos dos Anexos",
-        "| Campo | Valor | Fonte | Confianca |",
         "",
         "## Pendencias para Preenchimento Humano",
         "",
@@ -193,7 +193,7 @@ RESEARCHER_MISSING_SECTION_TEMPLATES = {
     "Matriz de Benchmark Competitivo": "\n".join(
         (
             (
-                "| Concorrente | URL | Consulta que encontrou | Especialidade/foco | "
+                "| Concorrente | URL | Palavra-chave que encontrou | Especialidade/foco | "
                 "Oferta | Promessa/copy | CTA | Funil | Provas | Pontos fortes | "
                 "Lacunas | Oportunidade | Status |"
             ),
@@ -534,9 +534,14 @@ def _build_market_seed_keywords(onboarding: Onboarding) -> list[str]:
     return [
         specialty,
         f"{specialty} preço",
+        f"{specialty} valor",
+        f"quanto custa {specialty}",
         f"{specialty} perto de mim",
         f"consulta {specialty}",
         f"clínica {specialty}",
+        f"médico {specialty}",
+        f"{specialty} particular",
+        f"agendar {specialty}",
     ]
 
 

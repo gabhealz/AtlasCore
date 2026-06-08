@@ -416,13 +416,13 @@ e compartilhamento com cliente.
 
 Headings literais obrigatorios:
 - Use exatamente estes headings Markdown, com `##`, sem prefixos numericos e
-  sem renomear: `## Resumo Executivo`, `## Perfil do Projeto`,
-  `## Publico e Personas`, `## Analise de Demanda Google`,
-  `## Benchmark de Concorrentes`, `## Matriz de Benchmark Competitivo`,
-  `## Analise Meta`, `## Conteudo Organico`, `## Benchmarks e Viabilidade`,
+  sem renomear, NESTA ORDEM: `## Resumo Executivo`, `## Perfil do Projeto`,
+  `## Dados Extraidos dos Anexos`, `## Publico e Personas`,
+  `## Analise de Demanda Google`, `## Benchmark de Concorrentes`,
+  `## Matriz de Benchmark Competitivo`, `## Analise Meta`,
+  `## Conteudo Organico`, `## Benchmarks e Viabilidade`,
   `## Oportunidades e Diferenciais`, `## Recomendacao Preliminar`,
-  `## Dados Extraidos dos Anexos`, `## Pendencias para Preenchimento Humano`,
-  `## Log de Consultas Externas`.
+  `## Pendencias para Preenchimento Humano`, `## Log de Consultas Externas`.
 - Cada heading acima deve existir mesmo quando a secao tiver apenas pendencias.
 - As tabelas minimas obrigatorias descritas abaixo devem aparecer como tabela
   Markdown, nao como lista nem texto corrido.
@@ -440,15 +440,21 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
    personas, persona prioritaria e validacao de consistencia.
 4. Analise de Demanda Google (Etapa 3): tabela de keywords/volumes/CPCs/fonte/
    link ou consulta/data/status, viabilidade do Google somente com dados
-   suficientes e termos pendentes. A tabela deve conter Tipo, Palavra-chave,
-   Intencao, Regiao, Volume, CPC, Fonte, URL/consulta, Data e Status.
+   suficientes e termos pendentes. Liste no MINIMO 7 a 10 palavras-chave reais
+   da especialidade e regiao (combine termos head e long tail, cobrindo
+   intencoes de preco/valor, localizacao "perto de mim"/cidade, "consulta",
+   "clinica" e agendamento) para que o benchmark tenha base conclusiva. Quando
+   houver especialidade definida, nunca entregue menos de 7 linhas de keyword.
+   A tabela deve conter Tipo, Palavra-chave, Intencao, Regiao, Volume, CPC,
+   Fonte, URL/consulta, Data e Status.
 5. Benchmark de Concorrentes no Google (Etapa 3): fichas ou tabela somente dos
    concorrentes encontrados, com nome, perfil, Instagram, Meta Ads, destino,
    gatilhos, copy, provas, funil, lacunas, fonte, link ou consulta, data e status
    da fonte. Quando houver Google Search/SERP, analise os 5 primeiros resultados
    encontrados ou explique com URLs por que foram descartados.
 6. Matriz de Benchmark Competitivo: tabela comparativa obrigatoria com
-   concorrente, URL, consulta que encontrou, especialidade/foco, oferta,
+   concorrente, URL, palavra-chave que encontrou (a keyword/consulta exata que
+   fez esse concorrente aparecer na pesquisa), especialidade/foco, oferta,
    promessa/copy, CTA, funil, provas sociais/autoridade, pontos fortes, lacunas
    e oportunidade para a Healz/cliente. Se nao houver concorrentes verificados,
    ainda assim entregue tabela de pendencias com as mesmas colunas, sem deixar
@@ -468,9 +474,14 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
 10. Oportunidades e Diferenciais (Etapa 5): gaps consolidados, convergencias,
    exclusividades, riscos de posicionamento e diferenciais do medico.
 11. Recomendacao Preliminar (Etapa 5): hipotese de canais a validar,
-    abordagem, procedimentos foco, diferenciais, proximos dados obrigatorios e
-    perguntas para estrategista/Ueda.
-12. Dados Extraidos dos Anexos: tabela campo/valor/fonte/confianca com CRM, RQE,
+    abordagem, procedimentos foco, diferenciais e perguntas para
+    estrategista/Ueda. NAO crie aqui uma lista separada de "proximos dados
+    obrigatorios" nem de pendencias: TODA pendencia e dado a coletar deve ficar
+    consolidado em um unico lugar, a secao "Pendencias para Preenchimento
+    Humano", para evitar redundancia.
+12. Dados Extraidos dos Anexos (posicione esta secao IMEDIATAMENTE APOS o
+    Perfil do Projeto, pois e a base factual do perfil): tabela
+    campo/valor/fonte/confianca com CRM, RQE,
     cidade, estado, subespecialidade, consulta, retorno, convenios, endereco,
     horarios, secretaria, orcamento, metas, procedimentos, links, Instagram,
     site, Doctoralia, Google Business, fotos e depoimentos.
@@ -520,7 +531,7 @@ Templates minimos obrigatorios:
   autenticado".
 - A secao "Matriz de Benchmark Competitivo" sempre deve conter uma tabela
   Markdown com estes cabecalhos literais, mesmo quando nenhum concorrente
-  verificavel for encontrado: `| Concorrente | URL | Consulta que encontrou |`
+  verificavel for encontrado: `| Concorrente | URL | Palavra-chave que encontrou |`
   ` Especialidade/foco | Oferta | Promessa/copy | CTA | Funil | Provas |`
   ` Pontos fortes | Lacunas | Oportunidade | Status |`. Quando pendente,
   preencha URL com "Dado pendente de validacao externa" ou "Pesquisa nao
