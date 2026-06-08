@@ -527,11 +527,105 @@ async def _build_transcription_context(
     return "\n\n".join(sections)
 
 
-def _build_market_seed_keywords(onboarding: Onboarding) -> list[str]:
-    """Deriva palavras-chave-semente do briefing para as APIs de volume/CPC."""
+PROFILE_EXTRACTION_SYSTEM_PROMPT = (
+    "Voce extrai dados objetivos do briefing e das transcricoes de um onboarding "
+    "medico da Healz. Responda SOMENTE com um JSON valido contendo exatamente as "
+    "chaves: \"specialty\", \"city\" e \"state\".\n"
+    "- \"specialty\": a especialidade/subespecialidade principal do medico, no "
+    "formato curto como as pessoas pesquisam no Google (ex.: \"ortopedista "
+    "joelho\", \"dermatologista\", \"harmonizacao facial\"). Prefira incluir a "
+    "subespecialidade/foco quando estiver claro.\n"
+    "- \"city\": a cidade principal de atendimento (ex.: \"Sao Paulo\").\n"
+    "- \"state\": a UF com 2 letras (ex.: \"SP\").\n"
+    "Use null em qualquer campo sem evidencia clara no texto. NUNCA invente."
+)
+
+
+async def _extract_and_apply_profile(
+    *,
+    db: AsyncSession,
+    onboarding: Onboarding,
+    transcription_context: str,
+    runner: AgentRunner,
+) -> str | None:
+    """Extrai especialidade/cidade do briefing ANTES da coleta de mercado, para
+    que o DataForSEO receba keywords reais mesmo quando o operador nao preencheu
+    a especialidade no cadastro. Preenche onboarding.specialty se estiver vazio e
+    retorna a cidade detectada (para compor as keywords). Best-effort."""
+    base = (transcription_context or "").strip()
+    if not base or base.startswith("Nenhuma transcricao"):
+        return None
+
+    try:
+        result = await runner.run(
+            agent_name="profile_extractor",
+            step_name="profile_extraction",
+            system_prompt=PROFILE_EXTRACTION_SYSTEM_PROMPT,
+            user_prompt=(
+                "Briefing e transcricoes do onboarding:\n" + _truncate_text(base)
+            ),
+            response_format={"type": "json_object"},
+            enable_web_search=False,
+        )
+    except Exception:  # noqa: BLE001 - extracao e best-effort, nunca bloqueia
+        logger.exception(
+            "Extracao de perfil do briefing falhou.",
+            extra={"onboarding_id": onboarding.id},
+        )
+        return None
+
+    try:
+        await record_usage(db=db, onboarding_id=onboarding.id, result=result)
+    except Exception:  # noqa: BLE001
+        pass
+
+    try:
+        data = json.loads(result.content) if result.content else {}
+    except (json.JSONDecodeError, TypeError):
+        data = {}
+    if not isinstance(data, dict):
+        return None
+
+    specialty = data.get("specialty")
+    city = data.get("city")
+
+    if not (onboarding.specialty or "").strip() and isinstance(specialty, str):
+        cleaned_specialty = specialty.strip()
+        if cleaned_specialty:
+            onboarding.specialty = cleaned_specialty
+            try:
+                await db.commit()
+            except Exception:  # noqa: BLE001
+                await db.rollback()
+
+    return city.strip() if isinstance(city, str) and city.strip() else None
+
+
+def _build_market_seed_keywords(
+    onboarding: Onboarding, city: str | None = None
+) -> list[str]:
+    """Deriva palavras-chave-semente do briefing para as APIs de volume/CPC.
+
+    Quando a cidade e conhecida, prioriza keywords locais (mais uteis para
+    clinicas), pois o paciente quase sempre busca por regiao."""
     specialty = (onboarding.specialty or "").strip()
     if not specialty:
         return []
+
+    normalized_city = (city or "").strip()
+    if normalized_city:
+        return [
+            specialty,
+            f"{specialty} {normalized_city}",
+            f"{specialty} preço {normalized_city}",
+            f"{specialty} particular {normalized_city}",
+            f"consulta {specialty} {normalized_city}",
+            f"clínica {specialty} {normalized_city}",
+            f"melhor {specialty} {normalized_city}",
+            f"{specialty} perto de mim",
+            f"quanto custa {specialty}",
+            f"agendar {specialty} {normalized_city}",
+        ]
 
     return [
         specialty,
@@ -547,7 +641,9 @@ def _build_market_seed_keywords(onboarding: Onboarding) -> list[str]:
     ]
 
 
-async def _build_market_data_context(onboarding: Onboarding) -> str | None:
+async def _build_market_data_context(
+    onboarding: Onboarding, city: str | None = None
+) -> str | None:
     """Coleta dados de mercado reais e os renderiza para injetar no prompt.
 
     Nunca propaga excecao: qualquer falha resulta em contexto vazio (None) e o
@@ -556,7 +652,7 @@ async def _build_market_data_context(onboarding: Onboarding) -> str | None:
     try:
         collected = await collect_market_data(
             specialty=onboarding.specialty,
-            keywords=_build_market_seed_keywords(onboarding),
+            keywords=_build_market_seed_keywords(onboarding, city=city),
             meta_search_terms=onboarding.specialty,
         )
     except Exception:  # noqa: BLE001 - coleta e best-effort, nunca bloqueia
@@ -1854,7 +1950,18 @@ async def bootstrap_pipeline(
             )
             step_specific_context: str | None = None
             if current_step.step_name == "researcher":
-                step_specific_context = await _build_market_data_context(onboarding)
+                # Extrai especialidade/cidade do briefing ANTES da coleta de
+                # mercado, para o DataForSEO receber keywords reais mesmo quando
+                # a especialidade nao foi preenchida no cadastro.
+                detected_city = await _extract_and_apply_profile(
+                    db=db,
+                    onboarding=onboarding,
+                    transcription_context=transcription_context,
+                    runner=agent_runner,
+                )
+                step_specific_context = await _build_market_data_context(
+                    onboarding, city=detected_city
+                )
             elif current_step.output_kind == "html":
                 step_specific_context, required_css_ids = (
                     await _build_html_step_context(
