@@ -24,6 +24,9 @@ class AgentRunResult:
     agent_name: str
     step_name: str
     model: str
+    # Fontes reais consultadas pela ferramenta de web_search (queries + URLs
+    # visitadas/citadas). Vazio quando a etapa nao usa pesquisa web.
+    web_search_sources: tuple[dict[str, Any], ...] = ()
 
 
 class AgentRunnerError(Exception):
@@ -233,6 +236,7 @@ class AgentRunner:
                     agent_name=agent_name,
                     step_name=step_name,
                     model=self._research_model,
+                    web_search_sources=self._extract_web_search_sources(response),
                 )
             except AgentRunnerError:
                 raise
@@ -564,6 +568,71 @@ class AgentRunner:
         if status == "incomplete":
             return str(reason) if reason else "incomplete"
         return None
+
+    @staticmethod
+    def _extract_web_search_sources(response: Any) -> tuple[dict[str, Any], ...]:
+        """Coleta as fontes reais do web_search: queries executadas e URLs
+        visitadas/citadas. Best-effort e tolerante ao formato (objeto ou dict)."""
+
+        def _get(obj: Any, key: str) -> Any:
+            if isinstance(obj, dict):
+                return obj.get(key)
+            return getattr(obj, key, None)
+
+        try:
+            items = list(_get(response, "output") or [])
+        except TypeError:
+            return ()
+
+        collected: list[dict[str, Any]] = []
+        seen: set[tuple[str | None, str]] = set()
+
+        def _add(url: Any, title: Any, query: Any) -> None:
+            if not isinstance(url, str) or not url.startswith(("http://", "https://")):
+                return
+            normalized_query = query.strip() if isinstance(query, str) else None
+            key = (normalized_query, url)
+            if key in seen:
+                return
+            seen.add(key)
+            entry: dict[str, Any] = {"url": url}
+            if isinstance(title, str) and title.strip():
+                entry["title"] = title.strip()
+            if normalized_query:
+                entry["query"] = normalized_query
+            collected.append(entry)
+
+        for item in items:
+            if _get(item, "type") == "web_search_call":
+                action = _get(item, "action")
+                query = _get(action, "query")
+                try:
+                    sources_iter = list(_get(action, "sources") or [])
+                except TypeError:
+                    sources_iter = []
+                if not sources_iter and isinstance(query, str) and query.strip():
+                    marker = (query.strip(), "")
+                    if marker not in seen:
+                        seen.add(marker)
+                        collected.append({"query": query.strip()})
+                for src in sources_iter:
+                    _add(_get(src, "url"), _get(src, "title"), query)
+                continue
+
+            try:
+                content_iter = list(_get(item, "content") or [])
+            except TypeError:
+                content_iter = []
+            for content_item in content_iter:
+                try:
+                    ann_iter = list(_get(content_item, "annotations") or [])
+                except TypeError:
+                    ann_iter = []
+                for ann in ann_iter:
+                    if _get(ann, "type") == "url_citation":
+                        _add(_get(ann, "url"), _get(ann, "title"), None)
+
+        return tuple(collected)
 
     @staticmethod
     def _extract_responses_content(response: Any) -> str:

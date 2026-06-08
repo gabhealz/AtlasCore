@@ -24,6 +24,7 @@ class GeneratedDocumentService:
         review_status: str = DOCUMENT_REVIEW_STATUS_APPROVED,
         review_feedback: str | None = None,
         reviewed_at: datetime | None = None,
+        search_sources: str | None = None,
         auto_commit: bool = True,
     ) -> GeneratedDocument:
         result = await db.execute(
@@ -46,6 +47,7 @@ class GeneratedDocumentService:
                 review_status=review_status,
                 review_feedback=review_feedback,
                 reviewed_at=reviewed_at,
+                search_sources=search_sources,
                 updated_at=now,
             )
             db.add(document)
@@ -57,6 +59,8 @@ class GeneratedDocumentService:
             document.review_status = review_status
             document.review_feedback = review_feedback
             document.reviewed_at = reviewed_at
+            if search_sources is not None:
+                document.search_sources = search_sources
             document.updated_at = now
 
         if auto_commit:

@@ -34,6 +34,9 @@ class GeneratedDocument(Base):
     review_status = Column(String, nullable=False, server_default="APPROVED")
     review_feedback = Column(Text, nullable=True)
     reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    # Fontes reais da pesquisa web (JSON serializado): queries executadas e
+    # URLs visitadas/citadas pela IA durante a geracao deste documento.
+    search_sources = Column(Text, nullable=True)
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

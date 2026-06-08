@@ -3,6 +3,14 @@ from datetime import datetime
 from pydantic import BaseModel, field_validator
 
 
+class ResearchSource(BaseModel):
+    """Uma fonte real consultada pela IA durante a pesquisa web."""
+
+    query: str | None = None
+    url: str | None = None
+    title: str | None = None
+
+
 class HumanReviewDocumentResponse(BaseModel):
     id: int
     onboarding_id: int
@@ -17,6 +25,7 @@ class HumanReviewDocumentResponse(BaseModel):
     reviewed_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
+    search_sources: list[ResearchSource] = []
 
 
 class HumanReviewDocumentEnvelope(BaseModel):

@@ -96,6 +96,11 @@ type HumanReviewDocument = {
   reviewed_at?: string | null;
   created_at: string;
   updated_at: string;
+  search_sources?: Array<{
+    query?: string | null;
+    url?: string | null;
+    title?: string | null;
+  }>;
 };
 
 type HumanReviewDocumentResponse = {
@@ -1796,6 +1801,48 @@ export default function OnboardingDetail() {
                   </p>
                 </div>
               </div>
+
+              {reviewDocument.search_sources &&
+              reviewDocument.search_sources.length > 0 ? (
+                <div className="mt-6 rounded-lg border border-sky-200 bg-sky-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">
+                    Fontes consultadas pela IA (
+                    {reviewDocument.search_sources.length})
+                  </p>
+                  <p className="mt-1 text-xs text-sky-700">
+                    Consultas executadas e paginas reais visitadas ou citadas
+                    durante esta pesquisa (capturadas do proprio web_search).
+                  </p>
+                  <ul className="mt-3 max-h-72 space-y-2 overflow-y-auto pr-1">
+                    {reviewDocument.search_sources.map((source, index) => (
+                      <li
+                        key={`${source.url ?? source.query ?? 'src'}-${index}`}
+                        className="text-sm"
+                      >
+                        {source.url ? (
+                          <a
+                            href={source.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="break-all font-medium text-sky-800 underline"
+                          >
+                            {source.title || source.url}
+                          </a>
+                        ) : (
+                          <span className="font-medium text-gray-800">
+                            {source.title || 'Consulta executada'}
+                          </span>
+                        )}
+                        {source.query ? (
+                          <span className="ml-1 text-xs text-gray-500">
+                            — busca: "{source.query}"
+                          </span>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
 
               <div className="mt-6 grid gap-5">
                 <div>

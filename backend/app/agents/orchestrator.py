@@ -1894,6 +1894,14 @@ async def bootstrap_pipeline(
                     step=current_step,
                     raw_content=run_result.content,
                 )
+                search_sources_json = (
+                    json.dumps(
+                        [dict(source) for source in run_result.web_search_sources],
+                        ensure_ascii=False,
+                    )
+                    if run_result.web_search_sources
+                    else None
+                )
                 await _record_maker_progress(
                     pipeline_service=pipeline_service,
                     db=db,
@@ -2029,6 +2037,7 @@ async def bootstrap_pipeline(
                         review_status=DOCUMENT_REVIEW_STATUS_AWAITING,
                         review_feedback=None,
                         reviewed_at=None,
+                        search_sources=search_sources_json,
                     )
                     await _record_reviewer_progress(
                         pipeline_service=pipeline_service,
@@ -2070,6 +2079,7 @@ async def bootstrap_pipeline(
                             draft=generated_draft,
                         ),
                         reviewed_at=None,
+                        search_sources=search_sources_json,
                     )
                     await pipeline_service.record_progress(
                         db=db,

@@ -1,3 +1,4 @@
+import json
 from collections.abc import Awaitable, Callable
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -130,6 +131,19 @@ async def _ensure_pipeline_inputs_ready(
         )
 
 
+def _parse_search_sources(raw: str | None) -> list[dict]:
+    """Decodifica o JSON de fontes reais da pesquisa, tolerando dados invalidos."""
+    if not raw:
+        return []
+    try:
+        data = json.loads(raw)
+    except (ValueError, TypeError):
+        return []
+    if not isinstance(data, list):
+        return []
+    return [item for item in data if isinstance(item, dict)]
+
+
 def _serialize_review_document(
     document,
 ) -> HumanReviewDocumentResponse:
@@ -147,6 +161,9 @@ def _serialize_review_document(
         reviewed_at=document.reviewed_at,
         created_at=document.created_at,
         updated_at=document.updated_at,
+        search_sources=_parse_search_sources(
+            getattr(document, "search_sources", None)
+        ),
     )
 
 
