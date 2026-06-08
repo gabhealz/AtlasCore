@@ -133,7 +133,7 @@ const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
 const ALLOWED_EXTENSIONS = ['.pdf', '.txt', '.docx'];
 const IMAGE_ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif'];
 const CSS_ID_PATTERN = /^[a-z][a-z0-9_-]*$/;
-const LANDING_PAGE_FEATURES_ENABLED = false;
+const LANDING_PAGE_FEATURES_ENABLED = true;
 const IMAGE_CATEGORY_OPTIONS: Array<{
   value: AssetCategory;
   label: string;
@@ -160,6 +160,86 @@ const IMAGE_CATEGORY_OPTIONS: Array<{
     description: 'Foto complementar para cards de dores ou procedimentos.',
   },
 ];
+
+type OnboardingTab = 'overview' | 'inputs' | 'pipeline' | 'review';
+
+const ONBOARDING_TABS: Array<{
+  id: OnboardingTab;
+  label: string;
+  icon: typeof FolderOpen;
+}> = [
+  { id: 'overview', label: 'Visao Geral', icon: FolderOpen },
+  { id: 'inputs', label: 'Insumos', icon: FileUp },
+  { id: 'pipeline', label: 'Esteira de IA', icon: PlayCircle },
+  { id: 'review', label: 'Revisao', icon: CheckCircle2 },
+];
+
+const PIPELINE_STAGES: Array<{ key: string; label: string }> = [
+  { key: 'researcher', label: 'Pesquisa' },
+  { key: 'strategist', label: 'Estrategia' },
+  { key: 'copywriter', label: 'Copy' },
+  { key: 'script_writer', label: 'Script' },
+  { key: 'html_developer', label: 'Landing HTML' },
+];
+
+function PipelineTimeline({
+  currentStepName,
+  status,
+}: {
+  currentStepName: string | null;
+  status: string | null;
+}) {
+  const allDone =
+    status === 'PENDING_CLIENT_CREATION' ||
+    status === 'APPROVED' ||
+    status === 'COMPLETED';
+  const baseStep = (currentStepName ?? '').replace('_review', '');
+  const currentIndex = PIPELINE_STAGES.findIndex(
+    (stage) => stage.key === baseStep,
+  );
+
+  return (
+    <ol className="flex flex-wrap items-center gap-y-2">
+      {PIPELINE_STAGES.map((stage, index) => {
+        const done = allDone || (currentIndex >= 0 && index < currentIndex);
+        const active = !allDone && index === currentIndex;
+        return (
+          <li key={stage.key} className="flex items-center">
+            <div
+              className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                done
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : active
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-100 text-gray-500'
+              }`}
+            >
+              <span
+                className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
+                  done
+                    ? 'bg-emerald-600 text-white'
+                    : active
+                      ? 'bg-white text-indigo-700'
+                      : 'bg-white text-gray-400'
+                }`}
+              >
+                {done ? '✓' : index + 1}
+              </span>
+              {stage.label}
+            </div>
+            {index < PIPELINE_STAGES.length - 1 ? (
+              <span
+                className={`mx-1 h-0.5 w-5 ${
+                  done ? 'bg-emerald-300' : 'bg-gray-200'
+                }`}
+              />
+            ) : null}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 function getFileExtension(filename: string) {
   const dotIndex = filename.lastIndexOf('.');
@@ -1001,9 +1081,7 @@ export default function OnboardingDetail() {
 
     if (!pipelineInputsReady) {
       setPipelineErrorMessage(
-        LANDING_PAGE_FEATURES_ENABLED
-          ? 'Complete documento base, imagem hero, foto do medico, foto da clinica e CTA antes de iniciar a esteira de IA.'
-          : 'Anexe ao menos um documento base ou transcricao antes de gerar o benchmark.',
+        'Anexe ao menos um documento base ou transcricao antes de gerar o benchmark.',
       );
       setPipelineSuccessMessage('');
       return;
@@ -1164,6 +1242,8 @@ export default function OnboardingDetail() {
     }
   };
 
+  const [activeTab, setActiveTab] = useState<OnboardingTab>('overview');
+  const hasPendingReview = resolvedPipelineStatus === 'AWAITING_REVIEW';
   const pipelineFailureMessage =
     resolvedPipelineStatus === 'FAILED' && latestPipelineEvent?.to_status === 'FAILED'
       ? latestPipelineEvent.error_message ??
@@ -1206,13 +1286,10 @@ export default function OnboardingDetail() {
     (asset) => asset.asset_kind === 'transcription',
   );
   const imageAssets = onboardingAssets.filter((asset) => asset.asset_kind === 'image');
-  const pipelineInputsReady = LANDING_PAGE_FEATURES_ENABLED
-    ? hasBaseDocument &&
-      hasHeroImage &&
-      hasProfilePicture &&
-      hasEnvironmentPhoto &&
-      hasCtaButton
-    : hasBaseDocument;
+  // Apenas o documento base e obrigatorio para iniciar a esteira. Imagens e
+  // CTAs sao recomendados (o agente HTML os usa quando existem) mas nao
+  // bloqueiam a geracao.
+  const pipelineInputsReady = hasBaseDocument;
   const pipelineButtonLabel = isStartingPipeline
     ? 'Iniciando pipeline...'
     : !hasValidOnboardingId || resolvedPipelineStatusLoading
@@ -1248,33 +1325,36 @@ export default function OnboardingDetail() {
       label: 'Documento base ou transcricao',
       description: 'Briefing, entrevista, pesquisa ou materiais do cliente.',
       done: hasBaseDocument,
+      optional: false,
     },
-    ...(LANDING_PAGE_FEATURES_ENABLED
-      ? [
-          {
-            label: 'Imagem hero',
-            description: 'Foto principal para a primeira dobra do site.',
-            done: hasHeroImage,
-          },
-          {
-            label: 'Foto do medico',
-            description: 'Retrato real para a secao de autoridade e bio.',
-            done: hasProfilePicture,
-          },
-          {
-            label: 'Foto da clinica',
-            description: 'Ambiente, estrutura ou consultorio para localizacao.',
-            done: hasEnvironmentPhoto,
-          },
-          {
-            label: 'CTA da landing page',
-            description: 'Nome, texto do botao e ID CSS para tracking.',
-            done: hasCtaButton,
-          },
-        ]
-      : []),
+    {
+      label: 'Imagem hero',
+      description: 'Foto principal para a primeira dobra da landing.',
+      done: hasHeroImage,
+      optional: true,
+    },
+    {
+      label: 'Foto do medico',
+      description: 'Retrato real para a secao de autoridade e bio.',
+      done: hasProfilePicture,
+      optional: true,
+    },
+    {
+      label: 'Foto da clinica',
+      description: 'Ambiente, estrutura ou consultorio para localizacao.',
+      done: hasEnvironmentPhoto,
+      optional: true,
+    },
+    {
+      label: 'CTA da landing page',
+      description: 'Nome, texto do botao e ID CSS para tracking.',
+      done: hasCtaButton,
+      optional: true,
+    },
   ];
-  const pendingPreparationItems = preparationItems.filter((item) => !item.done);
+  const pendingPreparationItems = preparationItems.filter(
+    (item) => !item.optional && !item.done,
+  );
   const pipelineReadinessLabel = pipelineInputsReady
     ? 'Pronto para IA'
     : `${pendingPreparationItems.length} pendencia${
@@ -1292,27 +1372,65 @@ export default function OnboardingDetail() {
           Voltar para Dashboard
         </button>
 
-        <div
-          className={`mb-6 rounded-xl border p-5 ${
-            justCreated
-              ? 'border-green-200 bg-green-50'
-              : 'border-blue-200 bg-blue-50'
-          }`}
-        >
-          <p
-            className={`text-sm font-semibold uppercase tracking-wide ${
-              justCreated ? 'text-green-700' : 'text-blue-700'
-            }`}
-          >
-            {justCreated ? 'Projeto criado com sucesso' : 'Detalhes do onboarding'}
-          </p>
-          <h1 className="mt-2 text-3xl font-bold text-gray-900">Projeto #{id}</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            {justCreated
-              ? 'O briefing inicial foi salvo. O proximo passo do fluxo e anexar as transcricoes e documentos base deste onboarding.'
-              : 'Este onboarding ja existe. O fluxo de detalhe completo ainda sera expandido nas proximas historias.'}
-          </p>
-        </div>
+        <header className="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-indigo-600">
+                {justCreated ? 'Projeto criado com sucesso' : 'Onboarding por IA'}
+              </p>
+              <h1 className="mt-1 text-3xl font-bold text-gray-900">
+                Projeto #{id}
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-gray-600">
+                Briefing, insumos, a esteira de agentes e a revisao humana deste
+                onboarding reunidos em um so painel.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${pipelineBadgeColor}`}
+              >
+                {pipelineStatusLabel}
+              </span>
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${pipelineConnectionBadgeColor}`}
+              >
+                {pipelineConnectionLabel}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        <nav className="mb-6 flex flex-wrap gap-1 rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
+          {ONBOARDING_TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            const showReviewDot = tab.id === 'review' && hasPendingReview;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+                {showReviewDot ? (
+                  <span
+                    className={`ml-1 h-2 w-2 rounded-full ${
+                      isActive ? 'bg-white' : 'bg-rose-500'
+                    }`}
+                  />
+                ) : null}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className={activeTab === 'overview' ? '' : 'hidden'}>
 
         {resolvedPipelineStatus === 'PENDING_CLIENT_CREATION' && (
           <div className="mb-6">
@@ -1361,9 +1479,9 @@ export default function OnboardingDetail() {
                 Complete os insumos do benchmark
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-gray-600">
-                Neste recorte urgente do MVP, a IA precisa apenas dos documentos
-                base para gerar o Benchmarking. Landing page, imagens, CTA e
-                tracking ficam desativados temporariamente.
+                Apenas o documento base e obrigatorio para iniciar a esteira. As
+                imagens e os CTAs sao recomendados: o agente de HTML os utiliza na
+                landing page quando estao disponiveis.
               </p>
             </div>
             <span
@@ -1402,7 +1520,7 @@ export default function OnboardingDetail() {
                         : 'bg-white text-gray-500'
                     }`}
                   >
-                    {item.done ? 'ok' : 'pendente'}
+                    {item.done ? 'ok' : item.optional ? 'opcional' : 'pendente'}
                   </span>
                 </div>
                 <p className="mt-2 text-xs">{item.description}</p>
@@ -1450,6 +1568,24 @@ export default function OnboardingDetail() {
             </div>
           </div>
         ) : null}
+        </div>
+
+        <div className={activeTab === 'pipeline' ? '' : 'hidden'}>
+        <div className="rounded-xl bg-white p-6 shadow">
+          <p className="text-sm font-semibold uppercase tracking-wide text-indigo-600">
+            Esteira de agentes
+          </p>
+          <p className="mb-5 mt-1 text-sm text-gray-600">
+            Sequencia: pesquisa, estrategia, copy, script e landing HTML, com
+            revisor CFM e aprovacao humana a cada etapa.
+          </p>
+          <PipelineTimeline
+            currentStepName={
+              latestPipelineEvent?.step_name ?? reviewDocument?.step_name ?? null
+            }
+            status={resolvedPipelineStatus}
+          />
+        </div>
 
         <div className="order-last mt-6 rounded-xl bg-white p-6 shadow">
           <div className="flex items-start justify-between gap-4">
@@ -1564,6 +1700,9 @@ export default function OnboardingDetail() {
           </div>
         </div>
 
+        </div>
+
+        <div className={activeTab === 'review' ? '' : 'hidden'}>
         <div className="mt-6 rounded-xl bg-white p-6 shadow">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -1766,6 +1905,9 @@ export default function OnboardingDetail() {
           )}
         </div>
 
+        </div>
+
+        <div className={activeTab === 'inputs' ? '' : 'hidden'}>
         <div className="mt-6 rounded-xl bg-white p-6 shadow">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -2337,6 +2479,7 @@ export default function OnboardingDetail() {
             </div>
           </div>
         ) : null}
+        </div>
       </div>
     </div>
   );
