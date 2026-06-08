@@ -535,9 +535,14 @@ PROFILE_EXTRACTION_SYSTEM_PROMPT = (
     "formato curto como as pessoas pesquisam no Google (ex.: \"ortopedista "
     "joelho\", \"dermatologista\", \"harmonizacao facial\"). Prefira incluir a "
     "subespecialidade/foco quando estiver claro.\n"
-    "- \"city\": a cidade principal de atendimento (ex.: \"Sao Paulo\").\n"
-    "- \"state\": a UF com 2 letras (ex.: \"SP\").\n"
-    "Use null em qualquer campo sem evidencia clara no texto. NUNCA invente."
+    "- \"city\": a cidade principal de atendimento. Se nao houver cidade "
+    "explicita, INFIRA a partir de pistas geograficas claras no texto (endereco, "
+    "bairro, rua, hospital ou faculdade conhecidos — ex.: rua \"Brigadeiro Luiz "
+    "Antonio\", \"HC-FMUSP\" e \"USP\" indicam Sao Paulo). Use null apenas se nao "
+    "houver nenhuma pista geografica.\n"
+    "- \"state\": a UF com 2 letras (ex.: \"SP\"), inferida pelas mesmas pistas.\n"
+    "Para specialty e os demais campos sem evidencia, use null. NUNCA invente "
+    "dados que contrariem o texto."
 )
 
 
