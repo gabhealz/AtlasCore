@@ -1,10 +1,10 @@
 import type { AxiosError } from 'axios';
 import { ArrowLeft, CheckCircle2, Code2, Copy, FileText } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import CodeViewer from '../components/CodeViewer';
+import { MarkdownView } from '../components/MarkdownView';
 import TrackingSheet, { type TrackingSheetRow } from '../components/TrackingSheet';
 import { api } from '../lib/api';
 
@@ -661,10 +661,8 @@ export default function DeliveryPage() {
                       </button>
                     </div>
 
-                    <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-5">
-                      <div className="prose prose-sm max-w-none text-gray-800 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700">
-                        <ReactMarkdown>{document.content}</ReactMarkdown>
-                      </div>
+                    <div className="mt-6 rounded-lg border border-gray-200 bg-white p-5">
+                      <MarkdownView content={document.content} />
                     </div>
                   </div>
                 ))

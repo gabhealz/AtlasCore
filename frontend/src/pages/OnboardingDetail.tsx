@@ -20,6 +20,7 @@ import {
 } from '../hooks/useOnboardingStream';
 import { api } from '../lib/api';
 import { ClientConversionForm } from '../components/onboarding/ClientConversionForm';
+import { MarkdownView } from '../components/MarkdownView';
 
 type UploadedAsset = {
   id: number;
@@ -1267,6 +1268,7 @@ export default function OnboardingDetail() {
 
   const [activeTab, setActiveTab] = useState<OnboardingTab>('overview');
   const hasPendingReview = resolvedPipelineStatus === 'AWAITING_REVIEW';
+  const [reviewPreview, setReviewPreview] = useState(true);
   const [onboardingCost, setOnboardingCost] = useState<CostSummary | null>(null);
 
   useEffect(() => {
@@ -1954,28 +1956,70 @@ export default function OnboardingDetail() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="review-content"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Conteudo gerado
-                  </label>
-                  <textarea
-                    id="review-content"
-                    value={reviewContent}
-                    onChange={(event) => {
-                      setReviewContent(event.target.value);
-                      setReviewActionErrorMessage('');
-                      setReviewActionSuccessMessage('');
-                    }}
-                    rows={reviewDocument.content_format === 'html' ? 18 : 14}
-                    className={`mt-3 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 ${
-                      reviewDocument.content_format === 'html' ? 'font-mono' : ''
-                    }`}
-                  />
+                  <div className="flex items-center justify-between">
+                    <label
+                      htmlFor="review-content"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Conteudo gerado
+                    </label>
+                    <div className="inline-flex overflow-hidden rounded-md border border-gray-200">
+                      <button
+                        type="button"
+                        onClick={() => setReviewPreview(true)}
+                        className={`px-3 py-1 text-xs font-medium transition-colors ${
+                          reviewPreview
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-white text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        Visualizar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setReviewPreview(false)}
+                        className={`px-3 py-1 text-xs font-medium transition-colors ${
+                          !reviewPreview
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-white text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        Editar
+                      </button>
+                    </div>
+                  </div>
+
+                  {reviewPreview ? (
+                    reviewDocument.content_format === 'html' ? (
+                      <iframe
+                        title="Pre-visualizacao da landing page"
+                        srcDoc={reviewContent}
+                        sandbox=""
+                        className="mt-3 h-[600px] w-full rounded-md border border-gray-200 bg-white"
+                      />
+                    ) : (
+                      <div className="mt-3 max-h-[600px] overflow-y-auto rounded-md border border-gray-200 bg-white px-4 py-3">
+                        <MarkdownView content={reviewContent} />
+                      </div>
+                    )
+                  ) : (
+                    <textarea
+                      id="review-content"
+                      value={reviewContent}
+                      onChange={(event) => {
+                        setReviewContent(event.target.value);
+                        setReviewActionErrorMessage('');
+                        setReviewActionSuccessMessage('');
+                      }}
+                      rows={reviewDocument.content_format === 'html' ? 20 : 16}
+                      className={`mt-3 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 ${
+                        reviewDocument.content_format === 'html' ? 'font-mono' : ''
+                      }`}
+                    />
+                  )}
                   <p className="mt-2 text-xs text-gray-500">
-                    O conteudo pode ser ajustado manualmente antes da aprovacao.
-                    Para HTML, esta historia mantem edicao textual sem preview.
+                    Alterne entre visualizar (renderizado) e editar. Para HTML, a
+                    pre-visualizacao mostra a landing page real, sem scripts.
                   </p>
                 </div>
 
