@@ -530,7 +530,7 @@ async def _build_transcription_context(
 PROFILE_EXTRACTION_SYSTEM_PROMPT = (
     "Voce extrai dados objetivos do briefing e das transcricoes de um onboarding "
     "medico da Healz. Responda SOMENTE com um JSON valido contendo exatamente as "
-    "chaves: \"specialty\", \"city\" e \"state\".\n"
+    "chaves: \"specialty\", \"city\", \"state\" e \"keywords\".\n"
     "- \"specialty\": a especialidade/subespecialidade principal do medico, no "
     "formato curto como as pessoas pesquisam no Google (ex.: \"ortopedista "
     "joelho\", \"dermatologista\", \"harmonizacao facial\"). Prefira incluir a "
@@ -541,8 +541,17 @@ PROFILE_EXTRACTION_SYSTEM_PROMPT = (
     "Antonio\", \"HC-FMUSP\" e \"USP\" indicam Sao Paulo). Use null apenas se nao "
     "houver nenhuma pista geografica.\n"
     "- \"state\": a UF com 2 letras (ex.: \"SP\"), inferida pelas mesmas pistas.\n"
-    "Para specialty e os demais campos sem evidencia, use null. NUNCA invente "
-    "dados que contrariem o texto."
+    "- \"keywords\": uma lista (8 a 12) de termos de busca REAIS que pacientes "
+    "digitam no Google para encontrar esse tipo de medico/servico, SEM cidade no "
+    "texto (a localizacao e tratada por fora). Misture sintomas/condicoes, "
+    "procedimentos e o especialista, do jeito NATURAL como as pessoas pesquisam "
+    "(ex.: para ortopedia de joelho: \"dor no joelho\", \"ortopedista "
+    "especialista em joelho\", \"cirurgia de joelho\", \"lesao no joelho\", "
+    "\"menisco\", \"protese de joelho\", \"infiltracao no joelho\"). Evite "
+    "rotulos artificiais como \"ortopedista joelho\"; priorize termos com volume "
+    "de busca real.\n"
+    "Para campos sem evidencia, use null (ou lista vazia em keywords). NUNCA "
+    "invente dados que contrariem o texto."
 )
 
 
@@ -552,14 +561,14 @@ async def _extract_and_apply_profile(
     onboarding: Onboarding,
     transcription_context: str,
     runner: AgentRunner,
-) -> str | None:
-    """Extrai especialidade/cidade do briefing ANTES da coleta de mercado, para
-    que o DataForSEO receba keywords reais mesmo quando o operador nao preencheu
-    a especialidade no cadastro. Preenche onboarding.specialty se estiver vazio e
-    retorna a cidade detectada (para compor as keywords). Best-effort."""
+) -> tuple[str | None, list[str]]:
+    """Extrai especialidade/cidade/keywords do briefing ANTES da coleta de
+    mercado, para que o DataForSEO receba keywords reais (de alto volume) mesmo
+    quando o operador nao preencheu o cadastro. Preenche onboarding.specialty se
+    vazio e retorna (cidade, keywords). Best-effort."""
     base = (transcription_context or "").strip()
     if not base or base.startswith("Nenhuma transcricao"):
-        return None
+        return (None, [])
 
     try:
         result = await runner.run(
@@ -577,7 +586,7 @@ async def _extract_and_apply_profile(
             "Extracao de perfil do briefing falhou.",
             extra={"onboarding_id": onboarding.id},
         )
-        return None
+        return (None, [])
 
     try:
         await record_usage(db=db, onboarding_id=onboarding.id, result=result)
@@ -589,10 +598,22 @@ async def _extract_and_apply_profile(
     except (json.JSONDecodeError, TypeError):
         data = {}
     if not isinstance(data, dict):
-        return None
+        return (None, [])
 
     specialty = data.get("specialty")
     city = data.get("city")
+
+    keywords: list[str] = []
+    raw_keywords = data.get("keywords")
+    if isinstance(raw_keywords, list):
+        seen: set[str] = set()
+        for item in raw_keywords:
+            if isinstance(item, str):
+                cleaned = " ".join(item.lower().split())
+                if cleaned and cleaned not in seen:
+                    seen.add(cleaned)
+                    keywords.append(cleaned)
+        keywords = keywords[:12]
 
     if not (onboarding.specialty or "").strip() and isinstance(specialty, str):
         cleaned_specialty = specialty.strip()
@@ -603,61 +624,48 @@ async def _extract_and_apply_profile(
             except Exception:  # noqa: BLE001
                 await db.rollback()
 
-    return city.strip() if isinstance(city, str) and city.strip() else None
+    detected_city = (
+        city.strip() if isinstance(city, str) and city.strip() else None
+    )
+    return (detected_city, keywords)
 
 
-def _build_market_seed_keywords(
-    onboarding: Onboarding, city: str | None = None
-) -> list[str]:
-    """Deriva palavras-chave-semente do briefing para as APIs de volume/CPC.
-
-    Quando a cidade e conhecida, prioriza keywords locais (mais uteis para
-    clinicas), pois o paciente quase sempre busca por regiao."""
+def _build_market_seed_keywords(onboarding: Onboarding) -> list[str]:
+    """Fallback de palavras-chave quando a extracao do briefing nao retornou
+    keywords (ex.: sem transcricao). Sem cidade no texto, pois isso fragmenta o
+    volume; a geografia e tratada pelo location_code do DataForSEO."""
     specialty = (onboarding.specialty or "").strip()
     if not specialty:
         return []
 
-    normalized_city = (city or "").strip()
-    if normalized_city:
-        return [
-            specialty,
-            f"{specialty} {normalized_city}",
-            f"{specialty} preço {normalized_city}",
-            f"{specialty} particular {normalized_city}",
-            f"consulta {specialty} {normalized_city}",
-            f"clínica {specialty} {normalized_city}",
-            f"melhor {specialty} {normalized_city}",
-            f"{specialty} perto de mim",
-            f"quanto custa {specialty}",
-            f"agendar {specialty} {normalized_city}",
-        ]
-
     return [
         specialty,
         f"{specialty} preço",
-        f"{specialty} valor",
-        f"quanto custa {specialty}",
-        f"{specialty} perto de mim",
         f"consulta {specialty}",
-        f"clínica {specialty}",
-        f"médico {specialty}",
         f"{specialty} particular",
-        f"agendar {specialty}",
+        f"quanto custa {specialty}",
+        f"melhor {specialty}",
     ]
 
 
 async def _build_market_data_context(
-    onboarding: Onboarding, city: str | None = None
+    onboarding: Onboarding,
+    *,
+    city: str | None = None,
+    keywords: list[str] | None = None,
 ) -> str | None:
     """Coleta dados de mercado reais e os renderiza para injetar no prompt.
 
-    Nunca propaga excecao: qualquer falha resulta em contexto vazio (None) e o
-    pipeline segue apenas com web_search.
+    Usa as keywords extraidas do briefing (alto volume, sem cidade) quando
+    disponiveis; senao cai no fallback derivado da especialidade. Nunca propaga
+    excecao: qualquer falha resulta em contexto vazio (None) e o pipeline segue
+    apenas com web_search.
     """
+    seed_keywords = keywords if keywords else _build_market_seed_keywords(onboarding)
     try:
         collected = await collect_market_data(
             specialty=onboarding.specialty,
-            keywords=_build_market_seed_keywords(onboarding, city=city),
+            keywords=seed_keywords,
             meta_search_terms=onboarding.specialty,
         )
     except Exception:  # noqa: BLE001 - coleta e best-effort, nunca bloqueia
@@ -1958,14 +1966,18 @@ async def bootstrap_pipeline(
                 # Extrai especialidade/cidade do briefing ANTES da coleta de
                 # mercado, para o DataForSEO receber keywords reais mesmo quando
                 # a especialidade nao foi preenchida no cadastro.
-                detected_city = await _extract_and_apply_profile(
-                    db=db,
-                    onboarding=onboarding,
-                    transcription_context=transcription_context,
-                    runner=agent_runner,
+                detected_city, detected_keywords = (
+                    await _extract_and_apply_profile(
+                        db=db,
+                        onboarding=onboarding,
+                        transcription_context=transcription_context,
+                        runner=agent_runner,
+                    )
                 )
                 step_specific_context = await _build_market_data_context(
-                    onboarding, city=detected_city
+                    onboarding,
+                    city=detected_city,
+                    keywords=detected_keywords,
                 )
             elif current_step.output_kind == "html":
                 step_specific_context, required_css_ids = (

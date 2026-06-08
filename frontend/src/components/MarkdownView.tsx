@@ -2,6 +2,58 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 /**
+ * Conserta tabelas Markdown que a IA emitiu "coladas" numa unica linha
+ * (cabecalho + |---| + linhas tudo junto), o que quebra a renderizacao GFM.
+ * So atua em linhas que contem uma regua de delimitador (|---|---|) grudada a
+ * conteudo; tabelas ja multi-linha passam intactas.
+ */
+function normalizeMarkdown(content: string): string {
+  const delimiterRun = /\|(?:\s*:?-{3,}:?\s*\|)+/;
+  return content
+    .split('\n')
+    .map((line) => {
+      const match = line.match(delimiterRun);
+      if (!match || match.index === undefined) {
+        return line;
+      }
+      if (!line.trim().startsWith('|')) {
+        return line;
+      }
+      const before = line.slice(0, match.index).trim();
+      const after = line.slice(match.index + match[0].length).trim();
+      // Delimitador sozinho na linha => tabela ja esta correta.
+      if (before === '' && after === '') {
+        return line;
+      }
+      const cols = (match[0].match(/-{3,}/g) || []).length;
+      if (cols < 2 || before === '') {
+        return line;
+      }
+      const splitRow = (segment: string) =>
+        segment
+          .replace(/^\|/, '')
+          .replace(/\|$/, '')
+          .split('|')
+          .map((cell) => cell.trim());
+
+      const header = splitRow(before);
+      const data = after ? splitRow(after) : [];
+      const headerLine = `| ${header.join(' | ')} |`;
+      const delimLine = `|${Array(cols).fill('---').join('|')}|`;
+      const rows: string[] = [];
+      for (let i = 0; i < data.length; i += cols) {
+        const row = data.slice(i, i + cols);
+        while (row.length < cols) {
+          row.push('');
+        }
+        rows.push(`| ${row.join(' | ')} |`);
+      }
+      return [headerLine, delimLine, ...rows].join('\n');
+    })
+    .join('\n');
+}
+
+/**
  * Renderiza Markdown (com tabelas GFM) em blocos estilizados, sem depender do
  * plugin de typography do Tailwind. Usado na revisao e na entrega.
  */
@@ -91,7 +143,7 @@ export function MarkdownView({ content }: { content: string }) {
           ),
         }}
       >
-        {content}
+        {normalizeMarkdown(content)}
       </ReactMarkdown>
     </div>
   );
