@@ -39,6 +39,7 @@ from app.services.html_validation_service import (
     HTMLValidationError,
     validate_generated_html,
 )
+from app.services.learning_service import build_learning_context
 from app.services.market_research import collect_market_data
 from app.services.pipeline_service import (
     PIPELINE_AWAITING_REVIEW_STATUS,
@@ -1860,6 +1861,19 @@ async def bootstrap_pipeline(
                         onboarding_id=onboarding_id,
                         asset_service=asset_service,
                     )
+                )
+            # Aprendizado (Nivel 1): injeta exemplares aprovados + licoes de
+            # revisao da mesma especialidade. Quanto maior a base, mais forte.
+            learning_context = await build_learning_context(
+                db=db,
+                onboarding=onboarding,
+                step_name=current_step.step_name,
+            )
+            if learning_context:
+                step_specific_context = (
+                    f"{step_specific_context}\n\n{learning_context}"
+                    if step_specific_context
+                    else learning_context
                 )
             rewrite_feedback: str | None = None
 
