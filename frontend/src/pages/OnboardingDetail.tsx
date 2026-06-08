@@ -103,6 +103,24 @@ type HumanReviewDocument = {
   }>;
 };
 
+type CostStep = {
+  step_name: string;
+  calls: number;
+  input_tokens: number;
+  output_tokens: number;
+  cost_usd: number;
+};
+
+type CostSummary = {
+  onboarding_id: number;
+  total_cost_usd: number;
+  total_input_tokens: number;
+  total_output_tokens: number;
+  total_web_searches: number;
+  calls: number;
+  by_step: CostStep[];
+};
+
 type HumanReviewDocumentResponse = {
   data: HumanReviewDocument;
 };
@@ -1249,6 +1267,29 @@ export default function OnboardingDetail() {
 
   const [activeTab, setActiveTab] = useState<OnboardingTab>('overview');
   const hasPendingReview = resolvedPipelineStatus === 'AWAITING_REVIEW';
+  const [onboardingCost, setOnboardingCost] = useState<CostSummary | null>(null);
+
+  useEffect(() => {
+    if (!hasValidOnboardingId) {
+      return;
+    }
+    let cancelled = false;
+    api
+      .get<{ data: CostSummary }>(`/onboardings/${onboardingId}/cost`)
+      .then((response) => {
+        if (!cancelled) {
+          setOnboardingCost(response.data.data);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setOnboardingCost(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [hasValidOnboardingId, onboardingId, resolvedPipelineStatus]);
   const pipelineFailureMessage =
     resolvedPipelineStatus === 'FAILED' && latestPipelineEvent?.to_status === 'FAILED'
       ? latestPipelineEvent.error_message ??
@@ -1541,6 +1582,53 @@ export default function OnboardingDetail() {
                 } anexado${onboardingAssets.length === 1 ? '' : 's'} neste onboarding.`}
           </p>
         </div>
+
+        {onboardingCost && onboardingCost.calls > 0 ? (
+          <div className="mt-6 rounded-xl bg-white p-6 shadow">
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+              Custo operacional deste onboarding
+            </p>
+            <h2 className="mt-1 text-2xl font-bold text-gray-900">
+              US$ {onboardingCost.total_cost_usd.toFixed(4)}
+              <span className="ml-2 text-sm font-normal text-gray-500">
+                (~R${' '}
+                {(onboardingCost.total_cost_usd * 5.5)
+                  .toFixed(2)
+                  .replace('.', ',')}
+                )
+              </span>
+            </h2>
+            <p className="mt-1 text-xs text-gray-500">
+              {onboardingCost.calls} chamadas de IA ·{' '}
+              {(
+                onboardingCost.total_input_tokens +
+                onboardingCost.total_output_tokens
+              ).toLocaleString('pt-BR')}{' '}
+              tokens · {onboardingCost.total_web_searches} buscas web
+            </p>
+            {onboardingCost.by_step.length > 0 ? (
+              <div className="mt-4 grid gap-2 md:grid-cols-2">
+                {onboardingCost.by_step.map((step) => (
+                  <div
+                    key={step.step_name}
+                    className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm"
+                  >
+                    <span className="font-medium text-gray-800">
+                      {step.step_name}
+                    </span>
+                    <span className="text-gray-600">
+                      US$ {step.cost_usd.toFixed(4)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            <p className="mt-3 text-xs text-gray-400">
+              Estimativa por uso real de tokens; a taxa de web search e
+              aproximada.
+            </p>
+          </div>
+        ) : null}
 
         {resolvedPipelineStatus === 'APPROVED' ? (
           <div className="mt-6 rounded-xl border border-emerald-200 bg-white p-6 shadow">

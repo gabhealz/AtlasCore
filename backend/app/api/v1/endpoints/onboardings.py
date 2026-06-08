@@ -11,6 +11,7 @@ from app.agents.orchestrator import (
     get_step_output_kind,
 )
 from app.api import deps
+from app.services.usage_service import summarize_onboarding_cost
 from app.models.onboarding import Onboarding
 from app.models.uploaded_asset import UploadedAsset
 from app.models.user import User
@@ -165,6 +166,18 @@ def _serialize_review_document(
             getattr(document, "search_sources", None)
         ),
     )
+
+
+@router.get("/{onboarding_id}/cost")
+async def get_onboarding_cost(
+    onboarding_id: int,
+    current_user: User = Depends(allow_read),
+    db: AsyncSession = Depends(deps.get_db),
+):
+    """Custo operacional (LLM + web search) acumulado deste onboarding."""
+    await _get_onboarding_or_404(db=db, onboarding_id=onboarding_id)
+    summary = await summarize_onboarding_cost(db, onboarding_id)
+    return {"data": summary}
 
 
 def _validate_human_review_state(onboarding: Onboarding) -> None:

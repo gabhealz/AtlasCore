@@ -27,6 +27,9 @@ class AgentRunResult:
     # Fontes reais consultadas pela ferramenta de web_search (queries + URLs
     # visitadas/citadas). Vazio quando a etapa nao usa pesquisa web.
     web_search_sources: tuple[dict[str, Any], ...] = ()
+    # Uso real de tokens reportado pela API, para telemetria de custo.
+    input_tokens: int = 0
+    output_tokens: int = 0
 
 
 class AgentRunnerError(Exception):
@@ -143,12 +146,15 @@ class AgentRunner:
                         model=self._model,
                     )
 
+                input_tokens, output_tokens = self._extract_usage(response)
                 return AgentRunResult(
                     content=content,
                     attempt_count=attempt_count,
                     agent_name=agent_name,
                     step_name=step_name,
                     model=self._model,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
                 )
             except AgentRunnerError:
                 raise
@@ -230,6 +236,7 @@ class AgentRunner:
                         model=self._research_model,
                     )
 
+                input_tokens, output_tokens = self._extract_usage(response)
                 return AgentRunResult(
                     content=content,
                     attempt_count=attempt_count,
@@ -237,6 +244,8 @@ class AgentRunner:
                     step_name=step_name,
                     model=self._research_model,
                     web_search_sources=self._extract_web_search_sources(response),
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
                 )
             except AgentRunnerError:
                 raise
@@ -568,6 +577,35 @@ class AgentRunner:
         if status == "incomplete":
             return str(reason) if reason else "incomplete"
         return None
+
+    @staticmethod
+    def _extract_usage(response: Any) -> tuple[int, int]:
+        """Extrai (input_tokens, output_tokens) de respostas do Chat Completions
+        (prompt/completion_tokens) ou da Responses API (input/output_tokens)."""
+
+        def _get(obj: Any, key: str) -> Any:
+            if isinstance(obj, dict):
+                return obj.get(key)
+            return getattr(obj, key, None)
+
+        usage = _get(response, "usage")
+        if usage is None:
+            return (0, 0)
+
+        raw_input = _get(usage, "input_tokens")
+        if raw_input is None:
+            raw_input = _get(usage, "prompt_tokens")
+        raw_output = _get(usage, "output_tokens")
+        if raw_output is None:
+            raw_output = _get(usage, "completion_tokens")
+
+        def _as_int(value: Any) -> int:
+            try:
+                return int(value) if value is not None else 0
+            except (TypeError, ValueError):
+                return 0
+
+        return (_as_int(raw_input), _as_int(raw_output))
 
     @staticmethod
     def _extract_web_search_sources(response: Any) -> tuple[dict[str, Any], ...]:

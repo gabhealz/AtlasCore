@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     # Validade do cache de keywords SEO (dias). Consultas mais novas que isso sao
     # reaproveitadas do banco em vez de chamar a API paga de novo.
     SEO_CACHE_TTL_DAYS: int = 30
+    # Taxa aproximada (USD) por chamada de web_search da OpenAI, usada na
+    # estimativa de custo do onboarding. Ajuste conforme o preco/contexto.
+    LLM_WEB_SEARCH_FEE_USD: float = 0.03
     # Google Ads Keyword Planner: alternativa gratuita ao DataForSEO p/ volume+CPC.
     GOOGLE_ADS_DEVELOPER_TOKEN: str = ""
     GOOGLE_ADS_CLIENT_ID: str = ""

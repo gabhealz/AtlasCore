@@ -41,6 +41,7 @@ from app.services.html_validation_service import (
 )
 from app.services.learning_service import build_learning_context
 from app.services.market_research import collect_market_data
+from app.services.usage_service import record_usage
 from app.services.pipeline_service import (
     PIPELINE_AWAITING_REVIEW_STATUS,
     PipelineService,
@@ -1904,6 +1905,19 @@ async def bootstrap_pipeline(
                     response_format=_build_step_response_format(current_step),
                     enable_web_search=current_step.step_name == "researcher",
                 )
+                maker_web_searches = len(
+                    {
+                        source["query"]
+                        for source in run_result.web_search_sources
+                        if isinstance(source, dict) and source.get("query")
+                    }
+                )
+                await record_usage(
+                    db=db,
+                    onboarding_id=onboarding_id,
+                    result=run_result,
+                    web_searches=maker_web_searches,
+                )
                 generated_draft = _parse_step_output(
                     step=current_step,
                     raw_content=run_result.content,
@@ -2032,6 +2046,11 @@ async def bootstrap_pipeline(
                         draft=generated_draft,
                     ),
                     response_format=_build_reviewer_response_format(),
+                )
+                await record_usage(
+                    db=db,
+                    onboarding_id=onboarding_id,
+                    result=review_result,
                 )
                 reviewer_decision = ReviewerDecision.model_validate_json(
                     review_result.content
