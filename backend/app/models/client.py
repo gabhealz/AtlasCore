@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, Numeric, String, ForeignKey
+from sqlalchemy import Boolean, Column, Date, DateTime, Integer, Numeric, String, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -16,6 +16,12 @@ class Client(Base):
     phone = Column(String, nullable=True)
     email = Column(String, nullable=True)
     monthly_fee = Column(Numeric(10, 2), nullable=False)
+    # Contrato (alimenta o cálculo de LTV / tempo de casa)
+    plan_name = Column(String, nullable=True)  # AQF, Pareto, Carol, Mentoria, etc.
+    external_code = Column(String, nullable=True)  # código do contrato (ex.: 2026/00046)
+    document = Column(String, nullable=True)  # CPF/CNPJ
+    contract_start_date = Column(Date, nullable=True)
+    contract_end_date = Column(Date, nullable=True)
     meta_account_id = Column(String, nullable=True)
     google_account_id = Column(String, nullable=True)
     tintim_id = Column(String, nullable=True)

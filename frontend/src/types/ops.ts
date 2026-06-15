@@ -7,6 +7,15 @@ export interface Client {
   phone?: string;
   email?: string;
   monthly_fee: number;
+  plan_name?: string;
+  external_code?: string;
+  document?: string;
+  contract_start_date?: string;
+  contract_end_date?: string;
+  /** Dias desde o início do contrato (tempo de casa) — calculado no backend. */
+  tenure_days?: number;
+  /** Meses completos de casa — usado para LTV. */
+  tenure_months?: number;
   meta_account_id?: string;
   google_account_id?: string;
   tintim_id?: string;
