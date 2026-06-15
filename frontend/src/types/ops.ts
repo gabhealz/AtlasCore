@@ -43,6 +43,7 @@ export interface MetricSnapshot {
   cost_per_conversion?: number;
   lp_to_whatsapp_rate?: number;
   whatsapp_to_booking_rate?: number;
+  lp_sessions?: number;
   revenue?: number;
   bookings?: number;
   created_at: string;

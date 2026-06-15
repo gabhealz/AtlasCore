@@ -33,6 +33,7 @@ class MetricSnapshot(Base):
     cost_per_conversion = Column(Numeric(10, 2), nullable=True)
     lp_to_whatsapp_rate = Column(Numeric(8, 4), nullable=True)
     whatsapp_to_booking_rate = Column(Numeric(8, 4), nullable=True)
+    lp_sessions = Column(Integer, nullable=True)  # sessões do site (GA4)
 
     revenue = Column(Numeric(10, 2), nullable=True)
     bookings = Column(Integer, nullable=True)

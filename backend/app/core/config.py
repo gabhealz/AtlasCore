@@ -68,6 +68,8 @@ class Settings(BaseSettings):
     GOOGLE_ADS_REFRESH_TOKEN: str = ""
     GOOGLE_ADS_LOGIN_CUSTOMER_ID: str = ""
     GOOGLE_ADS_CUSTOMER_ID: str = ""
+    # JSON da Service Account do GA4 codificado em base64 (fica no .env, fora do git).
+    GA4_SERVICE_ACCOUNT_B64: str = ""
     # Limite de itens coletados por fonte (evita prompt gigante / custo alto).
     MARKET_DATA_MAX_ITEMS: int = 15
     # Timeout das chamadas HTTP de coleta de mercado.

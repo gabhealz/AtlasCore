@@ -19,6 +19,7 @@ class MetricSnapshotBase(BaseModel):
     cost_per_conversion: float | None = Field(None, ge=0)
     lp_to_whatsapp_rate: float | None = Field(None, ge=0, le=100)
     whatsapp_to_booking_rate: float | None = Field(None, ge=0, le=100)
+    lp_sessions: int | None = Field(None, ge=0)
     revenue: float | None = Field(None, ge=0)
     bookings: int | None = Field(None, ge=0)
 

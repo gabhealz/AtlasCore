@@ -264,6 +264,13 @@ export function OpsClientDetail() {
           </div>
         </div>
 
+        {current_week?.lp_sessions != null && (
+          <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-base border border-line text-sm">
+            <span className="text-muted">Sessões no site (GA4):</span>
+            <span className="font-semibold text-ink">{formatNumber(current_week.lp_sessions)}</span>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {([
             { d: benchmarks.ctr(current_week?.ctr), v: formatPct(current_week?.ctr) },

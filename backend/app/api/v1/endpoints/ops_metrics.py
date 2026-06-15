@@ -79,6 +79,7 @@ def _aggregate_metrics(snapshots: list[MetricSnapshot]) -> dict | None:
         "conversions": sum((s.conversions or 0) for s in snapshots),
         "revenue": sum((float(s.revenue) if s.revenue else 0) for s in snapshots),
         "bookings": sum((s.bookings or 0) for s in snapshots),
+        "lp_sessions": sum((s.lp_sessions or 0) for s in snapshots),
     }
 
     if agg["impressions"] > 0:
