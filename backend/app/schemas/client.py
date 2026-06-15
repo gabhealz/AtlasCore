@@ -18,6 +18,8 @@ class ClientBase(BaseModel):
     contract_end_date: date | None = None
     meta_account_id: str | None = None
     google_account_id: str | None = None
+    ga4_property_id: str | None = None
+    ga4_measurement_id: str | None = None
     tintim_id: str | None = None
     active_platforms: str = "meta,google"
 
@@ -41,6 +43,8 @@ class ClientUpdate(BaseModel):
     contract_end_date: date | None = None
     meta_account_id: str | None = None
     google_account_id: str | None = None
+    ga4_property_id: str | None = None
+    ga4_measurement_id: str | None = None
     tintim_id: str | None = None
     active_platforms: str | None = None
     is_active: bool | None = None

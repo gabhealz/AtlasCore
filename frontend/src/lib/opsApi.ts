@@ -20,6 +20,11 @@ export interface ClientCreateInput {
   document?: string;
   contract_start_date?: string;
   contract_end_date?: string;
+  meta_account_id?: string;
+  google_account_id?: string;
+  ga4_property_id?: string;
+  ga4_measurement_id?: string;
+  tintim_id?: string;
 }
 
 export async function createClient(data: ClientCreateInput): Promise<Client> {

@@ -24,6 +24,11 @@ export function EditClientModal({ client, onClose, onSaved }: Props) {
     contract_end_date: client.contract_end_date,
     phone: client.phone,
     email: client.email,
+    meta_account_id: client.meta_account_id,
+    google_account_id: client.google_account_id,
+    ga4_property_id: client.ga4_property_id,
+    ga4_measurement_id: client.ga4_measurement_id,
+    tintim_id: client.tintim_id,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +118,34 @@ export function EditClientModal({ client, onClose, onSaved }: Props) {
               <input className={field} value={form.email || ''} onChange={(e) => set('email', e.target.value)} />
             </div>
           </div>
+
+          <div className="pt-2 border-t border-line">
+            <h3 className="text-sm font-semibold text-ink mt-3 mb-1">Integrações &amp; IDs</h3>
+            <p className="text-xs text-subtle mb-3">Vincule aqui os IDs de cada plataforma. Os tokens/credenciais ficam no servidor; aqui é só o ID da conta de cada cliente.</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={label}>Meta — Ad Account ID (act_...)</label>
+                <input className={field} placeholder="act_1234567890" value={form.meta_account_id || ''} onChange={(e) => set('meta_account_id', e.target.value)} />
+              </div>
+              <div>
+                <label className={label}>Google Ads — Customer ID</label>
+                <input className={field} placeholder="123-456-7890" value={form.google_account_id || ''} onChange={(e) => set('google_account_id', e.target.value)} />
+              </div>
+              <div>
+                <label className={label}>GA4 — Property ID (numérico)</label>
+                <input className={field} placeholder="312345678" value={form.ga4_property_id || ''} onChange={(e) => set('ga4_property_id', e.target.value)} />
+              </div>
+              <div>
+                <label className={label}>GA4 — Measurement ID (G-…)</label>
+                <input className={field} placeholder="G-XXXXXXXX" value={form.ga4_measurement_id || ''} onChange={(e) => set('ga4_measurement_id', e.target.value)} />
+              </div>
+              <div className="col-span-2">
+                <label className={label}>Tintim — Webhook Secret</label>
+                <input className={field} value={form.tintim_id || ''} onChange={(e) => set('tintim_id', e.target.value)} />
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose} className="px-4 py-2 border border-line rounded-md text-sm font-medium text-muted hover:bg-elevated">Cancelar</button>
             <button type="submit" disabled={saving} className="px-4 py-2 rounded-md text-sm font-medium bg-brand text-onbrand hover:bg-brand-soft disabled:opacity-50">

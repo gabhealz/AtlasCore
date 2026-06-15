@@ -18,6 +18,8 @@ export interface Client {
   tenure_months?: number;
   meta_account_id?: string;
   google_account_id?: string;
+  ga4_property_id?: string;
+  ga4_measurement_id?: string;
   tintim_id?: string;
   active_platforms: string;
   is_active: boolean;

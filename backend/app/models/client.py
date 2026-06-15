@@ -22,8 +22,10 @@ class Client(Base):
     document = Column(String, nullable=True)  # CPF/CNPJ
     contract_start_date = Column(Date, nullable=True)
     contract_end_date = Column(Date, nullable=True)
-    meta_account_id = Column(String, nullable=True)
-    google_account_id = Column(String, nullable=True)
+    meta_account_id = Column(String, nullable=True)  # Meta Ad Account ID (act_...)
+    google_account_id = Column(String, nullable=True)  # Google Ads Customer ID
+    ga4_property_id = Column(String, nullable=True)  # GA4 Property ID (numérico, p/ Data API)
+    ga4_measurement_id = Column(String, nullable=True)  # GA4 Measurement ID (G-...) referência
     tintim_id = Column(String, nullable=True)
     onboarding_id = Column(Integer, ForeignKey("onboardings.id"), nullable=True, unique=True)
     active_platforms = Column(String, default="meta,google")

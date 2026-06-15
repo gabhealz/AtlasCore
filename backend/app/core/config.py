@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     # Meta Ad Library: anuncios ativos de concorrentes. Token do app da agencia.
     META_AD_LIBRARY_TOKEN: str = ""
     META_AD_LIBRARY_COUNTRY: str = "BR"
+    # Token de acesso da Meta (app/System User) compartilhado para ler insights das
+    # contas de anúncio. Usado com o meta_account_id de cada cliente. Fica no .env.
+    META_ACCESS_TOKEN: str = ""
     # DataForSEO: volume de busca + CPC reais. Login/senha da API.
     DATAFORSEO_LOGIN: str = ""
     DATAFORSEO_PASSWORD: str = ""
