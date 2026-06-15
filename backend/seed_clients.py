@@ -15,6 +15,7 @@ from datetime import date
 
 from sqlalchemy import select
 
+from app.db import base as _base  # noqa: F401  (registra todos os mappers/relationships)
 from app.db.session import AsyncSessionLocal
 from app.models.client import Client
 
