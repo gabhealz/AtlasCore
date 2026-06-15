@@ -33,9 +33,13 @@ def _build_client():
         "refresh_token": settings.GOOGLE_ADS_REFRESH_TOKEN,
         "use_proto_plus": True,
     }
-    mcc = (settings.GOOGLE_ADS_LOGIN_CUSTOMER_ID or "").replace("-", "").replace(" ", "")
-    if mcc:
-        creds["login_customer_id"] = mcc
+    # Acesso é direto em cada conta de cliente (leitor por conta), NÃO via MCC.
+    # Por isso NÃO definimos login_customer_id — cada customer_id é consultado direto.
+    # (Se um dia o acesso passar a ser via MCC, definir GOOGLE_ADS_USE_MCC=1.)
+    if (getattr(settings, "GOOGLE_ADS_USE_MCC", "") or "") in ("1", "true", "True"):
+        mcc = (settings.GOOGLE_ADS_LOGIN_CUSTOMER_ID or "").replace("-", "").replace(" ", "")
+        if mcc:
+            creds["login_customer_id"] = mcc
     return GoogleAdsClient.load_from_dict(creds)
 
 
