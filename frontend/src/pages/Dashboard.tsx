@@ -66,19 +66,19 @@ export default function Dashboard() {
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return 'bg-amber-500/15 text-amber-300';
+        return 'bg-amber-50 text-amber-700';
       case 'RUNNING':
       case 'ACTIVE':
-        return 'bg-sky-500/15 text-sky-300';
+        return 'bg-sky-50 text-sky-700';
       case 'AWAITING_REVIEW':
-        return 'bg-amber-500/15 text-amber-300';
+        return 'bg-amber-50 text-amber-700';
       case 'APPROVED':
       case 'COMPLETED':
-        return 'bg-emerald-500/15 text-emerald-300';
+        return 'bg-emerald-50 text-emerald-700';
       case 'REJECTED':
-        return 'bg-rose-500/15 text-rose-300';
+        return 'bg-rose-50 text-rose-700';
       case 'FAILED':
-        return 'bg-rose-500/15 text-rose-300';
+        return 'bg-rose-50 text-rose-700';
       default:
         return 'bg-elevated text-muted';
     }
@@ -114,7 +114,7 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-ink">Atlas-Core Dashboard</h1>
           <button
             onClick={logout}
-            className="flex items-center text-subtle transition-colors hover:text-rose-400"
+            className="flex items-center text-subtle transition-colors hover:text-rose-600"
           >
             <LogOut className="mr-1 h-5 w-5" />
             <span className="text-sm font-medium">Sair</span>

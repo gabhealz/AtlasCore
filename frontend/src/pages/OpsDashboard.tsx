@@ -30,9 +30,9 @@ export function OpsDashboard() {
 
   if (errorMsg) {
     return (
-      <div className="p-8 text-rose-400">
+      <div className="p-8 text-rose-600">
         <h2 className="text-xl font-bold">Erro de Renderização/API</h2>
-        <pre className="mt-4 p-4 bg-rose-500/10 rounded-lg whitespace-pre-wrap">{errorMsg}</pre>
+        <pre className="mt-4 p-4 bg-rose-50 rounded-lg whitespace-pre-wrap">{errorMsg}</pre>
       </div>
     );
   }
@@ -140,17 +140,17 @@ export function OpsDashboard() {
         <KPICard 
           title="Investimento (Ad Spend)" 
           value={formatCurrency(totalSpend)} 
-          icon={<Activity className="w-5 h-5 text-rose-400" />}
+          icon={<Activity className="w-5 h-5 text-rose-600" />}
         />
         <KPICard 
           title="ROI Médio" 
           value={`${averageRoi.toFixed(1)}x`} 
-          icon={<TrendingUp className="w-5 h-5 text-emerald-400" />}
+          icon={<TrendingUp className="w-5 h-5 text-emerald-600" />}
         />
         <KPICard 
           title="Consultas Agendadas" 
           value={formatNumber(totalBookings)} 
-          icon={<Calendar className="w-5 h-5 text-sky-400" />}
+          icon={<Calendar className="w-5 h-5 text-sky-600" />}
         />
       </div>
 

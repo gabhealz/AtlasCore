@@ -4,7 +4,6 @@ import type { AxiosError } from 'axios';
 
 import { useAuthStore } from '../store/auth';
 import { api } from '../lib/api';
-import { LogIn } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -55,14 +54,14 @@ export default function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-base">
-      <div className="w-full max-w-md p-8 bg-card rounded-lg shadow-md">
-        <div className="flex justify-center mb-6">
-          <LogIn className="w-12 h-12 text-brand" />
+      <div className="w-full max-w-md p-8 bg-card rounded-2xl shadow-md border border-line">
+        <div className="flex justify-center mb-2">
+          <img src="/logo-healz.png" alt="Healz" className="h-12 w-auto" />
         </div>
-        <h2 className="text-2xl font-bold text-center text-ink mb-6">Atlas-Core Login</h2>
-        
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-center text-subtle mb-8">Atlas</h2>
+
         {error && (
-          <div className="mb-4 p-3 bg-rose-500/15 text-rose-300 rounded text-sm text-center">
+          <div className="mb-4 p-3 bg-rose-50 text-rose-700 rounded text-sm text-center">
             {error}
           </div>
         )}

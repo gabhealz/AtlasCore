@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard,
   BarChart3,
   Settings,
   LogOut,
@@ -28,11 +27,9 @@ export function Layout({ children }: LayoutProps) {
     <div className="flex h-screen bg-base">
       {/* Sidebar */}
       <aside className="w-64 bg-card border-r border-line flex flex-col">
-        <div className="h-16 flex items-center px-6 border-b border-line">
-          <div className="flex items-center gap-2 text-brand">
-            <LayoutDashboard className="h-6 w-6" />
-            <span className="text-xl font-bold tracking-tight">Atlas Core</span>
-          </div>
+        <div className="h-16 flex items-center gap-3 px-6 border-b border-line">
+          <img src="/logo-healz.png" alt="Healz" className="h-7 w-auto" />
+          <span className="text-xs font-semibold uppercase tracking-widest text-subtle">Atlas</span>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">

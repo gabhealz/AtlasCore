@@ -62,7 +62,7 @@ export function OpsClientDetail() {
     {
       header: 'Plataforma',
       accessor: (row: any) => (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.platform === 'meta' ? 'bg-sky-500/15 text-sky-300' : 'bg-rose-500/15 text-rose-300'}`}>
+        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.platform === 'meta' ? 'bg-sky-50 text-sky-700' : 'bg-rose-50 text-rose-700'}`}>
           {row.platform.toUpperCase()}
         </span>
       )
@@ -170,19 +170,19 @@ export function OpsClientDetail() {
               <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#b8ff2c" stopOpacity={0.35}/>
-                    <stop offset="95%" stopColor="#b8ff2c" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#ec298f" stopOpacity={0.35}/>
+                    <stop offset="95%" stopColor="#ec298f" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e3a6b" />
-                <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9fb0d0' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9fb0d0' }} tickFormatter={(value) => `R$ ${value / 1000}k`} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e7e9f2" />
+                <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9aa1b4' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9aa1b4' }} tickFormatter={(value) => `R$ ${value / 1000}k`} />
                 <Tooltip
                   formatter={(value: number) => [formatCurrency(value), 'Faturamento']}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #1e3a6b', background: '#0e2148', color: '#e8eefc' }}
-                  labelStyle={{ color: '#9fb0d0' }}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #e7e9f2', background: '#ffffff', color: '#1a1f36' }}
+                  labelStyle={{ color: '#9aa1b4' }}
                 />
-                <Area type="monotone" dataKey="revenue" stroke="#b8ff2c" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                <Area type="monotone" dataKey="revenue" stroke="#ec298f" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (

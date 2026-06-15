@@ -206,10 +206,10 @@ export function OpsClientSettings() {
                 <div className="flex flex-col">
                   <div className="flex items-center">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase ${
-                      integ.platform === 'meta' ? 'bg-sky-500/15 text-sky-300' :
-                      integ.platform === 'google' ? 'bg-rose-500/15 text-rose-300' :
-                      integ.platform === 'ga4' ? 'bg-amber-500/15 text-amber-300' :
-                      integ.platform === 'tintim' ? 'bg-emerald-500/15 text-emerald-300' :
+                      integ.platform === 'meta' ? 'bg-sky-50 text-sky-700' :
+                      integ.platform === 'google' ? 'bg-rose-50 text-rose-700' :
+                      integ.platform === 'ga4' ? 'bg-amber-50 text-amber-700' :
+                      integ.platform === 'tintim' ? 'bg-emerald-50 text-emerald-700' :
                       'bg-elevated text-muted'
                     }`}>
                       {integ.platform === 'meta' ? 'Meta Ads' :
@@ -228,7 +228,7 @@ export function OpsClientSettings() {
                   </div>
                   
                   {testResults[integ.platform] && (
-                    <div className={`mt-3 flex items-center text-sm ${testResults[integ.platform].success ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    <div className={`mt-3 flex items-center text-sm ${testResults[integ.platform].success ? 'text-emerald-600' : 'text-rose-600'}`}>
                       {testResults[integ.platform].success ? <CheckCircle2 className="w-4 h-4 mr-1" /> : <XCircle className="w-4 h-4 mr-1" />}
                       {testResults[integ.platform].message}
                     </div>
@@ -246,7 +246,7 @@ export function OpsClientSettings() {
                   </button>
                   <button
                     onClick={() => handleDelete(integ.platform)}
-                    className="inline-flex items-center text-sm text-rose-400 hover:text-rose-300"
+                    className="inline-flex items-center text-sm text-rose-600 hover:text-rose-700"
                   >
                     <Trash2 className="w-4 h-4 mr-1" />
                     Remover
