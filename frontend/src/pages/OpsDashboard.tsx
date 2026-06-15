@@ -51,6 +51,11 @@ export function OpsDashboard() {
       console.error("Filter error on item:", item, e);
       return false;
     }
+  }).sort((a, b) => {
+    // Clientes com atividade (gasto/faturamento na semana) primeiro.
+    const av = (a.current_week?.ad_spend || 0) + (a.current_week?.revenue || 0);
+    const bv = (b.current_week?.ad_spend || 0) + (b.current_week?.revenue || 0);
+    return bv - av;
   });
 
   const totalRevenue = filteredData.reduce((acc, curr) => acc + (curr.current_week?.revenue || 0), 0);

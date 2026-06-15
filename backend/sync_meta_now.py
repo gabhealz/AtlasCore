@@ -7,6 +7,7 @@ cliente. Lê insights agregados da semana (Graph API) e faz upsert em metric_sna
 import asyncio
 import json
 import logging
+import sys
 from datetime import date, timedelta
 
 import httpx
@@ -88,8 +89,12 @@ async def main() -> None:
     if not token:
         logger.error("META_ACCESS_TOKEN não configurado.")
         return
+    # Quantas semanas anteriores também sincronizar (backfill). 0 = só a semana atual.
+    backfill = int(sys.argv[1]) if len(sys.argv) > 1 else 0
     today = date.today()
-    monday = today - timedelta(days=today.weekday())
+    current_monday = today - timedelta(days=today.weekday())
+    weeks = [current_monday - timedelta(days=7 * n) for n in range(backfill + 1)]
+
     async with AsyncSessionLocal() as db:
         linked = await link_accounts(db)
         clients = (await db.execute(
@@ -97,32 +102,33 @@ async def main() -> None:
         )).scalars().all()
         synced = 0
         for c in clients:
-            try:
-                ins = await fetch_week(token, c.meta_account_id, monday.isoformat(), today.isoformat())
-            except Exception as exc:
-                logger.warning("Erro %s: %s", c.name, exc)
-                continue
-            if not ins:
-                logger.info("Sem dados Meta: %s", c.name)
-                continue
-            stmt = pg_insert(MetricSnapshot).values(
-                client_id=c.id, week_start=monday, date=monday, source="meta",
-                impressions=ins["impressions"], clicks=ins["clicks"], ctr=ins["ctr"],
-                cpc=ins["cpc"], ad_spend=ins["spend"], conversions=ins["leads"],
-            ).on_conflict_do_update(
-                index_elements=["client_id", "week_start", "source"],
-                set_={
-                    "impressions": ins["impressions"], "clicks": ins["clicks"],
-                    "ctr": ins["ctr"], "cpc": ins["cpc"], "ad_spend": ins["spend"],
-                    "conversions": ins["leads"],
-                },
-            )
-            await db.execute(stmt)
-            synced += 1
-            logger.info("%s: R$%.2f | %s imp | %s cliques | %s leads",
-                        c.name, ins["spend"], ins["impressions"], ins["clicks"], ins["leads"])
+            for monday in weeks:
+                until = min(monday + timedelta(days=6), today)
+                try:
+                    ins = await fetch_week(token, c.meta_account_id, monday.isoformat(), until.isoformat())
+                except Exception as exc:
+                    logger.warning("Erro %s (%s): %s", c.name, monday, exc)
+                    continue
+                if not ins:
+                    continue
+                stmt = pg_insert(MetricSnapshot).values(
+                    client_id=c.id, week_start=monday, date=monday, source="meta",
+                    impressions=ins["impressions"], clicks=ins["clicks"], ctr=ins["ctr"],
+                    cpc=ins["cpc"], ad_spend=ins["spend"], conversions=ins["leads"],
+                ).on_conflict_do_update(
+                    index_elements=["client_id", "week_start", "source"],
+                    set_={
+                        "impressions": ins["impressions"], "clicks": ins["clicks"],
+                        "ctr": ins["ctr"], "cpc": ins["cpc"], "ad_spend": ins["spend"],
+                        "conversions": ins["leads"],
+                    },
+                )
+                await db.execute(stmt)
+                synced += 1
+                logger.info("%s [%s]: R$%.2f | %s imp | %s cliques | %s leads",
+                            c.name, monday, ins["spend"], ins["impressions"], ins["clicks"], ins["leads"])
         await db.commit()
-        logger.info("Vinculados=%s | Sincronizados=%s", linked, synced)
+        logger.info("Vinculados=%s | Snapshots sincronizados=%s | semanas=%s", linked, synced, len(weeks))
 
 
 if __name__ == "__main__":
