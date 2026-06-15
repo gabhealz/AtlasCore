@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
   BarChart3,
-  Settings,
   LogOut,
   Bot,
   Search
@@ -20,7 +19,6 @@ export function Layout({ children }: LayoutProps) {
     { name: 'IA & Onboarding', href: '/dashboard', icon: Bot },
     { name: 'Ops Dashboard', href: '/ops', icon: BarChart3 },
     { name: 'Pesquisa SEO', href: '/seo', icon: Search },
-    { name: 'Configurações', href: '#', icon: Settings },
   ];
 
   return (

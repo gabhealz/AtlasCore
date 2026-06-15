@@ -32,7 +32,17 @@ export function IbgeMarketPanel({ city, state }: Props) {
   }, [city, state]);
 
   if (!city || !state) {
-    return null;
+    return (
+      <div className="bg-card rounded-xl shadow-sm border border-line border-dashed p-6">
+        <div className="flex items-center gap-2 mb-1">
+          <MapPin className="w-5 h-5 text-subtle" />
+          <h2 className="text-lg font-bold text-ink">Mercado da região (IBGE)</h2>
+        </div>
+        <p className="text-sm text-muted">
+          Preencha <strong>cidade</strong> e <strong>UF</strong> deste cliente (botão <strong>Editar</strong> acima) para ver população, porte do município e a pirâmide etária da região.
+        </p>
+      </div>
+    );
   }
 
   const chartData = pyramid.map((p) => ({

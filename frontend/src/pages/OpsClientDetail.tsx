@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Settings, PlusCircle } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Settings, PlusCircle, Pencil } from 'lucide-react';
 import { fetchClientDashboard } from '../lib/opsApi';
 import type { ClientDashboard, CampaignSnapshot } from '../types/ops';
 import { formatCurrency, formatNumber, formatPct } from '../lib/formatters';
@@ -9,6 +9,7 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { DataTable } from '../components/ui/DataTable';
 import type { Column } from '../components/ui/DataTable';
 import { ManualMetricsModal } from '../components/ops/ManualMetricsModal';
+import { EditClientModal } from '../components/ops/EditClientModal';
 import { IbgeMarketPanel } from '../components/ops/IbgeMarketPanel';
 import { benchmarks, healthClasses, healthDot, type Diag } from '../lib/benchmarks';
 import {
@@ -27,6 +28,7 @@ export function OpsClientDetail() {
   const [loading, setLoading] = useState(true);
   const [showCampaigns, setShowCampaigns] = useState(false);
   const [showManual, setShowManual] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const load = useCallback(() => {
     if (!clientId) return;
@@ -101,6 +103,17 @@ export function OpsClientDetail() {
         </div>
         <div className="flex items-center gap-3">
           <button
+            onClick={() => setShowEdit(true)}
+            className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              client.is_draft
+                ? 'bg-brand text-onbrand hover:bg-brand-soft'
+                : 'border border-line text-muted bg-card hover:bg-elevated'
+            }`}
+          >
+            <Pencil className="w-4 h-4 mr-2" />
+            {client.is_draft ? 'Concluir cadastro' : 'Editar'}
+          </button>
+          <button
             onClick={() => setShowManual(true)}
             className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium bg-brand text-onbrand hover:bg-brand-soft transition-colors"
           >
@@ -117,6 +130,9 @@ export function OpsClientDetail() {
         </div>
       </div>
 
+      {showEdit && (
+        <EditClientModal client={client} onClose={() => setShowEdit(false)} onSaved={load} />
+      )}
       {showManual && clientId && (
         <ManualMetricsModal
           clientId={parseInt(clientId, 10)}

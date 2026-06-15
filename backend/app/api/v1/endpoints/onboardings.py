@@ -654,7 +654,7 @@ async def activate_client_from_onboarding(
         for_update=True,
     )
 
-    if onboarding.status not in ("PENDING_CLIENT_CREATION", "COMPLETED"):
+    if onboarding.status != "PENDING_CLIENT_CREATION":
         _raise_api_error(
             status_code=status.HTTP_400_BAD_REQUEST,
             error_code="INVALID_ONBOARDING_STATE",

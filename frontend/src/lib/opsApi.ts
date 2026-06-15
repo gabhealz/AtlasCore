@@ -27,6 +27,16 @@ export async function createClient(data: ClientCreateInput): Promise<Client> {
   return response.data.data;
 }
 
+export interface ClientUpdateInput extends Partial<ClientCreateInput> {
+  is_active?: boolean;
+  is_draft?: boolean;
+}
+
+export async function updateClient(clientId: number, data: ClientUpdateInput): Promise<Client> {
+  const response = await api.patch<{ data: Client }>(`/clients/${clientId}`, data);
+  return response.data.data;
+}
+
 // --- Lançamento manual de métricas (faturamento/agendamentos da secretária) ---
 
 export interface ManualSnapshotInput {

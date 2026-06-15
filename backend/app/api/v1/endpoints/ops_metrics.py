@@ -85,8 +85,12 @@ def _aggregate_metrics(snapshots: list[MetricSnapshot]) -> dict | None:
         agg["ctr"] = (agg["clicks"] / agg["impressions"]) * 100
     if agg["clicks"] > 0:
         agg["cpc"] = agg["ad_spend"] / agg["clicks"]
+        # Taxa de conversão do site = leads (WhatsApp) / cliques.
+        agg["lp_to_whatsapp_rate"] = (agg["conversions"] / agg["clicks"]) * 100
     if agg["conversions"] > 0:
         agg["cost_per_conversion"] = agg["ad_spend"] / agg["conversions"]
+        # Taxa WhatsApp -> agendamento = agendamentos / leads.
+        agg["whatsapp_to_booking_rate"] = (agg["bookings"] / agg["conversions"]) * 100
 
     return agg
 

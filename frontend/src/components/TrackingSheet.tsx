@@ -25,7 +25,7 @@ export default function TrackingSheet({
     <div className="rounded-xl bg-white p-6 shadow">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-violet-700">
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand">
             Tracking Sheet
           </p>
           <h2 className="mt-2 text-2xl font-bold text-gray-900">
@@ -41,7 +41,7 @@ export default function TrackingSheet({
           type="button"
           onClick={onCopyCsv}
           disabled={isLoading || rows.length === 0 || !!errorMessage}
-          className="inline-flex items-center justify-center rounded-md border border-transparent bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-violet-300"
+          className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:bg-brand/40"
         >
           {copied ? (
             <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -53,7 +53,7 @@ export default function TrackingSheet({
       </div>
 
       {isLoading ? (
-        <div className="mt-6 rounded-lg border border-violet-100 bg-violet-50 px-4 py-5 text-sm text-violet-700">
+        <div className="mt-6 rounded-lg border border-brand/20 bg-brand/10 px-4 py-5 text-sm text-brand">
           Carregando Tracking Sheet final...
         </div>
       ) : null}
@@ -85,7 +85,7 @@ export default function TrackingSheet({
                 <tr key={row.css_id}>
                   <td className="px-4 py-3 font-medium text-gray-900">{row.name}</td>
                   <td className="px-4 py-3">
-                    <span className="rounded bg-violet-50 px-2 py-1 font-mono text-xs text-violet-800">
+                    <span className="rounded bg-brand/10 px-2 py-1 font-mono text-xs text-brand-soft">
                       {row.css_id}
                     </span>
                   </td>

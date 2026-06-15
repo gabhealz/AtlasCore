@@ -44,6 +44,7 @@ class ClientUpdate(BaseModel):
     tintim_id: str | None = None
     active_platforms: str | None = None
     is_active: bool | None = None
+    is_draft: bool | None = None
 
 
 class ClientResponse(ClientBase):
