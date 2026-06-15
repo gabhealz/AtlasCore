@@ -6,6 +6,7 @@ from app.api import deps
 from app.core.encryption import decrypt_value, encrypt_value
 from app.models.client import Client
 from app.models.integration_setting import IntegrationSetting
+from app.models.tintim_event import TintimEvent
 from app.models.user import User
 from app.schemas.integration import (
     IntegrationSettingCreate,
@@ -71,6 +72,42 @@ async def list_integrations(
     )
     integrations = result.scalars().all()
     return {"data": [_to_response(i) for i in integrations]}
+
+
+@router.get("/clients/{client_id}/tintim-events")
+async def list_tintim_events(
+    client_id: int,
+    limit: int = 50,
+    current_user: User = Depends(allow_read),
+    db: AsyncSession = Depends(deps.get_db),
+):
+    """Debug: últimos eventos do Tintim recebidos para o cliente (ver o que chega)."""
+    await _get_client_or_404(db, client_id)
+    result = await db.execute(
+        select(TintimEvent)
+        .where(TintimEvent.client_id == client_id)
+        .order_by(TintimEvent.id.desc())
+        .limit(min(limit, 200))
+    )
+    events = result.scalars().all()
+    return {
+        "data": [
+            {
+                "id": e.id,
+                "event_type": e.event_type,
+                "category": e.category,
+                "phone": e.phone,
+                "name": e.name,
+                "stage": e.stage,
+                "source": e.source,
+                "value": float(e.value) if e.value is not None else None,
+                "occurred_at": e.occurred_at,
+                "week_start": e.week_start,
+                "raw_json": e.raw_json,
+            }
+            for e in events
+        ]
+    }
 
 
 @router.post(
