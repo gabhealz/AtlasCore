@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Settings } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Settings, PlusCircle } from 'lucide-react';
 import { fetchClientDashboard } from '../lib/opsApi';
 import type { ClientDashboard, CampaignSnapshot } from '../types/ops';
 import { formatCurrency, formatNumber, formatPct } from '../lib/formatters';
@@ -8,6 +8,8 @@ import { KPICard } from '../components/ui/KPICard';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { DataTable } from '../components/ui/DataTable';
 import type { Column } from '../components/ui/DataTable';
+import { ManualMetricsModal } from '../components/ops/ManualMetricsModal';
+import { benchmarks, healthClasses, healthDot, type Diag } from '../lib/benchmarks';
 import {
   AreaChart,
   Area,
@@ -23,14 +25,19 @@ export function OpsClientDetail() {
   const [data, setData] = useState<ClientDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCampaigns, setShowCampaigns] = useState(false);
+  const [showManual, setShowManual] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!clientId) return;
     fetchClientDashboard(parseInt(clientId, 10))
       .then(setData)
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [clientId]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   if (loading) {
     return (
@@ -91,14 +98,31 @@ export function OpsClientDetail() {
             {(client.specialty || client.city) && <p className="text-sm text-muted mt-1">{client.specialty}{client.city ? ` • ${client.city}/${client.state}` : ''}</p>}
           </div>
         </div>
-        <Link
-          to={`/ops/${client.id}/settings`}
-          className="inline-flex items-center px-4 py-2 border border-line rounded-md shadow-sm text-sm font-medium text-muted bg-card hover:bg-elevated transition-colors"
-        >
-          <Settings className="w-4 h-4 mr-2 text-subtle" />
-          Integrações
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowManual(true)}
+            className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium bg-brand text-onbrand hover:bg-brand-soft transition-colors"
+          >
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Lançar dados
+          </button>
+          <Link
+            to={`/ops/${client.id}/settings`}
+            className="inline-flex items-center px-4 py-2 border border-line rounded-md shadow-sm text-sm font-medium text-muted bg-card hover:bg-elevated transition-colors"
+          >
+            <Settings className="w-4 h-4 mr-2 text-subtle" />
+            Integrações
+          </Link>
+        </div>
       </div>
+
+      {showManual && clientId && (
+        <ManualMetricsModal
+          clientId={parseInt(clientId, 10)}
+          onClose={() => setShowManual(false)}
+          onSaved={load}
+        />
+      )}
 
       {/* Contrato / tempo de casa (LTV) */}
       <div className="flex flex-wrap gap-x-10 gap-y-3 bg-card border border-line rounded-xl px-6 py-4 text-sm">
@@ -117,6 +141,12 @@ export function OpsClientDetail() {
         <div>
           <div className="text-subtle">Fee mensal</div>
           <div className="text-ink font-medium">{formatCurrency(client.monthly_fee)}</div>
+        </div>
+        <div>
+          <div className="text-subtle">Receita acumulada (LTV Healz)</div>
+          <div className="text-brand font-semibold">
+            {client.tenure_months != null ? formatCurrency(client.tenure_months * client.monthly_fee) : '—'}
+          </div>
         </div>
         <div>
           <div className="text-subtle">Situação</div>
@@ -218,27 +248,24 @@ export function OpsClientDetail() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="p-4 rounded-lg bg-base border border-line">
-            <div className="text-xs text-muted mb-1">CTR</div>
-            <div className="font-semibold text-ink">{formatPct(current_week?.ctr)}</div>
-          </div>
-          <div className="p-4 rounded-lg bg-base border border-line">
-            <div className="text-xs text-muted mb-1">CPC</div>
-            <div className="font-semibold text-ink">{formatCurrency(current_week?.cpc)}</div>
-          </div>
-          <div className="p-4 rounded-lg bg-base border border-line">
-            <div className="text-xs text-muted mb-1">Taxa LP → WhatsApp</div>
-            <div className="font-semibold text-ink">{formatPct(current_week?.lp_to_whatsapp_rate)}</div>
-          </div>
-          <div className="p-4 rounded-lg bg-base border border-line">
-            <div className="text-xs text-muted mb-1">Taxa WhatsApp → Agend.</div>
-            <div className="font-semibold text-ink">{formatPct(current_week?.whatsapp_to_booking_rate)}</div>
-          </div>
-          <div className="p-4 rounded-lg bg-base border border-line">
-            <div className="text-xs text-muted mb-1">Custo por Conversão</div>
-            <div className="font-semibold text-ink">{formatCurrency(current_week?.cost_per_conversion)}</div>
-          </div>
+          {([
+            { d: benchmarks.ctr(current_week?.ctr), v: formatPct(current_week?.ctr) },
+            { d: benchmarks.cpc(current_week?.cpc), v: formatCurrency(current_week?.cpc) },
+            { d: benchmarks.lp_to_whatsapp_rate(current_week?.lp_to_whatsapp_rate), v: formatPct(current_week?.lp_to_whatsapp_rate) },
+            { d: benchmarks.whatsapp_to_booking_rate(current_week?.whatsapp_to_booking_rate), v: formatPct(current_week?.whatsapp_to_booking_rate) },
+            { d: benchmarks.cost_per_conversion(current_week?.cost_per_conversion), v: formatCurrency(current_week?.cost_per_conversion) },
+          ] as { d: Diag; v: string }[]).map(({ d, v }) => (
+            <div key={d.label} className={`p-4 rounded-lg border ${healthClasses(d.status)}`} title={d.ideal}>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className={`inline-block w-2 h-2 rounded-full ${healthDot(d.status)}`}></span>
+                <span className="text-xs text-muted">{d.label}</span>
+              </div>
+              <div className="font-semibold text-ink">{v}</div>
+              <div className="text-[10px] text-subtle mt-1 leading-tight">{d.ideal}</div>
+            </div>
+          ))}
         </div>
+        <p className="text-xs text-subtle mt-4">Diagnóstico segundo os benchmarks internos da Healz (Doc 3). Verde = saudável · Amarelo = atenção · Vermelho = gargalo.</p>
       </div>
 
       {/* Campaigns */}

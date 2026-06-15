@@ -1,9 +1,51 @@
 import { api } from './api';
-import type { ClientDashboard, OpsDashboardEnvelope } from '../types/ops';
+import type { Client, ClientDashboard, OpsDashboardEnvelope } from '../types/ops';
 
 export async function fetchOpsDashboard(): Promise<ClientDashboard[]> {
   const response = await api.get<OpsDashboardEnvelope>('/ops/dashboard');
   return response.data.data;
+}
+
+// --- Clients API ---
+
+export interface ClientCreateInput {
+  name: string;
+  monthly_fee: number;
+  plan_name?: string;
+  specialty?: string;
+  city?: string;
+  state?: string;
+  phone?: string;
+  email?: string;
+  document?: string;
+  contract_start_date?: string;
+  contract_end_date?: string;
+}
+
+export async function createClient(data: ClientCreateInput): Promise<Client> {
+  const response = await api.post<{ data: Client }>('/clients', data);
+  return response.data.data;
+}
+
+// --- Lançamento manual de métricas (faturamento/agendamentos da secretária) ---
+
+export interface ManualSnapshotInput {
+  week_start: string; // YYYY-MM-DD (segunda-feira)
+  source?: string;    // default "manual"
+  revenue?: number;
+  bookings?: number;
+  conversions?: number;
+  impressions?: number;
+  clicks?: number;
+  ad_spend?: number;
+}
+
+export async function upsertSnapshot(clientId: number, data: ManualSnapshotInput): Promise<void> {
+  await api.post(`/ops/clients/${clientId}/snapshots`, {
+    client_id: clientId,
+    source: 'manual',
+    ...data,
+  });
 }
 
 export async function fetchClientDashboard(clientId: number): Promise<ClientDashboard> {

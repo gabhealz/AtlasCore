@@ -1,20 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, DollarSign, Calendar, Activity, ChevronRight, TrendingUp } from 'lucide-react';
+import { Search, DollarSign, Calendar, Activity, ChevronRight, TrendingUp, Plus } from 'lucide-react';
 import { fetchOpsDashboard } from '../lib/opsApi';
 import type { ClientDashboard } from '../types/ops';
 import { formatCurrency, formatNumber } from '../lib/formatters';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { DataTable } from '../components/ui/DataTable';
 import { KPICard } from '../components/ui/KPICard';
+import { NewClientModal } from '../components/ops/NewClientModal';
 
 export function OpsDashboard() {
   const [data, setData] = useState<ClientDashboard[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showNewClient, setShowNewClient] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setLoading(true);
     fetchOpsDashboard()
       .then((res) => {
         if (!Array.isArray(res)) {
@@ -27,6 +30,10 @@ export function OpsDashboard() {
       .catch((err) => setErrorMsg(err.message || String(err)))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   if (errorMsg) {
     return (
@@ -117,19 +124,31 @@ export function OpsDashboard() {
           <p className="text-muted mt-1">Visão geral do desempenho de todas as clínicas na semana atual.</p>
         </div>
 
-        <div className="relative w-full sm:w-96">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-subtle" />
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-80">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-subtle" />
+            </div>
+            <input
+              type="text"
+              placeholder="Buscar cliente..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2 border border-line rounded-lg leading-5 bg-card text-ink placeholder-subtle focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand sm:text-sm transition-shadow"
+            />
           </div>
-          <input
-            type="text"
-            placeholder="Buscar cliente..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-line rounded-lg leading-5 bg-card text-ink placeholder-subtle focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand sm:text-sm transition-shadow"
-          />
+          <button
+            onClick={() => setShowNewClient(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-brand text-onbrand hover:bg-brand-soft whitespace-nowrap"
+          >
+            <Plus className="w-4 h-4" /> Novo cliente
+          </button>
         </div>
       </div>
+
+      {showNewClient && (
+        <NewClientModal onClose={() => setShowNewClient(false)} onCreated={load} />
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KPICard 
