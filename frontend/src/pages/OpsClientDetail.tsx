@@ -307,7 +307,7 @@ export function OpsClientDetail() {
         {showCampaigns && (
           <div className="border-t border-line">
             <DataTable
-              data={campaigns}
+              data={[...campaigns].sort((a, b) => (Number(b.spend) || 0) - (Number(a.spend) || 0))}
               columns={campaignColumns}
               keyExtractor={(c) => c.id}
               className="border-0 shadow-none rounded-none"

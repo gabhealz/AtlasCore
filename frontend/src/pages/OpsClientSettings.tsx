@@ -226,6 +226,14 @@ export function OpsClientSettings() {
                     <span>Token Ativo: {integ.has_access_token ? 'Sim' : 'Não'}</span>
                     <span>Última Sincronização: {integ.last_sync_at ? new Date(integ.last_sync_at).toLocaleString('pt-BR') : 'Nunca'}</span>
                   </div>
+                  {integ.platform === 'tintim' && integ.account_id && (
+                    <div className="mt-3 p-3 rounded-lg bg-brand/10 border border-brand/20">
+                      <div className="text-xs font-semibold text-ink mb-1">URL do Webhook (cole no painel do Tintim)</div>
+                      <code className="block text-xs font-mono text-brand-soft break-all select-all">
+                        {`${window.location.origin}/api/v1/webhooks/tintim/${integ.account_id}`}
+                      </code>
+                    </div>
+                  )}
                   
                   {testResults[integ.platform] && (
                     <div className={`mt-3 flex items-center text-sm ${testResults[integ.platform].success ? 'text-emerald-600' : 'text-rose-600'}`}>

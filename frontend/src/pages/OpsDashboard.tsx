@@ -15,6 +15,11 @@ export function OpsDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showNewClient, setShowNewClient] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended' | 'draft'>('all');
+  const [healthFilter, setHealthFilter] = useState<'all' | 'green' | 'yellow' | 'red'>('all');
+  const [planFilter, setPlanFilter] = useState<string>('all');
+  const [sortField, setSortField] = useState<string>('activity');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   const load = useCallback(() => {
     setLoading(true);
@@ -44,19 +49,53 @@ export function OpsDashboard() {
     );
   }
 
-  const filteredData = (data || []).filter((item) => {
-    try {
-      return item?.client?.name?.toLowerCase().includes(searchQuery.toLowerCase());
-    } catch (e) {
-      console.error("Filter error on item:", item, e);
-      return false;
+  const plans = Array.from(
+    new Set((data || []).map((d) => d.client.plan_name).filter(Boolean))
+  ) as string[];
+
+  const ltv = (d: ClientDashboard) =>
+    (d.client.tenure_months || 0) * (d.client.monthly_fee || 0);
+
+  const sortValue = (d: ClientDashboard): number | string => {
+    switch (sortField) {
+      case 'name': return (d.client.name || '').toLowerCase();
+      case 'tenure': return d.client.tenure_months ?? -1;
+      case 'revenue': return d.current_week?.revenue || 0;
+      case 'spend': return d.current_week?.ad_spend || 0;
+      case 'roi': return d.roi ?? -1;
+      case 'bookings': return d.current_week?.bookings || 0;
+      case 'fee': return d.client.monthly_fee || 0;
+      case 'ltv': return ltv(d);
+      default: return (d.current_week?.ad_spend || 0) + (d.current_week?.revenue || 0); // activity
     }
-  }).sort((a, b) => {
-    // Clientes com atividade (gasto/faturamento na semana) primeiro.
-    const av = (a.current_week?.ad_spend || 0) + (a.current_week?.revenue || 0);
-    const bv = (b.current_week?.ad_spend || 0) + (b.current_week?.revenue || 0);
-    return bv - av;
-  });
+  };
+
+  const filteredData = (data || [])
+    .filter((item) => {
+      try {
+        if (!item?.client?.name?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+        if (statusFilter === 'active' && (!item.client.is_active || item.client.is_draft)) return false;
+        if (statusFilter === 'suspended' && item.client.is_active) return false;
+        if (statusFilter === 'draft' && !item.client.is_draft) return false;
+        if (healthFilter !== 'all' && item.health_status !== healthFilter) return false;
+        if (planFilter !== 'all' && item.client.plan_name !== planFilter) return false;
+        return true;
+      } catch (e) {
+        console.error('Filter error on item:', item, e);
+        return false;
+      }
+    })
+    .sort((a, b) => {
+      const av = sortValue(a);
+      const bv = sortValue(b);
+      let cmp: number;
+      if (typeof av === 'string' || typeof bv === 'string') {
+        cmp = String(av).localeCompare(String(bv));
+      } else {
+        cmp = av - bv;
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
 
   const totalRevenue = filteredData.reduce((acc, curr) => acc + (curr.current_week?.revenue || 0), 0);
   const totalSpend = filteredData.reduce((acc, curr) => acc + (curr.current_week?.ad_spend || 0), 0);
@@ -183,6 +222,44 @@ export function OpsDashboard() {
           value={formatNumber(totalBookings)} 
           icon={<Calendar className="w-5 h-5 text-sky-600" />}
         />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 bg-card border border-line rounded-xl px-4 py-3">
+        <span className="text-xs font-semibold text-subtle uppercase tracking-wide mr-1">Filtros</span>
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className="border border-line rounded-lg bg-card text-ink text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand">
+          <option value="all">Todos os status</option>
+          <option value="active">Ativos</option>
+          <option value="suspended">Suspensos</option>
+          <option value="draft">Rascunhos</option>
+        </select>
+        <select value={healthFilter} onChange={(e) => setHealthFilter(e.target.value as typeof healthFilter)} className="border border-line rounded-lg bg-card text-ink text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand">
+          <option value="all">Toda saúde</option>
+          <option value="green">Verde</option>
+          <option value="yellow">Amarelo</option>
+          <option value="red">Vermelho</option>
+        </select>
+        <select value={planFilter} onChange={(e) => setPlanFilter(e.target.value)} className="border border-line rounded-lg bg-card text-ink text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand">
+          <option value="all">Todos os planos</option>
+          {plans.map((p) => <option key={p} value={p}>{p}</option>)}
+        </select>
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-xs text-subtle">{filteredData.length} clientes · Ordenar:</span>
+          <select value={sortField} onChange={(e) => setSortField(e.target.value)} className="border border-line rounded-lg bg-card text-ink text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand">
+            <option value="activity">Atividade</option>
+            <option value="name">Nome</option>
+            <option value="tenure">Tempo de casa</option>
+            <option value="revenue">Faturamento</option>
+            <option value="spend">Investimento</option>
+            <option value="roi">ROI</option>
+            <option value="bookings">Consultas</option>
+            <option value="fee">Fee mensal</option>
+            <option value="ltv">LTV</option>
+          </select>
+          <button onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))} title="Inverter ordem"
+            className="px-2.5 py-1.5 border border-line rounded-lg text-sm text-muted hover:bg-elevated">
+            {sortDir === 'asc' ? '↑ Cresc.' : '↓ Decr.'}
+          </button>
+        </div>
       </div>
 
       {loading ? (

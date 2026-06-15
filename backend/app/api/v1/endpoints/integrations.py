@@ -139,10 +139,17 @@ async def create_integration(
             },
         )
 
+    # Tintim usa o account_id como "webhook secret". Se não vier, geramos um.
+    account_id = integration_in.account_id
+    if integration_in.platform == "tintim" and not account_id:
+        from app.core.config import settings
+        from app.integrations.tintim_webhook import generate_webhook_secret
+        account_id = generate_webhook_secret(client_id, settings.SECRET_KEY)
+
     integration = IntegrationSetting(
         client_id=client_id,
         platform=integration_in.platform,
-        account_id=integration_in.account_id,
+        account_id=account_id,
         is_active=integration_in.is_active,
         encrypted_access_token=(
             encrypt_value(integration_in.access_token)
