@@ -54,44 +54,44 @@ export default function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+    <div className="flex items-center justify-center min-h-screen bg-base">
+      <div className="w-full max-w-md p-8 bg-card rounded-lg shadow-md">
         <div className="flex justify-center mb-6">
-          <LogIn className="w-12 h-12 text-blue-600" />
+          <LogIn className="w-12 h-12 text-brand" />
         </div>
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Atlas-Core Login</h2>
+        <h2 className="text-2xl font-bold text-center text-ink mb-6">Atlas-Core Login</h2>
         
         {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm text-center">
+          <div className="mb-4 p-3 bg-rose-500/15 text-rose-300 rounded text-sm text-center">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-muted">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 border border-line rounded-md shadow-sm focus:outline-none focus:ring-brand focus:border-brand"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Senha</label>
+            <label className="block text-sm font-medium text-muted">Senha</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 border border-line rounded-md shadow-sm focus:outline-none focus:ring-brand focus:border-brand"
             />
           </div>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-blue-300"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-onbrand bg-brand hover:bg-brand-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand disabled:cursor-not-allowed disabled:bg-brand/40"
           >
             {isSubmitting ? 'Entrando...' : 'Entrar'}
           </button>

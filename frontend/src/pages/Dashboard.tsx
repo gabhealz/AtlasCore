@@ -66,21 +66,21 @@ export default function Dashboard() {
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-amber-500/15 text-amber-300';
       case 'RUNNING':
       case 'ACTIVE':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-sky-500/15 text-sky-300';
       case 'AWAITING_REVIEW':
-        return 'bg-amber-100 text-amber-800';
+        return 'bg-amber-500/15 text-amber-300';
       case 'APPROVED':
       case 'COMPLETED':
-        return 'bg-green-100 text-green-800';
+        return 'bg-emerald-500/15 text-emerald-300';
       case 'REJECTED':
-        return 'bg-rose-100 text-rose-800';
+        return 'bg-rose-500/15 text-rose-300';
       case 'FAILED':
-        return 'bg-red-100 text-red-800';
+        return 'bg-rose-500/15 text-rose-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-elevated text-muted';
     }
   };
 
@@ -108,13 +108,13 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
+    <div className="min-h-screen bg-base">
+      <header className="bg-card shadow">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <h1 className="text-2xl font-bold text-gray-900">Atlas-Core Dashboard</h1>
+          <h1 className="text-2xl font-bold text-ink">Atlas-Core Dashboard</h1>
           <button
             onClick={logout}
-            className="flex items-center text-gray-600 transition-colors hover:text-red-600"
+            className="flex items-center text-subtle transition-colors hover:text-rose-400"
           >
             <LogOut className="mr-1 h-5 w-5" />
             <span className="text-sm font-medium">Sair</span>
@@ -126,26 +126,26 @@ export default function Dashboard() {
         <div className="mb-6 flex items-center justify-between gap-4">
           <div className="relative w-full max-w-xs">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <Search className="h-5 w-5 text-gray-400" />
+              <Search className="h-5 w-5 text-subtle" />
             </div>
             <input
               type="text"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-10 pr-3 leading-5 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 sm:text-sm"
+              className="block w-full rounded-md border border-line bg-card py-2 pl-10 pr-3 leading-5 placeholder-subtle focus:border-brand focus:outline-none focus:placeholder-subtle focus:ring-1 focus:ring-brand sm:text-sm"
               placeholder="Buscar medico..."
             />
           </div>
 
           <div className="flex gap-2">
             <button
-              className="flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+              className="flex items-center rounded-md border border-line bg-card px-4 py-2 text-sm font-medium text-muted shadow-sm hover:bg-elevated"
               onClick={() => navigate('/ops')}
             >
               Ops Dashboard
             </button>
             <button
-              className="flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+              className="flex items-center rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-onbrand shadow-sm hover:bg-brand-soft"
               onClick={() => navigate('/onboarding/new')}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -154,34 +154,34 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-md bg-white shadow">
+        <div className="overflow-hidden rounded-md bg-card shadow">
           {loading ? (
-            <div className="p-8 text-center text-gray-500">Carregando projetos...</div>
+            <div className="p-8 text-center text-muted">Carregando projetos...</div>
           ) : filteredOnboardings.length === 0 ? (
             <div className="flex flex-col items-center p-12 text-center">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-300">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-elevated text-subtle">
                 <Search className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900">Nenhum projeto encontrado</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <h3 className="text-lg font-medium text-ink">Nenhum projeto encontrado</h3>
+              <p className="mt-1 text-sm text-muted">
                 {query
                   ? 'Tente ajustar a busca para encontrar um onboarding existente.'
                   : 'Comece criando um novo projeto de onboarding.'}
               </p>
             </div>
           ) : (
-            <ul className="divide-y divide-gray-200">
+            <ul className="divide-y divide-line">
               {filteredOnboardings.map((project) => (
                 <li key={project.id}>
-                  <div className="block hover:bg-gray-50">
+                  <div className="block hover:bg-elevated">
                     <div className="flex items-center px-4 py-4 sm:px-6">
                       <div className="flex min-w-0 flex-1 items-center">
                         <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                           <div>
-                            <p className="truncate text-sm font-medium text-blue-600">
+                            <p className="truncate text-sm font-medium text-brand">
                               {getDoctorName(project)}
                             </p>
-                            <p className="mt-2 flex items-center text-sm text-gray-500">
+                            <p className="mt-2 flex items-center text-sm text-muted">
                               <span className="truncate">
                                 Criado em:{' '}
                                 {formatCreatedAt(project.created_at)}
@@ -189,8 +189,8 @@ export default function Dashboard() {
                             </p>
                           </div>
                           <div className="hidden md:block">
-                            <p className="text-sm text-gray-900">ID do Projeto: #{project.id}</p>
-                            <p className="mt-2 flex items-center text-sm text-gray-500">
+                            <p className="text-sm text-ink">ID do Projeto: #{project.id}</p>
+                            <p className="mt-2 flex items-center text-sm text-muted">
                               <span
                                 className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusBadgeColor(project.status ?? '')}`}
                               >
@@ -207,7 +207,7 @@ export default function Dashboard() {
                             state: { onboardingStatus: project.status },
                           })
                         }
-                        className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                        className="inline-flex items-center gap-2 rounded-md border border-line px-3 py-2 text-sm font-medium text-muted transition-colors hover:border-brand/40 hover:bg-brand/10 hover:text-brand"
                       >
                         Abrir
                         <ChevronRight className="h-4 w-4" />

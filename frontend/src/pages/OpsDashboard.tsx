@@ -30,9 +30,9 @@ export function OpsDashboard() {
 
   if (errorMsg) {
     return (
-      <div className="p-8 text-red-600">
+      <div className="p-8 text-rose-400">
         <h2 className="text-xl font-bold">Erro de Renderização/API</h2>
-        <pre className="mt-4 p-4 bg-red-50 whitespace-pre-wrap">{errorMsg}</pre>
+        <pre className="mt-4 p-4 bg-rose-500/10 rounded-lg whitespace-pre-wrap">{errorMsg}</pre>
       </div>
     );
   }
@@ -56,8 +56,10 @@ export function OpsDashboard() {
       header: 'Cliente',
       accessor: (row: ClientDashboard) => (
         <div>
-          <div className="font-medium text-gray-900">{row.client.name}</div>
-          {row.client.specialty && <div className="text-xs text-gray-500">{row.client.specialty}</div>}
+          <div className="font-medium text-ink">{row.client.name}</div>
+          <div className="text-xs text-subtle">
+            {row.client.specialty || row.client.plan_name || '—'}
+          </div>
         </div>
       ),
     },
@@ -66,6 +68,12 @@ export function OpsDashboard() {
       accessor: (row: ClientDashboard) => (
         <StatusBadge status={row.health_status as any} />
       ),
+    },
+    {
+      header: 'Tempo de casa',
+      accessor: (row: ClientDashboard) =>
+        row.client.tenure_months != null ? `${row.client.tenure_months} meses` : '-',
+      className: 'text-right text-muted',
     },
     {
       header: 'Faturamento',
@@ -80,7 +88,7 @@ export function OpsDashboard() {
     {
       header: 'ROI',
       accessor: (row: ClientDashboard) => row.roi ? `${row.roi.toFixed(1)}x` : '-',
-      className: 'text-right font-medium text-gray-900'
+      className: 'text-right font-medium text-ink'
     },
     {
       header: 'Consultas',
@@ -92,7 +100,7 @@ export function OpsDashboard() {
       accessor: (row: ClientDashboard) => (
         <Link
           to={`/ops/${row.client.id}`}
-          className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-900"
+          className="inline-flex items-center text-sm font-medium text-brand hover:text-brand-soft"
         >
           Detalhes <ChevronRight className="ml-1 w-4 h-4" />
         </Link>
@@ -105,20 +113,20 @@ export function OpsDashboard() {
     <div className="py-8 space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Ops Dashboard</h1>
-          <p className="text-gray-500 mt-1">Visão geral do desempenho de todas as clínicas na semana atual.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-ink">Ops Dashboard</h1>
+          <p className="text-muted mt-1">Visão geral do desempenho de todas as clínicas na semana atual.</p>
         </div>
-        
+
         <div className="relative w-full sm:w-96">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className="h-5 w-5 text-subtle" />
           </div>
           <input
             type="text"
             placeholder="Buscar cliente..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-shadow"
+            className="block w-full pl-10 pr-3 py-2 border border-line rounded-lg leading-5 bg-card text-ink placeholder-subtle focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand sm:text-sm transition-shadow"
           />
         </div>
       </div>
@@ -127,29 +135,29 @@ export function OpsDashboard() {
         <KPICard 
           title="Faturamento Total" 
           value={formatCurrency(totalRevenue)} 
-          icon={<DollarSign className="w-5 h-5 text-indigo-500" />}
+          icon={<DollarSign className="w-5 h-5 text-brand" />}
         />
         <KPICard 
           title="Investimento (Ad Spend)" 
           value={formatCurrency(totalSpend)} 
-          icon={<Activity className="w-5 h-5 text-rose-500" />}
+          icon={<Activity className="w-5 h-5 text-rose-400" />}
         />
         <KPICard 
           title="ROI Médio" 
           value={`${averageRoi.toFixed(1)}x`} 
-          icon={<TrendingUp className="w-5 h-5 text-emerald-500" />}
+          icon={<TrendingUp className="w-5 h-5 text-emerald-400" />}
         />
         <KPICard 
           title="Consultas Agendadas" 
           value={formatNumber(totalBookings)} 
-          icon={<Calendar className="w-5 h-5 text-blue-500" />}
+          icon={<Calendar className="w-5 h-5 text-sky-400" />}
         />
       </div>
 
       {loading ? (
         <div className="animate-pulse space-y-4">
-          <div className="h-12 bg-gray-200 rounded-xl w-full"></div>
-          <div className="h-64 bg-gray-100 rounded-xl w-full"></div>
+          <div className="h-12 bg-elevated rounded-xl w-full"></div>
+          <div className="h-64 bg-card rounded-xl w-full"></div>
         </div>
       ) : (
         <DataTable

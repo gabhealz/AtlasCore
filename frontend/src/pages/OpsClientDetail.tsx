@@ -35,7 +35,7 @@ export function OpsClientDetail() {
   if (loading) {
     return (
       <div className="py-12 flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
       </div>
     );
   }
@@ -43,7 +43,7 @@ export function OpsClientDetail() {
   if (!data) {
     return (
       <div className="py-12 text-center">
-        <p className="text-gray-500">Cliente não encontrado.</p>
+        <p className="text-muted">Cliente não encontrado.</p>
       </div>
     );
   }
@@ -58,11 +58,11 @@ export function OpsClientDetail() {
   }));
 
   const campaignColumns: Column<CampaignSnapshot>[] = [
-    { header: 'Campanha', accessor: 'campaign_name', className: 'font-medium text-gray-900' },
-    { 
-      header: 'Plataforma', 
+    { header: 'Campanha', accessor: 'campaign_name', className: 'font-medium text-ink' },
+    {
+      header: 'Plataforma',
       accessor: (row: any) => (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.platform === 'meta' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
+        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.platform === 'meta' ? 'bg-sky-500/15 text-sky-300' : 'bg-rose-500/15 text-rose-300'}`}>
           {row.platform.toUpperCase()}
         </span>
       )
@@ -72,7 +72,7 @@ export function OpsClientDetail() {
     { header: 'CTR', accessor: (row: any) => formatPct(row.ctr), className: 'text-right' },
     { header: 'CPC', accessor: (row: any) => formatCurrency(row.cpc), className: 'text-right' },
     { header: 'Conversões', accessor: (row: any) => formatNumber(row.conversions), className: 'text-right' },
-    { header: 'Gasto', accessor: (row: any) => formatCurrency(row.spend), className: 'text-right font-medium text-gray-900' },
+    { header: 'Gasto', accessor: (row: any) => formatCurrency(row.spend), className: 'text-right font-medium text-ink' },
   ];
 
   return (
@@ -80,24 +80,48 @@ export function OpsClientDetail() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to="/ops" className="p-2 text-gray-500 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors">
+          <Link to="/ops" className="p-2 text-muted hover:text-ink rounded-full hover:bg-elevated transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900">{client.name}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-ink">{client.name}</h1>
               <StatusBadge status={health_status as any} />
             </div>
-            {client.specialty && <p className="text-sm text-gray-500 mt-1">{client.specialty} • {client.city}/{client.state}</p>}
+            {(client.specialty || client.city) && <p className="text-sm text-muted mt-1">{client.specialty}{client.city ? ` • ${client.city}/${client.state}` : ''}</p>}
           </div>
         </div>
         <Link
           to={`/ops/${client.id}/settings`}
-          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center px-4 py-2 border border-line rounded-md shadow-sm text-sm font-medium text-muted bg-card hover:bg-elevated transition-colors"
         >
-          <Settings className="w-4 h-4 mr-2 text-gray-500" />
+          <Settings className="w-4 h-4 mr-2 text-subtle" />
           Integrações
         </Link>
+      </div>
+
+      {/* Contrato / tempo de casa (LTV) */}
+      <div className="flex flex-wrap gap-x-10 gap-y-3 bg-card border border-line rounded-xl px-6 py-4 text-sm">
+        <div>
+          <div className="text-subtle">Plano</div>
+          <div className="text-ink font-medium">{client.plan_name || '—'}</div>
+        </div>
+        <div>
+          <div className="text-subtle">Início do contrato</div>
+          <div className="text-ink font-medium">{client.contract_start_date ? client.contract_start_date.split('-').reverse().join('/') : '—'}</div>
+        </div>
+        <div>
+          <div className="text-subtle">Tempo de casa</div>
+          <div className="text-brand font-semibold">{client.tenure_months != null ? `${client.tenure_months} meses` : '—'}{client.tenure_days != null ? ` (${client.tenure_days} dias)` : ''}</div>
+        </div>
+        <div>
+          <div className="text-subtle">Fee mensal</div>
+          <div className="text-ink font-medium">{formatCurrency(client.monthly_fee)}</div>
+        </div>
+        <div>
+          <div className="text-subtle">Situação</div>
+          <div className="text-ink font-medium">{client.is_active ? 'Ativo' : 'Suspenso'}</div>
+        </div>
       </div>
 
       {/* KPIs */}
@@ -138,92 +162,93 @@ export function OpsClientDetail() {
       </div>
 
       {/* Chart */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-        <h3 className="text-base font-semibold text-gray-900 mb-6">Histórico de Faturamento (8 semanas)</h3>
+      <div className="bg-card p-6 rounded-xl border border-line shadow-sm">
+        <h3 className="text-base font-semibold text-ink mb-6">Histórico de Faturamento (8 semanas)</h3>
         <div className="h-72 w-full">
           {chartData.length > 1 ? (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#b8ff2c" stopOpacity={0.35}/>
+                    <stop offset="95%" stopColor="#b8ff2c" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} tickFormatter={(value) => `R$ ${value / 1000}k`} />
-                <Tooltip 
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e3a6b" />
+                <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9fb0d0' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9fb0d0' }} tickFormatter={(value) => `R$ ${value / 1000}k`} />
+                <Tooltip
                   formatter={(value: number) => [formatCurrency(value), 'Faturamento']}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #1e3a6b', background: '#0e2148', color: '#e8eefc' }}
+                  labelStyle={{ color: '#9fb0d0' }}
                 />
-                <Area type="monotone" dataKey="revenue" stroke="#4f46e5" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                <Area type="monotone" dataKey="revenue" stroke="#b8ff2c" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex items-center justify-center text-gray-400 text-sm">Dados insuficientes para o gráfico</div>
+            <div className="h-full flex items-center justify-center text-subtle text-sm">Dados insuficientes para o gráfico</div>
           )}
         </div>
       </div>
 
       {/* Funnel */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-6">Saúde do Funil</h2>
-        
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 bg-gray-50 p-6 rounded-lg border border-gray-100">
+      <div className="bg-card rounded-xl shadow-sm border border-line p-6">
+        <h2 className="text-lg font-bold text-ink mb-6">Saúde do Funil</h2>
+
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 bg-base p-6 rounded-lg border border-line">
           <div className="text-center w-full md:w-1/4">
-            <div className="text-sm text-gray-500 mb-1">Impressões</div>
-            <div className="text-2xl font-bold text-gray-900">{formatNumber(current_week?.impressions)}</div>
+            <div className="text-sm text-muted mb-1">Impressões</div>
+            <div className="text-2xl font-bold text-ink">{formatNumber(current_week?.impressions)}</div>
           </div>
-          <div className="hidden md:block w-8 border-t-2 border-dashed border-gray-300"></div>
+          <div className="hidden md:block w-8 border-t-2 border-dashed border-line"></div>
           <div className="text-center w-full md:w-1/4">
-            <div className="text-sm text-gray-500 mb-1">Cliques</div>
-            <div className="text-2xl font-bold text-gray-900">{formatNumber(current_week?.clicks)}</div>
+            <div className="text-sm text-muted mb-1">Cliques</div>
+            <div className="text-2xl font-bold text-ink">{formatNumber(current_week?.clicks)}</div>
           </div>
-          <div className="hidden md:block w-8 border-t-2 border-dashed border-gray-300"></div>
+          <div className="hidden md:block w-8 border-t-2 border-dashed border-line"></div>
           <div className="text-center w-full md:w-1/4">
-            <div className="text-sm text-gray-500 mb-1">Conversões (WhatsApp)</div>
-            <div className="text-2xl font-bold text-gray-900">{formatNumber(current_week?.conversions)}</div>
+            <div className="text-sm text-muted mb-1">Conversões (WhatsApp)</div>
+            <div className="text-2xl font-bold text-ink">{formatNumber(current_week?.conversions)}</div>
           </div>
-          <div className="hidden md:block w-8 border-t-2 border-dashed border-gray-300"></div>
-          <div className="text-center w-full md:w-1/4 bg-indigo-50 py-3 rounded-lg border border-indigo-100">
-            <div className="text-sm text-indigo-600 mb-1 font-medium">Agendamentos</div>
-            <div className="text-2xl font-bold text-indigo-900">{formatNumber(current_week?.bookings)}</div>
+          <div className="hidden md:block w-8 border-t-2 border-dashed border-line"></div>
+          <div className="text-center w-full md:w-1/4 bg-brand/10 py-3 rounded-lg border border-brand/30">
+            <div className="text-sm text-brand mb-1 font-medium">Agendamentos</div>
+            <div className="text-2xl font-bold text-ink">{formatNumber(current_week?.bookings)}</div>
           </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="p-4 rounded-lg bg-gray-50">
-            <div className="text-xs text-gray-500 mb-1">CTR</div>
-            <div className="font-semibold text-gray-900">{formatPct(current_week?.ctr)}</div>
+          <div className="p-4 rounded-lg bg-base border border-line">
+            <div className="text-xs text-muted mb-1">CTR</div>
+            <div className="font-semibold text-ink">{formatPct(current_week?.ctr)}</div>
           </div>
-          <div className="p-4 rounded-lg bg-gray-50">
-            <div className="text-xs text-gray-500 mb-1">CPC</div>
-            <div className="font-semibold text-gray-900">{formatCurrency(current_week?.cpc)}</div>
+          <div className="p-4 rounded-lg bg-base border border-line">
+            <div className="text-xs text-muted mb-1">CPC</div>
+            <div className="font-semibold text-ink">{formatCurrency(current_week?.cpc)}</div>
           </div>
-          <div className="p-4 rounded-lg bg-gray-50">
-            <div className="text-xs text-gray-500 mb-1">Taxa LP → WhatsApp</div>
-            <div className="font-semibold text-gray-900">{formatPct(current_week?.lp_to_whatsapp_rate)}</div>
+          <div className="p-4 rounded-lg bg-base border border-line">
+            <div className="text-xs text-muted mb-1">Taxa LP → WhatsApp</div>
+            <div className="font-semibold text-ink">{formatPct(current_week?.lp_to_whatsapp_rate)}</div>
           </div>
-          <div className="p-4 rounded-lg bg-gray-50">
-            <div className="text-xs text-gray-500 mb-1">Taxa WhatsApp → Agend.</div>
-            <div className="font-semibold text-gray-900">{formatPct(current_week?.whatsapp_to_booking_rate)}</div>
+          <div className="p-4 rounded-lg bg-base border border-line">
+            <div className="text-xs text-muted mb-1">Taxa WhatsApp → Agend.</div>
+            <div className="font-semibold text-ink">{formatPct(current_week?.whatsapp_to_booking_rate)}</div>
           </div>
-          <div className="p-4 rounded-lg bg-gray-50">
-            <div className="text-xs text-gray-500 mb-1">Custo por Conversão</div>
-            <div className="font-semibold text-gray-900">{formatCurrency(current_week?.cost_per_conversion)}</div>
+          <div className="p-4 rounded-lg bg-base border border-line">
+            <div className="text-xs text-muted mb-1">Custo por Conversão</div>
+            <div className="font-semibold text-ink">{formatCurrency(current_week?.cost_per_conversion)}</div>
           </div>
         </div>
       </div>
 
       {/* Campaigns */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div 
-          className="p-6 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors"
+      <div className="bg-card rounded-xl shadow-sm border border-line overflow-hidden">
+        <div
+          className="p-6 flex justify-between items-center cursor-pointer hover:bg-elevated transition-colors"
           onClick={() => setShowCampaigns(!showCampaigns)}
         >
-          <h2 className="text-lg font-bold text-gray-900">Campanhas da Semana ({campaigns.length})</h2>
-          <button className="text-indigo-600 font-medium text-sm flex items-center">
+          <h2 className="text-lg font-bold text-ink">Campanhas da Semana ({campaigns.length})</h2>
+          <button className="text-brand font-medium text-sm flex items-center">
             {showCampaigns ? (
               <>Ocultar <ChevronUp className="w-4 h-4 ml-1" /></>
             ) : (
@@ -233,7 +258,7 @@ export function OpsClientDetail() {
         </div>
         
         {showCampaigns && (
-          <div className="border-t border-gray-200">
+          <div className="border-t border-line">
             <DataTable
               data={campaigns}
               columns={campaignColumns}

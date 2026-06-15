@@ -23,10 +23,10 @@ export function DataTable<T>({
   className,
 }: DataTableProps<T>) {
   return (
-    <div className={cn("overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm", className)}>
+    <div className={cn("overflow-hidden rounded-xl border border-line bg-card shadow-sm", className)}>
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm text-gray-500">
-          <thead className="bg-gray-50 text-xs uppercase text-gray-700">
+        <table className="w-full text-left text-sm text-muted">
+          <thead className="bg-elevated text-xs uppercase text-muted">
             <tr>
               {columns.map((col, idx) => (
                 <th key={idx} className={cn("px-6 py-4 font-semibold", col.className)}>
@@ -35,19 +35,19 @@ export function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-line bg-card">
             {data.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={columns.length} className="px-6 py-8 text-center text-subtle">
                   Nenhum registro encontrado.
                 </td>
               </tr>
             ) : (
               data.map((row) => (
-                <tr 
+                <tr
                   key={keyExtractor(row)}
                   onClick={() => onRowClick?.(row)}
-                  className={cn("hover:bg-gray-50 transition-colors", onRowClick && "cursor-pointer")}
+                  className={cn("hover:bg-elevated transition-colors", onRowClick && "cursor-pointer")}
                 >
                   {columns.map((col, idx) => (
                     <td key={idx} className={cn("px-6 py-4 whitespace-nowrap", col.className)}>

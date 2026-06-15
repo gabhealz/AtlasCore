@@ -77,7 +77,7 @@ export function OpsClientSettings() {
   if (loading) {
     return (
       <div className="py-12 flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
       </div>
     );
   }
@@ -85,25 +85,25 @@ export function OpsClientSettings() {
   return (
     <div className="py-8 space-y-8">
       <div className="flex items-center gap-4">
-        <Link to={`/ops/${clientId}`} className="p-2 text-gray-500 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors">
+        <Link to={`/ops/${clientId}`} className="p-2 text-muted hover:text-ink rounded-full hover:bg-elevated transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Integrações</h1>
-          <p className="text-gray-500 mt-1">Gerencie os tokens e conexões das plataformas para este cliente.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-ink">Integrações</h1>
+          <p className="text-muted mt-1">Gerencie os tokens e conexões das plataformas para este cliente.</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center">
-            <Key className="w-5 h-5 mr-2 text-indigo-500" />
+      <div className="bg-card rounded-xl shadow-sm border border-line overflow-hidden">
+        <div className="p-6 border-b border-line flex justify-between items-center">
+          <h2 className="text-lg font-bold text-ink flex items-center">
+            <Key className="w-5 h-5 mr-2 text-brand" />
             Tokens Ativos
           </h2>
           {!showForm && (
             <button
               onClick={() => setShowForm(true)}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-onbrand bg-brand hover:bg-brand-soft"
             >
               <Plus className="w-4 h-4 mr-1" /> Adicionar
             </button>
@@ -111,14 +111,14 @@ export function OpsClientSettings() {
         </div>
 
         {showForm && (
-          <div className="p-6 bg-gray-50 border-b border-gray-200">
+          <div className="p-6 bg-base border-b border-line">
             <form onSubmit={handleCreate} className="space-y-4 max-w-2xl">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Plataforma</label>
+                <label className="block text-sm font-medium text-muted">Plataforma</label>
                 <select 
                   value={newPlatform} 
                   onChange={e => setNewPlatform(e.target.value)}
-                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border"
+                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-line focus:outline-none focus:ring-brand focus:border-brand sm:text-sm rounded-md border"
                 >
                   <option value="meta">Meta Ads (Facebook / Instagram)</option>
                   <option value="google">Google Ads</option>
@@ -128,7 +128,7 @@ export function OpsClientSettings() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-muted">
                   {newPlatform === 'meta' ? 'Account ID da Conta de Anúncios' :
                    newPlatform === 'google' ? 'Customer ID (Google Ads)' :
                    newPlatform === 'ga4' ? 'Property ID (GA4)' :
@@ -138,7 +138,7 @@ export function OpsClientSettings() {
                   type="text" 
                   value={newAccountId}
                   onChange={e => setNewAccountId(e.target.value)}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full border border-line rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                   placeholder={
                     newPlatform === 'meta' ? 'ex: act_12345678' :
                     newPlatform === 'google' ? 'ex: 123-456-7890' :
@@ -150,7 +150,7 @@ export function OpsClientSettings() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-muted">
                   {newPlatform === 'meta' ? 'Access Token (System User ou Pessoal)' :
                    newPlatform === 'google' ? 'Refresh Token (OAuth2)' :
                    newPlatform === 'ga4' ? 'JSON da Service Account (colar o conteúdo inteiro)' :
@@ -162,7 +162,7 @@ export function OpsClientSettings() {
                     rows={4}
                     value={newAccessToken}
                     onChange={e => setNewAccessToken(e.target.value)}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm font-mono text-xs"
+                    className="mt-1 block w-full border border-line rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm font-mono text-xs"
                     placeholder='{"type": "service_account", "project_id": "..."}'
                   />
                 ) : (
@@ -171,7 +171,7 @@ export function OpsClientSettings() {
                     required={newPlatform !== 'tintim'}
                     value={newAccessToken}
                     onChange={e => setNewAccessToken(e.target.value)}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full border border-line rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand focus:border-brand sm:text-sm"
                   />
                 )}
               </div>
@@ -180,13 +180,13 @@ export function OpsClientSettings() {
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
+                  className="bg-card py-2 px-4 border border-line rounded-md shadow-sm text-sm font-medium text-muted hover:bg-elevated focus:outline-none"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none"
+                  className="bg-brand border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-onbrand hover:bg-brand-soft focus:outline-none"
                 >
                   Salvar
                 </button>
@@ -196,21 +196,21 @@ export function OpsClientSettings() {
         )}
 
         {integrations.length === 0 && !showForm ? (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-muted">
             Nenhuma integração configurada para este cliente.
           </div>
         ) : (
-          <ul className="divide-y divide-gray-200">
+          <ul className="divide-y divide-line">
             {integrations.map((integ) => (
-              <li key={integ.id} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <li key={integ.id} className="p-6 flex items-center justify-between hover:bg-elevated transition-colors">
                 <div className="flex flex-col">
                   <div className="flex items-center">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase ${
-                      integ.platform === 'meta' ? 'bg-blue-100 text-blue-800' :
-                      integ.platform === 'google' ? 'bg-rose-100 text-rose-800' :
-                      integ.platform === 'ga4' ? 'bg-amber-100 text-amber-800' :
-                      integ.platform === 'tintim' ? 'bg-green-100 text-green-800' :
-                      'bg-gray-100 text-gray-800'
+                      integ.platform === 'meta' ? 'bg-sky-500/15 text-sky-300' :
+                      integ.platform === 'google' ? 'bg-rose-500/15 text-rose-300' :
+                      integ.platform === 'ga4' ? 'bg-amber-500/15 text-amber-300' :
+                      integ.platform === 'tintim' ? 'bg-emerald-500/15 text-emerald-300' :
+                      'bg-elevated text-muted'
                     }`}>
                       {integ.platform === 'meta' ? 'Meta Ads' :
                        integ.platform === 'google' ? 'Google Ads' :
@@ -218,17 +218,17 @@ export function OpsClientSettings() {
                        integ.platform === 'tintim' ? 'Tintim' :
                        integ.platform}
                     </span>
-                    <span className="ml-3 text-sm font-medium text-gray-900">
-                      ID da Conta: <span className="font-mono font-normal text-gray-600">{integ.account_id || 'Não definido'}</span>
+                    <span className="ml-3 text-sm font-medium text-ink">
+                      ID da Conta: <span className="font-mono font-normal text-subtle">{integ.account_id || 'Não definido'}</span>
                     </span>
                   </div>
-                  <div className="mt-2 text-sm text-gray-500 flex items-center gap-4">
+                  <div className="mt-2 text-sm text-muted flex items-center gap-4">
                     <span>Token Ativo: {integ.has_access_token ? 'Sim' : 'Não'}</span>
                     <span>Última Sincronização: {integ.last_sync_at ? new Date(integ.last_sync_at).toLocaleString('pt-BR') : 'Nunca'}</span>
                   </div>
                   
                   {testResults[integ.platform] && (
-                    <div className={`mt-3 flex items-center text-sm ${testResults[integ.platform].success ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={`mt-3 flex items-center text-sm ${testResults[integ.platform].success ? 'text-emerald-400' : 'text-rose-400'}`}>
                       {testResults[integ.platform].success ? <CheckCircle2 className="w-4 h-4 mr-1" /> : <XCircle className="w-4 h-4 mr-1" />}
                       {testResults[integ.platform].message}
                     </div>
@@ -239,14 +239,14 @@ export function OpsClientSettings() {
                   <button
                     onClick={() => handleTest(integ.platform)}
                     disabled={testing[integ.platform]}
-                    className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
+                    className="inline-flex items-center text-sm text-brand hover:text-brand-soft disabled:opacity-50"
                   >
                     <RefreshCw className={`w-4 h-4 mr-1 ${testing[integ.platform] ? 'animate-spin' : ''}`} />
                     Testar
                   </button>
                   <button
                     onClick={() => handleDelete(integ.platform)}
-                    className="inline-flex items-center text-sm text-red-600 hover:text-red-900"
+                    className="inline-flex items-center text-sm text-rose-400 hover:text-rose-300"
                   >
                     <Trash2 className="w-4 h-4 mr-1" />
                     Remover
