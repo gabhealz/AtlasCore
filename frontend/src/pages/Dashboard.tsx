@@ -178,7 +178,7 @@ export default function Dashboard() {
                       <div className="flex min-w-0 flex-1 items-center">
                         <div className="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                           <div>
-                            <p className="truncate text-sm font-medium text-brand">
+                            <p className="truncate text-sm font-semibold text-ink">
                               {getDoctorName(project)}
                             </p>
                             <p className="mt-2 flex items-center text-sm text-muted">

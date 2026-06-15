@@ -2,13 +2,13 @@
 
 /* Identidade visual Healz — healthtech: claro, limpo, acento rosa-magenta */
 @theme {
-  --color-base: #f7f8fc;        /* fundo do app (off-white frio) */
-  --color-card: #ffffff;        /* superfície de cards/painéis/sidebar */
-  --color-elevated: #f1f3fa;    /* hover / superfície elevada */
-  --color-line: #e7e9f2;        /* bordas / divisores */
-  --color-ink: #1a1f36;         /* texto primário (slate escuro) */
-  --color-muted: #5a6276;       /* texto secundário */
-  --color-subtle: #9aa1b4;      /* texto terciário / ícones apagados */
+  --color-base: #eef0f5;        /* fundo do app (cinza suave — evita o branco que cansa a vista) */
+  --color-card: #ffffff;        /* superfície de cards/painéis/sidebar (destaca suave sobre o cinza) */
+  --color-elevated: #e7eaf1;    /* hover / superfície elevada */
+  --color-line: #e1e5ee;        /* bordas / divisores */
+  --color-ink: #232838;         /* texto primário (slate escuro, não preto puro) */
+  --color-muted: #5f6678;       /* texto secundário */
+  --color-subtle: #98a0b2;      /* texto terciário / ícones apagados */
   --color-brand: #ec298f;       /* rosa-magenta Healz (do logo) */
   --color-brand-soft: #c71e76;  /* rosa mais escuro (hover) */
   --color-brand-tint: #fce7f3;  /* rosa bem claro (chips/realces) */
