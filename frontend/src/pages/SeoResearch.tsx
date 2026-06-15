@@ -114,7 +114,7 @@ export function SeoResearch() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto flex max-w-5xl flex-col">
         <header className="mb-6">
-          <p className="text-sm font-semibold uppercase tracking-wide text-indigo-600">
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand">
             Inteligencia SEO
           </p>
           <h1 className="mt-1 text-3xl font-bold text-gray-900">
@@ -174,7 +174,7 @@ export function SeoResearch() {
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
+              className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:bg-brand"
             >
               <Search className="mr-2 h-4 w-4" />
               {loading ? 'Pesquisando...' : 'Pesquisar'}
@@ -297,7 +297,7 @@ export function SeoResearch() {
                   </div>
                   <div>
                     <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                      <FileText className="h-4 w-4 text-indigo-600" />
+                      <FileText className="h-4 w-4 text-brand" />
                       Onboardings ({internal.onboardings.length})
                     </p>
                     <ul className="mt-3 space-y-2">

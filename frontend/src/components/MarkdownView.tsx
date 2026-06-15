@@ -97,7 +97,7 @@ export function MarkdownView({ content }: { content: string }) {
           li: (props) => <li className="leading-relaxed" {...props} />,
           a: (props) => (
             <a
-              className="break-words text-indigo-600 underline"
+              className="break-words text-brand underline"
               target="_blank"
               rel="noopener noreferrer"
               {...props}

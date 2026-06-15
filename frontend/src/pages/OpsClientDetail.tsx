@@ -9,6 +9,7 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { DataTable } from '../components/ui/DataTable';
 import type { Column } from '../components/ui/DataTable';
 import { ManualMetricsModal } from '../components/ops/ManualMetricsModal';
+import { IbgeMarketPanel } from '../components/ops/IbgeMarketPanel';
 import { benchmarks, healthClasses, healthDot, type Diag } from '../lib/benchmarks';
 import {
   AreaChart,
@@ -267,6 +268,9 @@ export function OpsClientDetail() {
         </div>
         <p className="text-xs text-subtle mt-4">Diagnóstico segundo os benchmarks internos da Healz (Doc 3). Verde = saudável · Amarelo = atenção · Vermelho = gargalo.</p>
       </div>
+
+      {/* Mercado da região (IBGE) */}
+      <IbgeMarketPanel city={client.city} state={client.state} />
 
       {/* Campaigns */}
       <div className="bg-card rounded-xl shadow-sm border border-line overflow-hidden">

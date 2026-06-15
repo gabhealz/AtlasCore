@@ -130,14 +130,14 @@ export default function NewOnboarding() {
         <button
           type="button"
           onClick={() => navigate('/dashboard')}
-          className="mb-6 flex items-center text-blue-600 hover:text-blue-800"
+          className="mb-6 flex items-center text-brand hover:text-brand-soft"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
           Voltar para Dashboard
         </button>
 
         <div className="mb-6 rounded-xl bg-white p-6 shadow">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand">
             Novo onboarding
           </p>
           <h1 className="mt-2 text-3xl font-bold text-gray-900">
@@ -163,7 +163,7 @@ export default function NewOnboarding() {
                 className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${
                   errors.doctor_name
                     ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                    : 'border-gray-300 focus:border-brand focus:ring-brand'
                 }`}
                 placeholder="Ex: Dra. Ana Silva"
               />
@@ -172,7 +172,7 @@ export default function NewOnboarding() {
               ) : null}
             </div>
 
-            <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+            <div className="rounded-lg border border-brand/10 bg-brand/10 px-4 py-3 text-sm text-brand-soft">
               <div className="flex items-start gap-3">
                 <FileUp className="mt-0.5 h-4 w-4 shrink-0" />
                 <p>
@@ -201,7 +201,7 @@ export default function NewOnboarding() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+              className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:bg-brand"
             >
               <Save className="mr-2 h-4 w-4" />
               {isSubmitting ? 'Criando projeto...' : 'Criar Projeto'}

@@ -50,10 +50,10 @@ export function ClientConversionForm({ onboardingId }: Props) {
   };
 
   return (
-    <div className="bg-white p-8 rounded-xl shadow-sm border border-indigo-100 max-w-2xl mx-auto my-12">
+    <div className="bg-white p-8 rounded-xl shadow-sm border border-brand/10 max-w-2xl mx-auto my-12">
       <div className="text-center mb-8">
-        <div className="mx-auto w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
-          <UserPlus className="h-8 w-8 text-indigo-600" />
+        <div className="mx-auto w-16 h-16 bg-brand/10 rounded-full flex items-center justify-center mb-4">
+          <UserPlus className="h-8 w-8 text-brand" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900">Onboarding Finalizado! 🎉</h2>
         <p className="mt-2 text-gray-600">
@@ -79,7 +79,7 @@ export function ClientConversionForm({ onboardingId }: Props) {
               required
               value={formData.email}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand sm:text-sm p-2.5 border"
               placeholder="medico@clinica.com.br"
             />
           </div>
@@ -93,7 +93,7 @@ export function ClientConversionForm({ onboardingId }: Props) {
               required
               value={formData.phone}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand sm:text-sm p-2.5 border"
               placeholder="(11) 99999-9999"
             />
           </div>
@@ -112,7 +112,7 @@ export function ClientConversionForm({ onboardingId }: Props) {
                 required
                 value={formData.monthly_fee}
                 onChange={handleChange}
-                className="pl-9 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border"
+                className="pl-9 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand sm:text-sm p-2.5 border"
                 placeholder="2500.00"
               />
             </div>
@@ -127,7 +127,7 @@ export function ClientConversionForm({ onboardingId }: Props) {
               required
               value={formData.city}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand sm:text-sm p-2.5 border"
               placeholder="São Paulo"
             />
           </div>
@@ -142,7 +142,7 @@ export function ClientConversionForm({ onboardingId }: Props) {
               maxLength={2}
               value={formData.state}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border uppercase"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand sm:text-sm p-2.5 border uppercase"
               placeholder="SP"
             />
           </div>
@@ -152,7 +152,7 @@ export function ClientConversionForm({ onboardingId }: Props) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand hover:bg-brand-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isSubmitting ? (
               <>

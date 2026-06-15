@@ -63,7 +63,14 @@ export function OpsDashboard() {
       header: 'Cliente',
       accessor: (row: ClientDashboard) => (
         <div>
-          <div className="font-medium text-ink">{row.client.name}</div>
+          <div className="font-medium text-ink flex items-center gap-2">
+            {row.client.name}
+            {row.client.is_draft && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                Rascunho
+              </span>
+            )}
+          </div>
           <div className="text-xs text-subtle">
             {row.client.specialty || row.client.plan_name || '—'}
           </div>

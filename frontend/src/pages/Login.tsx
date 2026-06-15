@@ -55,10 +55,11 @@ export default function Login() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-base">
       <div className="w-full max-w-md p-8 bg-card rounded-2xl shadow-md border border-line">
-        <div className="flex justify-center mb-2">
-          <img src="/logo-healz.png" alt="Healz" className="h-12 w-auto" />
+        <div className="flex items-center justify-center gap-2.5 mb-2">
+          <img src="/favicon-healz.png" alt="" className="h-10 w-10" />
+          <span className="text-3xl font-bold tracking-tight text-ink">healz</span>
         </div>
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-center text-subtle mb-8">Atlas</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-[0.25em] text-center text-subtle mb-8">Atlas</h2>
 
         {error && (
           <div className="mb-4 p-3 bg-rose-50 text-rose-700 rounded text-sm text-center">

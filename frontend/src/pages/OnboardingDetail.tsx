@@ -234,7 +234,7 @@ function PipelineTimeline({
                 done
                   ? 'bg-emerald-100 text-emerald-800'
                   : active
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-brand text-white'
                     : 'bg-gray-100 text-gray-500'
               }`}
             >
@@ -243,7 +243,7 @@ function PipelineTimeline({
                   done
                     ? 'bg-emerald-600 text-white'
                     : active
-                      ? 'bg-white text-indigo-700'
+                      ? 'bg-white text-brand-soft'
                       : 'bg-white text-gray-400'
                 }`}
               >
@@ -304,7 +304,7 @@ function getOnboardingStatusBadgeColor(status: string) {
     case 'PENDING':
       return 'bg-yellow-100 text-yellow-800';
     case 'RUNNING':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-brand/10 text-brand-soft';
     case 'AWAITING_REVIEW':
       return 'bg-amber-100 text-amber-800';
     case 'APPROVED':
@@ -314,7 +314,7 @@ function getOnboardingStatusBadgeColor(status: string) {
     case 'FAILED':
       return 'bg-red-100 text-red-800';
     case 'ACTIVE':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-brand/10 text-brand-soft';
     case 'COMPLETED':
       return 'bg-green-100 text-green-800';
     default:
@@ -1414,7 +1414,7 @@ export default function OnboardingDetail() {
       <div className="mx-auto flex max-w-5xl flex-col">
         <button
           onClick={() => navigate('/dashboard')}
-          className="mb-6 flex items-center text-blue-600 hover:text-blue-800"
+          className="mb-6 flex items-center text-brand hover:text-brand-soft"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
           Voltar para Dashboard
@@ -1423,7 +1423,7 @@ export default function OnboardingDetail() {
         <header className="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-indigo-600">
+              <p className="text-sm font-semibold uppercase tracking-wide text-brand">
                 {justCreated ? 'Projeto criado com sucesso' : 'Onboarding por IA'}
               </p>
               <h1 className="mt-1 text-3xl font-bold text-gray-900">
@@ -1460,7 +1460,7 @@ export default function OnboardingDetail() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-indigo-600 text-white shadow-sm'
+                    ? 'bg-brand text-white shadow-sm'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
@@ -1488,7 +1488,7 @@ export default function OnboardingDetail() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-lg bg-white p-6 shadow">
-            <div className="mb-4 inline-flex rounded-full bg-blue-100 p-3 text-blue-700">
+            <div className="mb-4 inline-flex rounded-full bg-brand/10 p-3 text-brand-soft">
               <FileUp className="h-5 w-5" />
             </div>
             <h2 className="text-lg font-semibold text-gray-900">
@@ -1667,7 +1667,7 @@ export default function OnboardingDetail() {
 
         <div className={activeTab === 'pipeline' ? '' : 'hidden'}>
         <div className="rounded-xl bg-white p-6 shadow">
-          <p className="text-sm font-semibold uppercase tracking-wide text-indigo-600">
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand">
             Esteira de agentes
           </p>
           <p className="mb-5 mt-1 text-sm text-gray-600">
@@ -1685,7 +1685,7 @@ export default function OnboardingDetail() {
         <div className="order-last mt-6 rounded-xl bg-white p-6 shadow">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-indigo-600">
+              <p className="text-sm font-semibold uppercase tracking-wide text-brand">
                 Execucao do pipeline
               </p>
               <h2 className="mt-2 text-2xl font-bold text-gray-900">
@@ -1787,7 +1787,7 @@ export default function OnboardingDetail() {
                 !['PENDING', 'FAILED'].includes(resolvedPipelineStatus ?? '') ||
                 !pipelineInputsReady
               }
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
+              className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:bg-brand"
             >
               <PlayCircle className="mr-2 h-4 w-4" />
               {pipelineButtonLabel}
@@ -1969,7 +1969,7 @@ export default function OnboardingDetail() {
                         onClick={() => setReviewPreview(true)}
                         className={`px-3 py-1 text-xs font-medium transition-colors ${
                           reviewPreview
-                            ? 'bg-indigo-600 text-white'
+                            ? 'bg-brand text-white'
                             : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                       >
@@ -1980,7 +1980,7 @@ export default function OnboardingDetail() {
                         onClick={() => setReviewPreview(false)}
                         className={`px-3 py-1 text-xs font-medium transition-colors ${
                           !reviewPreview
-                            ? 'bg-indigo-600 text-white'
+                            ? 'bg-brand text-white'
                             : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                       >
@@ -2090,7 +2090,7 @@ export default function OnboardingDetail() {
         <div className="mt-6 rounded-xl bg-white p-6 shadow">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
+              <p className="text-sm font-semibold uppercase tracking-wide text-brand">
                 Upload de transcricao
               </p>
               <h2 className="mt-2 text-2xl font-bold text-gray-900">
@@ -2118,7 +2118,7 @@ export default function OnboardingDetail() {
                 multiple
                 accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
                 onChange={handleFileChange}
-                className="mt-3 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-blue-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-blue-700"
+                className="mt-3 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-brand file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-brand-soft"
               />
               <p className="mt-2 text-xs text-gray-500">
                 Formatos aceitos: `.pdf`, `.docx` e `.txt`. Limite: 50MB por
@@ -2130,18 +2130,18 @@ export default function OnboardingDetail() {
                   {selectedFiles.map((file) => (
                     <div
                       key={`${file.name}-${file.size}-${file.lastModified}`}
-                      className="flex items-center justify-between rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900"
+                      className="flex items-center justify-between rounded-lg border border-brand/10 bg-brand/10 px-4 py-3 text-sm text-brand-soft"
                     >
                       <div className="flex items-center gap-3">
                         <FileText className="h-4 w-4" />
                         <div>
                           <p className="font-medium">{file.name}</p>
-                          <p className="text-xs text-blue-700">
+                          <p className="text-xs text-brand-soft">
                             {formatFileSize(file.size)}
                           </p>
                         </div>
                       </div>
-                      <span className="rounded-full bg-white px-2 py-1 text-xs font-semibold uppercase text-blue-700">
+                      <span className="rounded-full bg-white px-2 py-1 text-xs font-semibold uppercase text-brand-soft">
                         pronto
                       </span>
                     </div>
@@ -2170,7 +2170,7 @@ export default function OnboardingDetail() {
               <button
                 type="submit"
                 disabled={isUploading || selectedFiles.length === 0}
-                className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+                className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:bg-brand"
               >
                 <Upload className="mr-2 h-4 w-4" />
                 {isUploading

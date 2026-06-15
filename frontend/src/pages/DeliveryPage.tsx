@@ -429,7 +429,7 @@ export default function DeliveryPage() {
                 state: { onboardingStatus: pipelineStatus },
               })
             }
-            className="inline-flex items-center text-blue-600 hover:text-blue-800"
+            className="inline-flex items-center text-brand hover:text-brand-soft"
           >
             <ArrowLeft className="mr-1 h-4 w-4" />
             Voltar para o onboarding
@@ -514,7 +514,7 @@ export default function DeliveryPage() {
             <div className="rounded-xl bg-white p-6 shadow">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wide text-indigo-700">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-brand-soft">
                     Codigo da landing page
                   </p>
                   <h2 className="mt-2 text-2xl font-bold text-gray-900">
@@ -594,7 +594,7 @@ export default function DeliveryPage() {
 
             <div className="rounded-xl bg-white p-6 shadow">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+                <p className="text-sm font-semibold uppercase tracking-wide text-brand-soft">
                   Benchmarking
                 </p>
                 <h2 className="mt-2 text-2xl font-bold text-gray-900">
@@ -627,10 +627,10 @@ export default function DeliveryPage() {
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <div className="inline-flex rounded-full bg-blue-100 p-3 text-blue-700">
+                        <div className="inline-flex rounded-full bg-brand/10 p-3 text-brand-soft">
                           <FileText className="h-5 w-5" />
                         </div>
-                        <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-blue-700">
+                        <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-brand-soft">
                           {getDeliverableLabel(document.document_kind)}
                         </p>
                         <h2 className="mt-2 text-2xl font-bold text-gray-900">
@@ -650,7 +650,7 @@ export default function DeliveryPage() {
                             targetId: `document-${document.id}`,
                           })
                         }
-                        className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700"
+                        className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-soft"
                       >
                         {copiedTargetId === `document-${document.id}` ? (
                           <CheckCircle2 className="mr-2 h-4 w-4" />

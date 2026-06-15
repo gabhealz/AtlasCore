@@ -21,6 +21,7 @@ export interface Client {
   tintim_id?: string;
   active_platforms: string;
   is_active: boolean;
+  is_draft?: boolean;
   created_at: string;
   updated_at: string;
 }

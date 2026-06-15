@@ -27,9 +27,10 @@ export function Layout({ children }: LayoutProps) {
     <div className="flex h-screen bg-base">
       {/* Sidebar */}
       <aside className="w-64 bg-card border-r border-line flex flex-col">
-        <div className="h-16 flex items-center gap-3 px-6 border-b border-line">
-          <img src="/logo-healz.png" alt="Healz" className="h-7 w-auto" />
-          <span className="text-xs font-semibold uppercase tracking-widest text-subtle">Atlas</span>
+        <div className="h-16 flex items-center gap-2.5 px-6 border-b border-line">
+          <img src="/favicon-healz.png" alt="" className="h-7 w-7" />
+          <span className="text-lg font-bold tracking-tight text-ink">healz</span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-subtle mt-1">Atlas</span>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
