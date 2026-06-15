@@ -53,6 +53,8 @@ class Settings(BaseSettings):
     # Validade do cache de keywords SEO (dias). Consultas mais novas que isso sao
     # reaproveitadas do banco em vez de chamar a API paga de novo.
     SEO_CACHE_TTL_DAYS: int = 30
+    # Validade do cache de dados do IBGE (dias) — população/pirâmide mudam pouco.
+    IBGE_CACHE_TTL_DAYS: int = 90
     # Taxa aproximada (USD) por chamada de web_search da OpenAI, usada na
     # estimativa de custo do onboarding. Ajuste conforme o preco/contexto.
     LLM_WEB_SEARCH_FEE_USD: float = 0.03

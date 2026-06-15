@@ -49,6 +49,7 @@ class ClientUpdate(BaseModel):
 class ClientResponse(ClientBase):
     id: int
     is_active: bool
+    is_draft: bool = False
     created_at: datetime
     updated_at: datetime
 

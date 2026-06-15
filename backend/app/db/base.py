@@ -3,6 +3,7 @@ from app.models.campaign_snapshot import CampaignSnapshot  # noqa: F401
 from app.models.client import Client  # noqa: F401
 from app.models.cta_button import CTAButton  # noqa: F401
 from app.models.generated_document import GeneratedDocument  # noqa: F401
+from app.models.ibge_municipio import IbgeMunicipio  # noqa: F401
 from app.models.integration_setting import IntegrationSetting  # noqa: F401
 from app.models.llm_usage_event import LLMUsageEvent  # noqa: F401
 from app.models.metric_snapshot import MetricSnapshot  # noqa: F401
