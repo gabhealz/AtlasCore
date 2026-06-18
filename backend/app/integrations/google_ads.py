@@ -71,7 +71,6 @@ def fetch_daily_insights(
         total_spend = 0.0
         total_impressions = 0
         total_clicks = 0
-        total_cpc = 0.0
         total_conversions = 0.0
 
         row_count = 0
@@ -80,7 +79,6 @@ def fetch_daily_insights(
             total_spend += metrics.cost_micros / 1_000_000
             total_impressions += metrics.impressions
             total_clicks += metrics.clicks
-            total_cpc += metrics.average_cpc / 1_000_000
             total_conversions += metrics.conversions
             row_count += 1
 
@@ -92,11 +90,14 @@ def fetch_daily_insights(
             )
             return _empty_result()
 
+        # Weighted average CPC = total spend / total clicks (not arithmetic mean of daily CPCs)
+        cpc = round(total_spend / max(total_clicks, 1), 2)
+
         return {
             "spend": round(total_spend, 2),
             "impressions": total_impressions,
             "clicks": total_clicks,
-            "cpc": round(total_cpc / max(row_count, 1), 2),
+            "cpc": cpc,
             "conversions": round(total_conversions, 2),
         }
 
