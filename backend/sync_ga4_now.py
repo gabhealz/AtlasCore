@@ -83,12 +83,24 @@ async def main() -> None:
                     continue
                 if not data or data["sessions"] == 0:
                     continue
+                # NOTE: MetricSnapshot does not have ga4_conversions/ga4_new_users columns yet.
+                # GA4 conversions are mapped to the 'conversions' column as a fallback;
+                # on conflict we only update lp_sessions (to avoid overwriting Meta/Google Ads
+                # conversions already stored for the same week/source).
+                logger.debug(
+                    "GA4 colunas ga4_conversions/ga4_new_users ausentes no modelo — "
+                    "conversões mapeadas para 'conversions' apenas na inserção inicial."
+                )
                 stmt = pg_insert(MetricSnapshot).values(
                     client_id=c.id, week_start=monday, date=monday, source="ga4",
                     lp_sessions=data["sessions"],
+                    conversions=data["conversions"],
                 ).on_conflict_do_update(
                     index_elements=["client_id", "week_start", "source"],
-                    set_={"lp_sessions": data["sessions"]},
+                    set_={
+                        "lp_sessions": data["sessions"],
+                        "conversions": data["conversions"],
+                    },
                 )
                 await db.execute(stmt)
                 synced += 1

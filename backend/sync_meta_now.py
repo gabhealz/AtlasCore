@@ -7,6 +7,7 @@ cliente. Lê insights agregados da semana (Graph API) e faz upsert em metric_sna
 import asyncio
 import json
 import logging
+import os
 import sys
 from datetime import date, timedelta
 
@@ -85,6 +86,15 @@ async def fetch_week(token: str, account_id: str, since: str, until: str) -> dic
 
 
 async def main() -> None:
+    # Check if META_ACCESS_TOKEN looks like a user token (they expire in ~60 days).
+    # Long-lived tokens start with "EAA" and are typically 150+ chars.
+    meta_token = os.environ.get("META_ACCESS_TOKEN", "")
+    if meta_token and len(meta_token) < 150:
+        logger.warning(
+            "META_ACCESS_TOKEN parece ser um token de curta duração (< 150 chars). "
+            "Tokens de usuário expiram em ~60 dias. Considere trocar por um System User token long-lived."
+        )
+
     token = settings.META_ACCESS_TOKEN
     if not token:
         logger.error("META_ACCESS_TOKEN não configurado.")
