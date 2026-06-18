@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Key, Plus, Trash2, CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 import { fetchIntegrations, createIntegration, deleteIntegration, testIntegration, type IntegrationSetting } from '../lib/opsApi';
@@ -16,18 +16,29 @@ export function OpsClientSettings() {
   const [newAccountId, setNewAccountId] = useState('');
   const [newAccessToken, setNewAccessToken] = useState('');
 
-  const loadData = () => {
+  const loadData = useCallback(() => {
     if (!clientId) return;
-    setLoading(true);
-    fetchIntegrations(parseInt(clientId, 10))
-      .then(setIntegrations)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  };
+    let cancelled = false;
+
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await fetchIntegrations(parseInt(clientId, 10));
+        if (!cancelled) setIntegrations(data);
+      } catch (_) {
+        if (!cancelled) console.error(_);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [clientId]);
 
   useEffect(() => {
-    loadData();
-  }, [clientId]);
+    const cleanup = loadData();
+    return cleanup ?? undefined;
+  }, [loadData]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,8 +53,8 @@ export function OpsClientSettings() {
       setNewAccountId('');
       setNewAccessToken('');
       loadData();
-    } catch (err) {
-      console.error(err);
+    } catch (_) {
+      console.error(_);
       alert('Erro ao salvar integração. Verifique os dados.');
     }
   };
@@ -55,8 +66,8 @@ export function OpsClientSettings() {
     try {
       await deleteIntegration(parseInt(clientId, 10), platform);
       loadData();
-    } catch (err) {
-      console.error(err);
+    } catch (_) {
+      console.error(_);
       alert('Erro ao remover integração.');
     }
   };
@@ -67,7 +78,7 @@ export function OpsClientSettings() {
     try {
       const result = await testIntegration(parseInt(clientId, 10), platform);
       setTestResults(prev => ({ ...prev, [platform]: result }));
-    } catch (err) {
+    } catch {
       setTestResults(prev => ({ ...prev, [platform]: { success: false, message: 'Erro na requisição.' } }));
     } finally {
       setTesting(prev => ({ ...prev, [platform]: false }));

@@ -124,7 +124,7 @@ export function OpsDashboard() {
     {
       header: 'Status',
       accessor: (row: ClientDashboard) => (
-        <StatusBadge status={row.health_status as any} />
+        <StatusBadge status={row.health_status} />
       ),
     },
     {

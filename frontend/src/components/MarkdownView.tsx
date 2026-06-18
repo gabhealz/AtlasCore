@@ -59,31 +59,31 @@ function normalizeMarkdown(content: string): string {
  */
 export function MarkdownView({ content }: { content: string }) {
   return (
-    <div className="text-sm text-gray-700">
+    <div className="text-sm text-ink">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
           h1: (props) => (
             <h1
-              className="mb-3 mt-6 text-2xl font-bold text-gray-900 first:mt-0"
+              className="mb-3 mt-6 text-2xl font-bold text-ink first:mt-0"
               {...props}
             />
           ),
           h2: (props) => (
             <h2
-              className="mb-2 mt-6 border-b border-gray-100 pb-1 text-xl font-bold text-gray-900 first:mt-0"
+              className="mb-2 mt-6 border-b border-line pb-1 text-xl font-bold text-ink first:mt-0"
               {...props}
             />
           ),
           h3: (props) => (
             <h3
-              className="mb-2 mt-4 text-base font-semibold text-gray-900"
+              className="mb-2 mt-4 text-base font-semibold text-ink"
               {...props}
             />
           ),
           h4: (props) => (
             <h4
-              className="mb-1 mt-3 text-sm font-semibold text-gray-800"
+              className="mb-1 mt-3 text-sm font-semibold text-ink"
               {...props}
             />
           ),
@@ -104,19 +104,19 @@ export function MarkdownView({ content }: { content: string }) {
             />
           ),
           strong: (props) => (
-            <strong className="font-semibold text-gray-900" {...props} />
+            <strong className="font-semibold text-ink" {...props} />
           ),
           em: (props) => <em className="italic" {...props} />,
           blockquote: (props) => (
             <blockquote
-              className="my-3 border-l-4 border-gray-200 pl-4 italic text-gray-600"
+              className="my-3 border-l-4 border-line pl-4 italic text-muted"
               {...props}
             />
           ),
-          hr: () => <hr className="my-4 border-gray-200" />,
+          hr: () => <hr className="my-4 border-line" />,
           code: (props) => (
             <code
-              className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-800"
+              className="rounded bg-elevated px-1 py-0.5 font-mono text-xs text-ink"
               {...props}
             />
           ),
@@ -128,16 +128,16 @@ export function MarkdownView({ content }: { content: string }) {
               />
             </div>
           ),
-          thead: (props) => <thead className="bg-gray-50" {...props} />,
+          thead: (props) => <thead className="bg-elevated" {...props} />,
           th: (props) => (
             <th
-              className="border border-gray-200 px-3 py-2 font-semibold text-gray-700"
+              className="border border-line px-3 py-2 font-semibold text-ink"
               {...props}
             />
           ),
           td: (props) => (
             <td
-              className="border border-gray-200 px-3 py-2 align-top text-gray-700"
+              className="border border-line px-3 py-2 align-top text-ink"
               {...props}
             />
           ),

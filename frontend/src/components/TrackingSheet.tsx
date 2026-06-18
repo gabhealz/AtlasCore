@@ -22,16 +22,16 @@ export default function TrackingSheet({
   copied,
 }: TrackingSheetProps) {
   return (
-    <div className="rounded-xl bg-white p-6 shadow">
+    <div className="rounded-xl bg-card p-6 shadow">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-brand">
             Tracking Sheet
           </p>
-          <h2 className="mt-2 text-2xl font-bold text-gray-900">
+          <h2 className="mt-2 text-2xl font-bold text-ink">
             IDs CSS e eventos sugeridos
           </h2>
-          <p className="mt-2 max-w-3xl text-sm text-gray-600">
+          <p className="mt-2 max-w-3xl text-sm text-muted">
             Use esta tabela final para copiar o mapeamento operacional dos botoes
             CTA direto para a configuracao do Google Tag Manager.
           </p>
@@ -65,25 +65,25 @@ export default function TrackingSheet({
       ) : null}
 
       {!isLoading && !errorMessage && rows.length === 0 ? (
-        <div className="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-5 text-sm text-gray-600">
+        <div className="mt-6 rounded-lg border border-dashed border-line bg-elevated px-4 py-5 text-sm text-muted">
           Nenhum dado de tracking foi encontrado para este onboarding.
         </div>
       ) : null}
 
       {!isLoading && !errorMessage && rows.length > 0 ? (
-        <div className="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-white">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+        <div className="mt-6 overflow-x-auto rounded-lg border border-line bg-card">
+          <table className="min-w-full divide-y divide-line text-sm">
+            <thead className="bg-elevated text-left text-xs font-semibold uppercase tracking-wide text-subtle">
               <tr>
                 <th className="px-4 py-3">Nome do botao</th>
                 <th className="px-4 py-3">ID CSS</th>
                 <th className="px-4 py-3">Evento sugerido</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 text-gray-700">
+            <tbody className="divide-y divide-line text-ink">
               {rows.map((row) => (
                 <tr key={row.css_id}>
-                  <td className="px-4 py-3 font-medium text-gray-900">{row.name}</td>
+                  <td className="px-4 py-3 font-medium text-ink">{row.name}</td>
                   <td className="px-4 py-3">
                     <span className="rounded bg-brand/10 px-2 py-1 font-mono text-xs text-brand-soft">
                       {row.css_id}

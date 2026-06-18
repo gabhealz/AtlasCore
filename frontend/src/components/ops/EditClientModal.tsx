@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { updateClient, type ClientUpdateInput } from '../../lib/opsApi';
 import type { Client } from '../../types/ops';
@@ -45,8 +45,9 @@ export function EditClientModal({ client, onClose, onSaved }: Props) {
       await updateClient(client.id, { ...form, is_draft: false });
       onSaved();
       onClose();
-    } catch (err: any) {
-      setError(err?.response?.data?.detail?.message || 'Erro ao salvar.');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { detail?: { message?: string } } } };
+      setError(e?.response?.data?.detail?.message || 'Erro ao salvar.');
     } finally {
       setSaving(false);
     }
