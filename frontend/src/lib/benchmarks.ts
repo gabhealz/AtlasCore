@@ -42,12 +42,12 @@ export const benchmarks = {
     ideal: 'R$ 1,50–3,00 (cidades médias) · R$ 3–6 (grandes centros)',
   }),
   lp_to_whatsapp_rate: (v: Metric): Diag => ({
-    status: band(v, 15, 10),
+    status: band(v, 20, 10),
     label: 'Conversão do site (→ WhatsApp)',
     ideal: '> 20% excelente · 15–20% bom · 10–15% atenção · < 10% crítico',
   }),
   whatsapp_to_booking_rate: (v: Metric): Diag => ({
-    status: band(v, 20, 15),
+    status: band(v, 30, 15),
     label: 'WhatsApp → Agendamento',
     ideal: '> 30% excelente · 20–30% bom · 15–20% atenção · < 15% crítico',
   }),
