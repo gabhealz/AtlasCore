@@ -1,4 +1,4 @@
-import { cn } from './KPICard';
+import { cn } from './kpiUtils';
 
 interface StatusBadgeProps {
   status: 'green' | 'yellow' | 'red' | 'neutral';

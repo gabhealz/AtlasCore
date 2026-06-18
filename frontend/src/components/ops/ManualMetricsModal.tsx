@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { upsertSnapshot, type ManualSnapshotInput } from '../../lib/opsApi';
 
@@ -31,8 +31,9 @@ export function ManualMetricsModal({ clientId, onClose, onSaved }: Props) {
       await upsertSnapshot(clientId, form);
       onSaved();
       onClose();
-    } catch (err: any) {
-      setError(err?.response?.data?.detail?.message || 'Erro ao salvar dados.');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { detail?: { message?: string } } } };
+      setError(e?.response?.data?.detail?.message || 'Erro ao salvar dados.');
     } finally {
       setSaving(false);
     }
@@ -48,6 +49,7 @@ export function ManualMetricsModal({ clientId, onClose, onSaved }: Props) {
     { key: 'ad_spend', label: 'Investimento (R$)', step: '0.01' },
     { key: 'impressions', label: 'Impressões' },
     { key: 'clicks', label: 'Cliques' },
+    { key: 'lp_sessions', label: 'Sessões LP (GA4)' },
   ];
 
   return (

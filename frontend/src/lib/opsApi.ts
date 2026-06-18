@@ -53,6 +53,7 @@ export interface ManualSnapshotInput {
   impressions?: number;
   clicks?: number;
   ad_spend?: number;
+  lp_sessions?: number;
 }
 
 export async function upsertSnapshot(clientId: number, data: ManualSnapshotInput): Promise<void> {

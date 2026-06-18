@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { createClient, type ClientCreateInput } from '../../lib/opsApi';
 
@@ -29,8 +29,9 @@ export function NewClientModal({ onClose, onCreated }: Props) {
       await createClient(form);
       onCreated();
       onClose();
-    } catch (err: any) {
-      setError(err?.response?.data?.detail?.message || 'Erro ao criar cliente.');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { detail?: { message?: string } } } };
+      setError(e?.response?.data?.detail?.message || 'Erro ao criar cliente.');
     } finally {
       setSaving(false);
     }

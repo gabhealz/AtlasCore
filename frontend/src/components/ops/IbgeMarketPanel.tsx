@@ -19,16 +19,27 @@ export function IbgeMarketPanel({ city, state }: Props) {
 
   useEffect(() => {
     if (!city || !state) return;
-    setLoading(true);
-    setError(null);
-    resolveMunicipio(city, state)
-      .then((m) => {
+    let cancelled = false;
+
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const m = await resolveMunicipio(city, state);
+        if (cancelled) return;
         setMun(m);
-        return fetchPiramide(m.id);
-      })
-      .then((p) => setPyramid(p.data))
-      .catch(() => setError('Não foi possível obter dados do IBGE para esta cidade.'))
-      .finally(() => setLoading(false));
+        const p = await fetchPiramide(m.id);
+        if (!cancelled) {
+          setPyramid(p.data);
+        }
+      } catch {
+        if (!cancelled) setError('Não foi possível obter dados do IBGE para esta cidade.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, [city, state]);
 
   if (!city || !state) {
