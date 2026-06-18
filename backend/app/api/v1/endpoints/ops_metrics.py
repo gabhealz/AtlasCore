@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
 
@@ -189,6 +189,29 @@ async def get_ops_dashboard(
             curr_agg["ad_spend"] if curr_agg else None,
         )
 
+        # Query last 12 weeks of metric snapshots for this client
+        snapshots_result = await db.execute(
+            select(MetricSnapshot)
+            .where(MetricSnapshot.client_id == client.id)
+            .order_by(desc(MetricSnapshot.week_start))
+            .limit(12)
+        )
+        snapshots = snapshots_result.scalars().all()
+        weekly_history = [
+            {
+                "week_start": str(s.week_start),
+                "source": s.source,
+                "impressions": s.impressions,
+                "clicks": s.clicks,
+                "spend": float(s.ad_spend) if s.ad_spend is not None else None,
+                "leads": s.conversions,
+                "bookings": s.bookings,
+                "revenue": float(s.revenue) if s.revenue is not None else None,
+                "lp_sessions": s.lp_sessions,
+            }
+            for s in reversed(snapshots)  # chronological order
+        ]
+
         dashboard_data.append(
             {
                 "client": client,
@@ -206,7 +229,7 @@ async def get_ops_dashboard(
                     prev_agg["bookings"] if prev_agg else None,
                 ),
                 "health_status": _get_health_status(roi),
-                "weekly_history": [],
+                "weekly_history": weekly_history,
                 "campaigns": [],
             }
         )
