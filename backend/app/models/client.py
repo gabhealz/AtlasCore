@@ -27,7 +27,7 @@ class Client(Base):
     ga4_property_id = Column(String, nullable=True)  # GA4 Property ID (numérico, p/ Data API)
     ga4_measurement_id = Column(String, nullable=True)  # GA4 Measurement ID (G-...) referência
     tintim_id = Column(String, nullable=True)
-    onboarding_id = Column(Integer, ForeignKey("onboardings.id"), nullable=True, unique=True)
+    onboarding_id = Column(Integer, ForeignKey("onboardings.id", ondelete="SET NULL"), nullable=True, unique=True)
     active_platforms = Column(String, default="meta,google")
     is_active = Column(Boolean, default=True)
     # Rascunho criado automaticamente ao finalizar um onboarding (faltam dados/integrações).
@@ -39,14 +39,14 @@ class Client(Base):
 
     # Relationships
     metric_snapshots = relationship(
-        "MetricSnapshot", back_populates="client", lazy="selectin"
+        "MetricSnapshot", back_populates="client", lazy="selectin", cascade="all, delete-orphan"
     )
     campaign_snapshots = relationship(
-        "CampaignSnapshot", back_populates="client", lazy="selectin"
+        "CampaignSnapshot", back_populates="client", lazy="selectin", cascade="all, delete-orphan"
     )
     integration_settings = relationship(
-        "IntegrationSetting", back_populates="client", lazy="selectin"
+        "IntegrationSetting", back_populates="client", lazy="selectin", cascade="all, delete-orphan"
     )
     sync_logs = relationship(
-        "SyncLog", back_populates="client", lazy="selectin"
+        "SyncLog", back_populates="client", lazy="selectin", cascade="all, delete-orphan"
     )

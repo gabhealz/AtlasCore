@@ -1,4 +1,5 @@
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
     ForeignKey,
@@ -24,7 +25,7 @@ class GeneratedDocument(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     onboarding_id = Column(
-        Integer, ForeignKey("onboardings.id"), nullable=False, index=True
+        Integer, ForeignKey("onboardings.id", ondelete="CASCADE"), nullable=False, index=True
     )
     step_name = Column(String, nullable=False)
     agent_name = Column(String, nullable=False)
@@ -37,6 +38,7 @@ class GeneratedDocument(Base):
     # Fontes reais da pesquisa web (JSON serializado): queries executadas e
     # URLs visitadas/citadas pela IA durante a geracao deste documento.
     search_sources = Column(Text, nullable=True)
+    is_current = Column(Boolean, default=True, nullable=False, server_default="true")
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
