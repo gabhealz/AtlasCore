@@ -356,3 +356,27 @@ async def upload_image_asset(
         )
 
     return {"data": uploaded_asset}
+
+
+@router.delete("/{asset_id}", status_code=204)
+async def delete_asset(
+    asset_id: int,
+    _current_user=Depends(allow_write),
+    db: AsyncSession = Depends(deps.get_db),
+    asset_service: AssetService = Depends(get_asset_service),
+):
+    result = await db.execute(select(UploadedAsset).where(UploadedAsset.id == asset_id))
+    asset = result.scalars().first()
+    if not asset:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error_code": "NOT_FOUND", "message": "Asset não encontrado."},
+        )
+    # Delete from MinIO if object_key exists
+    if asset.object_key:
+        try:
+            asset_service.delete_object(asset.object_key)
+        except Exception:
+            pass  # log but don't fail if MinIO deletion fails
+    await db.delete(asset)
+    await db.commit()

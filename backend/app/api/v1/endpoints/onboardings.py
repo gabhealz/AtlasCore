@@ -280,6 +280,16 @@ async def get_onboardings(
     onboardings = result.scalars().all()
     return {"data": onboardings}
 
+
+@router.get("/{onboarding_id}", response_model=OnboardingDetailEnvelope)
+async def get_onboarding(
+    onboarding_id: int,
+    current_user: User = Depends(allow_read),
+    db: AsyncSession = Depends(deps.get_db),
+):
+    onboarding = await _get_onboarding_or_404(db=db, onboarding_id=onboarding_id)
+    return {"data": onboarding}
+
 @router.post(
     "",
     response_model=OnboardingDetailEnvelope,

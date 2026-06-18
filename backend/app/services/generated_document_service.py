@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.generated_document import GeneratedDocument
@@ -27,6 +27,19 @@ class GeneratedDocumentService:
         search_sources: str | None = None,
         auto_commit: bool = True,
     ) -> GeneratedDocument:
+        # Before saving new document, mark old ones as not current
+        # (requires is_current column — added via migration)
+        if hasattr(GeneratedDocument, "is_current"):
+            await db.execute(
+                update(GeneratedDocument)
+                .where(
+                    GeneratedDocument.onboarding_id == onboarding_id,
+                    GeneratedDocument.step_name == step_name,
+                    GeneratedDocument.is_current == True,  # noqa: E712
+                )
+                .values(is_current=False)
+            )
+
         result = await db.execute(
             select(GeneratedDocument).where(
                 GeneratedDocument.onboarding_id == onboarding_id,
@@ -37,7 +50,7 @@ class GeneratedDocumentService:
         now = datetime.now(UTC)
 
         if document is None:
-            document = GeneratedDocument(
+            new_doc_kwargs: dict = dict(
                 onboarding_id=onboarding_id,
                 step_name=step_name,
                 agent_name=agent_name,
@@ -50,6 +63,9 @@ class GeneratedDocumentService:
                 search_sources=search_sources,
                 updated_at=now,
             )
+            if hasattr(GeneratedDocument, "is_current"):
+                new_doc_kwargs["is_current"] = True
+            document = GeneratedDocument(**new_doc_kwargs)
             db.add(document)
         else:
             document.step_name = step_name
@@ -62,6 +78,8 @@ class GeneratedDocumentService:
             if search_sources is not None:
                 document.search_sources = search_sources
             document.updated_at = now
+            if hasattr(document, "is_current"):
+                document.is_current = True
 
         if auto_commit:
             await db.commit()
