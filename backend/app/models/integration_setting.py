@@ -18,7 +18,7 @@ class IntegrationSetting(Base):
     __tablename__ = "integration_settings"
 
     id = Column(Integer, primary_key=True, index=True)
-    client_id = Column(Integer, ForeignKey("clients.id"), nullable=False, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Platform: "meta", "google", "tintim"
     platform = Column(String(20), nullable=False)

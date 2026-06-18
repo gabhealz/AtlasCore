@@ -19,7 +19,7 @@ class CampaignSnapshot(Base):
     __tablename__ = "campaign_snapshots"
 
     id = Column(Integer, primary_key=True, index=True)
-    client_id = Column(Integer, ForeignKey("clients.id"), nullable=False, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, index=True)
     week_start = Column(Date, nullable=False)
     platform = Column(String, nullable=False)
     campaign_id = Column(String, nullable=False)

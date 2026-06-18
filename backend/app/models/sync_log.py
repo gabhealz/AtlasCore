@@ -16,7 +16,7 @@ class SyncLog(Base):
     __tablename__ = "sync_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    client_id = Column(Integer, ForeignKey("clients.id"), nullable=False, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, index=True)
 
     platform = Column(String(20), nullable=False)  # meta, google, tintim
     started_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -26,9 +26,9 @@ class TintimEvent(Base):
     __tablename__ = "tintim_events"
 
     id = Column(Integer, primary_key=True, index=True)
-    client_id = Column(Integer, ForeignKey("clients.id"), nullable=False, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id", ondelete="CASCADE"), nullable=False, index=True)
     integration_id = Column(
-        Integer, ForeignKey("integration_settings.id"), nullable=True
+        Integer, ForeignKey("integration_settings.id", ondelete="SET NULL"), nullable=True
     )
 
     external_event_id = Column(String, nullable=True)

@@ -9,7 +9,7 @@ class PipelineEvent(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     onboarding_id = Column(
-        Integer, ForeignKey("onboardings.id"), nullable=False, index=True
+        Integer, ForeignKey("onboardings.id", ondelete="CASCADE"), nullable=False, index=True
     )
     step_name = Column(String, nullable=False)
     from_status = Column(String, nullable=False)

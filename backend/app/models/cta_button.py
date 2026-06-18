@@ -16,7 +16,7 @@ class CTAButton(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     onboarding_id = Column(
-        Integer, ForeignKey("onboardings.id"), nullable=False, index=True
+        Integer, ForeignKey("onboardings.id", ondelete="CASCADE"), nullable=False, index=True
     )
     name = Column(String, nullable=False)
     button_text = Column(String, nullable=False)
