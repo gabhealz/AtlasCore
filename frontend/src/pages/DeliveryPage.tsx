@@ -8,7 +8,7 @@ import { MarkdownView } from '../components/MarkdownView';
 import TrackingSheet, { type TrackingSheetRow } from '../components/TrackingSheet';
 import { api } from '../lib/api';
 
-const LANDING_PAGE_FEATURES_ENABLED = false;
+const LANDING_PAGE_FEATURES_ENABLED = true;
 
 type DeliverableDocument = {
   id: number;

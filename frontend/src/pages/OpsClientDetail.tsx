@@ -26,15 +26,23 @@ export function OpsClientDetail() {
   const { clientId } = useParams<{ clientId: string }>();
   const [data, setData] = useState<ClientDashboard | null>(null);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showCampaigns, setShowCampaigns] = useState(false);
   const [showManual, setShowManual] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
 
   const load = useCallback(() => {
     if (!clientId) return;
+    setLoading(true);
+    setErrorMsg(null);
     fetchClientDashboard(parseInt(clientId, 10))
       .then(setData)
-      .catch(console.error)
+      .catch((err: { response?: { status?: number } }) => {
+        const status = err?.response?.status;
+        if (status === 404) setErrorMsg('Cliente não encontrado.');
+        else if (status === 403) setErrorMsg('Sem permissão para ver este cliente.');
+        else setErrorMsg('Erro ao carregar dados. Tente novamente.');
+      })
       .finally(() => setLoading(false));
   }, [clientId]);
 
@@ -46,6 +54,20 @@ export function OpsClientDetail() {
     return (
       <div className="py-12 flex justify-center items-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-rose-600 mb-4">{errorMsg}</p>
+        <button
+          onClick={load}
+          className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium bg-brand text-onbrand hover:bg-brand-soft transition-colors"
+        >
+          Tentar novamente
+        </button>
       </div>
     );
   }
@@ -71,18 +93,18 @@ export function OpsClientDetail() {
     { header: 'Campanha', accessor: 'campaign_name', className: 'font-medium text-ink' },
     {
       header: 'Plataforma',
-      accessor: (row: any) => (
+      accessor: (row: CampaignSnapshot) => (
         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.platform === 'meta' ? 'bg-sky-50 text-sky-700' : 'bg-rose-50 text-rose-700'}`}>
           {row.platform.toUpperCase()}
         </span>
       )
     },
-    { header: 'Impressões', accessor: (row: any) => formatNumber(row.impressions), className: 'text-right' },
-    { header: 'Cliques', accessor: (row: any) => formatNumber(row.clicks), className: 'text-right' },
-    { header: 'CTR', accessor: (row: any) => formatPct(row.ctr), className: 'text-right' },
-    { header: 'CPC', accessor: (row: any) => formatCurrency(row.cpc), className: 'text-right' },
-    { header: 'Conversões', accessor: (row: any) => formatNumber(row.conversions), className: 'text-right' },
-    { header: 'Gasto', accessor: (row: any) => formatCurrency(row.spend), className: 'text-right font-medium text-ink' },
+    { header: 'Impressões', accessor: (row: CampaignSnapshot) => formatNumber(row.impressions), className: 'text-right' },
+    { header: 'Cliques', accessor: (row: CampaignSnapshot) => formatNumber(row.clicks), className: 'text-right' },
+    { header: 'CTR', accessor: (row: CampaignSnapshot) => formatPct(row.ctr), className: 'text-right' },
+    { header: 'CPC', accessor: (row: CampaignSnapshot) => formatCurrency(row.cpc), className: 'text-right' },
+    { header: 'Conversões', accessor: (row: CampaignSnapshot) => formatNumber(row.conversions), className: 'text-right' },
+    { header: 'Gasto', accessor: (row: CampaignSnapshot) => formatCurrency(row.spend), className: 'text-right font-medium text-ink' },
   ];
 
   return (
@@ -96,7 +118,7 @@ export function OpsClientDetail() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold tracking-tight text-ink">{client.name}</h1>
-              <StatusBadge status={health_status as any} />
+              <StatusBadge status={health_status} />
             </div>
             {(client.specialty || client.city) && <p className="text-sm text-muted mt-1">{client.specialty}{client.city ? ` • ${client.city}/${client.state}` : ''}</p>}
           </div>
