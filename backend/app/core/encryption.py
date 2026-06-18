@@ -18,18 +18,18 @@ def _derive_fernet_key(secret: str) -> bytes:
     return base64.urlsafe_b64encode(digest)
 
 
-_fernet = Fernet(_derive_fernet_key(settings.SECRET_KEY))
+def _get_fernet() -> Fernet:
+    key_source = settings.FIELD_ENCRYPTION_KEY.strip() or settings.SECRET_KEY
+    return Fernet(_derive_fernet_key(key_source))
 
 
 def encrypt_value(plain_text: str) -> str:
-    """Encrypt a plain-text string and return the ciphertext as a UTF-8 string."""
     if not plain_text:
         return ""
-    return _fernet.encrypt(plain_text.encode("utf-8")).decode("utf-8")
+    return _get_fernet().encrypt(plain_text.encode("utf-8")).decode("utf-8")
 
 
 def decrypt_value(cipher_text: str) -> str:
-    """Decrypt a ciphertext string and return the original plain-text."""
     if not cipher_text:
         return ""
-    return _fernet.decrypt(cipher_text.encode("utf-8")).decode("utf-8")
+    return _get_fernet().decrypt(cipher_text.encode("utf-8")).decode("utf-8")

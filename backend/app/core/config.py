@@ -11,8 +11,9 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     SECRET_KEY: str = ""
+    FIELD_ENCRYPTION_KEY: str = ""
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 8  # 8 hours
-    COOKIE_SECURE: bool = False
+    COOKIE_SECURE: bool = True
 
     DATABASE_URL: str = "postgresql://postgres:postgres@db:5432/atlas_core"
 
@@ -94,6 +95,10 @@ class Settings(BaseSettings):
             raise ValueError(
                 "MINIO_ACCESS_KEY e MINIO_SECRET_KEY precisam estar configuradas."
             )
+
+        if self.OPENAI_API_KEY and not self.OPENAI_API_KEY.strip().startswith("sk-"):
+            import logging
+            logging.getLogger(__name__).warning("OPENAI_API_KEY parece inválida (não começa com sk-).")
 
         return self
 

@@ -31,3 +31,4 @@ facebook-business>=19.0.0
 google-ads>=25.1.0
 google-analytics-data>=0.18.0
 protobuf>=4.25.0
+slowapi==0.1.9

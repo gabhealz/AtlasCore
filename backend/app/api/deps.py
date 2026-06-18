@@ -51,6 +51,12 @@ async def _get_user_from_token(*, db: AsyncSession, token: str) -> User:
             },
         )
 
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"error_code": "USER_INACTIVE", "message": "Conta desativada."},
+        )
+
     return user
 
 
