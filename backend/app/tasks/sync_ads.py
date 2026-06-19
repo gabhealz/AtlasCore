@@ -10,8 +10,9 @@ from datetime import date, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+import app.db.base  # noqa: F401 — registra todos os modelos no mapper antes da resolução de relationships
+
 from app.core.encryption import decrypt_value
-from app.models.client import Client  # noqa: F401 — força resolução do mapper Client↔IntegrationSetting
 from app.models.integration_setting import IntegrationSetting
 from app.models.metric_snapshot import MetricSnapshot
 from app.models.sync_log import SyncLog
