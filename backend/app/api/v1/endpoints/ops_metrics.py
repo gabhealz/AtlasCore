@@ -199,15 +199,19 @@ async def get_ops_dashboard(
         snapshots = snapshots_result.scalars().all()
         weekly_history = [
             {
-                "week_start": str(s.week_start),
+                "id": s.id,
+                "client_id": s.client_id,
+                "week_start": s.week_start,
                 "source": s.source,
                 "impressions": s.impressions,
                 "clicks": s.clicks,
-                "spend": float(s.ad_spend) if s.ad_spend is not None else None,
-                "leads": s.conversions,
+                "ad_spend": float(s.ad_spend) if s.ad_spend is not None else None,
+                "conversions": s.conversions,
                 "bookings": s.bookings,
                 "revenue": float(s.revenue) if s.revenue is not None else None,
                 "lp_sessions": s.lp_sessions,
+                "created_at": s.created_at,
+                "updated_at": s.updated_at,
             }
             for s in reversed(snapshots)  # chronological order
         ]
