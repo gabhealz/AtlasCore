@@ -44,9 +44,6 @@ class Client(Base):
     campaign_snapshots = relationship(
         "CampaignSnapshot", back_populates="client", lazy="selectin", cascade="all, delete-orphan"
     )
-    integration_settings = relationship(
-        "IntegrationSetting", back_populates="client", lazy="selectin", cascade="all, delete-orphan"
-    )
     sync_logs = relationship(
         "SyncLog", back_populates="client", lazy="selectin", cascade="all, delete-orphan"
     )

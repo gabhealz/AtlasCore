@@ -35,17 +35,5 @@ celery_app.conf.update(
 # Auto-discover tasks in the app.tasks package
 celery_app.autodiscover_tasks(["app.tasks"])
 
-# Explicit imports to guarantee task registration
+# Explicit import to guarantee task registration (sync_ads uses Core SQL only, no ORM mapper needed)
 import app.tasks.sync_ads  # noqa: F401, E402
-
-
-# Resolve SQLAlchemy mappers in each worker process AFTER the prefork fork.
-# configure_mappers() pre-fork é insuficiente porque o fork pode capturar estado parcial.
-from celery.signals import worker_process_init  # noqa: E402
-
-
-@worker_process_init.connect
-def _init_sqlalchemy_mappers(**kwargs):  # noqa: ANN003
-    import app.db.base  # noqa: F401 — registra todos os modelos
-    from sqlalchemy.orm import configure_mappers
-    configure_mappers()
