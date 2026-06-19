@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { AxiosError } from 'axios';
 
 import { useAuthStore } from '../store/auth';
@@ -12,6 +12,8 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const setToken = useAuthStore((state) => state.setToken);
   const navigate = useNavigate();
+  const location = useLocation();
+  const successMessage = (location.state as { message?: string } | null)?.message ?? null;
 
   type LoginErrorResponse = {
     detail?: {
@@ -61,6 +63,12 @@ export default function Login() {
         </div>
         <h2 className="text-xs font-semibold uppercase tracking-[0.25em] text-center text-subtle mb-8">Atlas</h2>
 
+        {successMessage && (
+          <div className="mb-4 p-3 bg-emerald-50 text-emerald-700 rounded text-sm text-center">
+            {successMessage}
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 p-3 bg-rose-50 text-rose-700 rounded text-sm text-center">
             {error}
@@ -96,6 +104,12 @@ export default function Login() {
             {isSubmitting ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
+
+        <div className="mt-4 text-center">
+          <a href="/forgot-password" className="text-sm text-muted hover:text-brand transition-colors">
+            Esqueceu sua senha?
+          </a>
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,8 @@ import { create } from 'zustand';
 interface AuthState {
   token: string | null;
   role: string | null;
+  email: string | null;
+  name: string | null;
   setToken: (token: string | null) => void;
   logout: () => Promise<void>;
 }
@@ -11,22 +13,17 @@ interface AuthState {
 type JwtPayload = {
   exp?: number;
   role?: string;
+  email?: string;
+  name?: string;
 };
 
 function decodeJwtPayload(token: string): JwtPayload {
   const tokenParts = token.split('.');
-  if (tokenParts.length !== 3) {
-    return {};
-  }
-
+  if (tokenParts.length !== 3) return {};
   try {
     const base64 = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const paddedBase64 = base64.padEnd(
-      base64.length + ((4 - (base64.length % 4)) % 4),
-      '=',
-    );
-    const decodedPayload = atob(paddedBase64);
-    return JSON.parse(decodedPayload) as JwtPayload;
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    return JSON.parse(atob(padded)) as JwtPayload;
   } catch {
     return {};
   }
@@ -34,53 +31,49 @@ function decodeJwtPayload(token: string): JwtPayload {
 
 export function isTokenExpired(token: string): boolean {
   const payload = decodeJwtPayload(token);
-  if (!payload?.exp) {
-    return true;
-  }
-
+  if (!payload?.exp) return true;
   return payload.exp * 1000 <= Date.now();
 }
 
 function getInitialToken(): string | null {
-  const storedToken = localStorage.getItem('token');
-  if (!storedToken) {
-    return null;
-  }
-
-  if (isTokenExpired(storedToken)) {
+  const stored = localStorage.getItem('token');
+  if (!stored || isTokenExpired(stored)) {
     localStorage.removeItem('token');
     return null;
   }
-
-  return storedToken;
+  return stored;
 }
 
-function getInitialRole(): string | null {
-  const storedToken = localStorage.getItem('token');
-  if (!storedToken || isTokenExpired(storedToken)) {
-    return null;
-  }
-  return decodeJwtPayload(storedToken).role ?? null;
+function extractFromToken(token: string | null) {
+  if (!token || isTokenExpired(token)) return { role: null, email: null, name: null };
+  const p = decodeJwtPayload(token);
+  return {
+    role: p.role ?? null,
+    email: p.email ?? null,
+    name: p.name ?? null,
+  };
 }
+
+const initialToken = getInitialToken();
+const initialExtracted = extractFromToken(initialToken);
 
 export const useAuthStore = create<AuthState>((set) => ({
-  token: getInitialToken(),
-  role: getInitialRole(),
+  token: initialToken,
+  ...initialExtracted,
   setToken: (token) => {
     if (token && !isTokenExpired(token)) {
       localStorage.setItem('token', token);
-      const role = decodeJwtPayload(token).role ?? null;
-      set({ token, role });
+      set({ token, ...extractFromToken(token) });
     } else {
       localStorage.removeItem('token');
-      set({ token: null, role: null });
+      set({ token: null, role: null, email: null, name: null });
     }
   },
   logout: async () => {
     try {
       await axios.post('/api/v1/auth/logout');
-    } catch { /* ignore errors on logout */ }
+    } catch { /* ignore */ }
     localStorage.removeItem('token');
-    set({ token: null, role: null });
+    set({ token: null, role: null, email: null, name: null });
   },
 }));

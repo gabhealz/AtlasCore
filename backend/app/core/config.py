@@ -76,6 +76,11 @@ class Settings(BaseSettings):
     # Timeout das chamadas HTTP de coleta de mercado.
     MARKET_DATA_TIMEOUT_SECONDS: float = 30
 
+    # Email (Brevo transactional API)
+    BREVO_API_KEY: str = ""
+    # URL base da aplicação frontend (usada em links de email)
+    APP_BASE_URL: str = "https://atlas.healz.com.br"
+
     REDIS_URL: str = "redis://redis:6379/0"
     MINIO_URL: str = "http://minio:9000"
     MINIO_PUBLIC_URL: str = "http://localhost:9000"

@@ -1,6 +1,7 @@
 from app.db.base_class import Base  # noqa: F401
 from app.models.campaign_snapshot import CampaignSnapshot  # noqa: F401
 from app.models.client import Client  # noqa: F401
+from app.models.password_reset_token import PasswordResetToken  # noqa: F401
 from app.models.cta_button import CTAButton  # noqa: F401
 from app.models.generated_document import GeneratedDocument  # noqa: F401
 from app.models.ibge_municipio import IbgeMunicipio  # noqa: F401
@@ -14,3 +15,4 @@ from app.models.sync_log import SyncLog  # noqa: F401
 from app.models.tintim_event import TintimEvent  # noqa: F401
 from app.models.uploaded_asset import UploadedAsset  # noqa: F401
 from app.models.user import User  # noqa: F401
+from app.models.user_invitation import UserInvitation  # noqa: F401
