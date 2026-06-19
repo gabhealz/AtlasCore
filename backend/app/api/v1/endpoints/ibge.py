@@ -9,6 +9,7 @@ from app.schemas.ibge import (
     MunicipioEnvelope,
     MunicipioListEnvelope,
     PiramideResponse,
+    RendaResponse,
 )
 from app.services import ibge_service
 
@@ -67,6 +68,21 @@ async def municipio_piramide(
         )
     piramide = await ibge_service.get_piramide(db, mun)
     return {"municipio_id": municipio_id, "ano": mun.pyramid_ano, "data": piramide or []}
+
+
+@router.get("/municipios/{municipio_id}/renda", response_model=RendaResponse)
+async def municipio_renda(
+    municipio_id: int,
+    current_user: User = Depends(allow_read),
+):
+    result = await ibge_client.fetch_renda_per_capita(municipio_id)
+    if result is None:
+        return RendaResponse(municipio_id=municipio_id)
+    return RendaResponse(
+        municipio_id=municipio_id,
+        renda_per_capita=result.get("media"),
+        ano=result.get("ano"),
+    )
 
 
 @router.get("/uf/{uf}/populacao", response_model=EstadoPopulacaoResponse)

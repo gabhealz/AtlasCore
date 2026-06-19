@@ -38,3 +38,10 @@ class EstadoPopulacaoResponse(BaseModel):
     uf: str
     populacao: int | None = None
     ano: int | None = None
+
+
+class RendaResponse(BaseModel):
+    municipio_id: int
+    renda_per_capita: float | None = None
+    ano: int | None = None
+    fonte: str = "Censo 2022 / IBGE SIDRA"

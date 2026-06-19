@@ -3,7 +3,7 @@ import { MapPin } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
-import { resolveMunicipio, fetchPiramide, PORTE_LABEL, type Municipio, type PiramideItem } from '../../lib/ibgeApi';
+import { resolveMunicipio, fetchPiramide, fetchRenda, PORTE_LABEL, type Municipio, type PiramideItem, type RendaData } from '../../lib/ibgeApi';
 import { formatNumber } from '../../lib/formatters';
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
 export function IbgeMarketPanel({ city, state }: Props) {
   const [mun, setMun] = useState<Municipio | null>(null);
   const [pyramid, setPyramid] = useState<PiramideItem[]>([]);
+  const [renda, setRenda] = useState<RendaData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,9 +29,13 @@ export function IbgeMarketPanel({ city, state }: Props) {
         const m = await resolveMunicipio(city, state);
         if (cancelled) return;
         setMun(m);
-        const p = await fetchPiramide(m.id);
+        const [p, r] = await Promise.all([
+          fetchPiramide(m.id),
+          fetchRenda(m.id),
+        ]);
         if (!cancelled) {
           setPyramid(p.data);
+          setRenda(r);
         }
       } catch {
         if (!cancelled) setError('Não foi possível obter dados do IBGE para esta cidade.');
@@ -75,7 +80,7 @@ export function IbgeMarketPanel({ city, state }: Props) {
 
       {mun && !loading && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="p-4 rounded-lg bg-base border border-line">
               <div className="text-xs text-muted mb-1">População</div>
               <div className="font-semibold text-ink">{formatNumber(mun.populacao)}{mun.populacao_ano ? ` (${mun.populacao_ano})` : ''}</div>
@@ -90,6 +95,19 @@ export function IbgeMarketPanel({ city, state }: Props) {
             <div className="p-4 rounded-lg bg-base border border-line">
               <div className="text-xs text-muted mb-1">Município</div>
               <div className="font-semibold text-ink">{mun.nome}/{mun.uf_sigla}</div>
+            </div>
+            <div className="p-4 rounded-lg bg-base border border-line">
+              <div className="text-xs text-muted mb-1">Renda per capita</div>
+              <div className="font-semibold text-ink">
+                {renda?.renda_per_capita != null
+                  ? `R$ ${Math.round(renda.renda_per_capita).toLocaleString('pt-BR')}`
+                  : '—'}
+              </div>
+              <div className="text-xs text-muted mt-0.5">
+                {renda?.renda_per_capita != null
+                  ? `Mensal · ${renda.ano ?? 'Censo 2022'}`
+                  : 'Censo 2022'}
+              </div>
             </div>
           </div>
 
