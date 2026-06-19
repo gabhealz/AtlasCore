@@ -33,6 +33,18 @@ export async function fetchPiramide(municipioId: number): Promise<PiramideRespon
   return res.data;
 }
 
+export interface RendaData {
+  municipio_id: number;
+  renda_per_capita: number | null;
+  ano: number | null;
+  fonte: string;
+}
+
+export async function fetchRenda(municipioId: number): Promise<RendaData> {
+  const res = await api.get<RendaData>(`/ibge/municipios/${municipioId}/renda`);
+  return res.data;
+}
+
 export const PORTE_LABEL: Record<string, string> = {
   AA: 'Capital',
   A: 'Interior grande (> 300 mil)',

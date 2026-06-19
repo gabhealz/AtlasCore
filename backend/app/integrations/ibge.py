@@ -3,6 +3,7 @@
 - Lista de municípios por UF (localidades v1).
 - População estimada (agregado 6579, variável 9324) por município ou UF.
 - Pirâmide etária (Censo 2022, agregado 9514, variável 93, sexo + faixas de 5 anos).
+- Renda domiciliar per capita (Censo 2022, agregado 9534, variável 9529).
 """
 
 import logging
@@ -118,3 +119,26 @@ async def fetch_piramide(municipio_id: int) -> tuple[list[dict] | None, int | No
     except Exception as exc:
         logger.warning("IBGE: falha ao buscar pirâmide do município %s: %s", municipio_id, exc)
         return None, ano
+
+
+async def fetch_renda_per_capita(municipio_id: int) -> dict | None:
+    """Rendimento nominal médio mensal per capita (Censo 2022).
+
+    Returns: {"media": float, "ano": int} or None if unavailable.
+    """
+    url = (
+        f"{BASE}/api/v3/agregados/9534/periodos/2022/variaveis/9529"
+        f"?localidades=N6[{municipio_id}]"
+    )
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            data = resp.json()
+        value, year = _latest_serie_value(data)
+        if value is None:
+            return None
+        return {"media": float(value), "ano": year or 2022}
+    except Exception as exc:
+        logger.warning("IBGE: falha ao buscar renda per capita do município %s: %s", municipio_id, exc)
+        return None
