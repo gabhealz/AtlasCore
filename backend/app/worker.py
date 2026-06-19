@@ -38,8 +38,14 @@ celery_app.autodiscover_tasks(["app.tasks"])
 # Explicit imports to guarantee task registration
 import app.tasks.sync_ads  # noqa: F401, E402
 
-# Importar todos os modelos e forçar configure_mappers() ANTES do fork do prefork pool.
-# Sem isso, o SQLAlchemy não consegue resolver relationship("Client",...) nos workers.
-import app.db.base  # noqa: F401, E402
-from sqlalchemy.orm import configure_mappers  # noqa: E402
-configure_mappers()
+
+# Resolve SQLAlchemy mappers in each worker process AFTER the prefork fork.
+# configure_mappers() pre-fork é insuficiente porque o fork pode capturar estado parcial.
+from celery.signals import worker_process_init  # noqa: E402
+
+
+@worker_process_init.connect
+def _init_sqlalchemy_mappers(**kwargs):  # noqa: ANN003
+    import app.db.base  # noqa: F401 — registra todos os modelos
+    from sqlalchemy.orm import configure_mappers
+    configure_mappers()
