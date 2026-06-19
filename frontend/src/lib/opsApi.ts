@@ -1,8 +1,9 @@
 import { api } from './api';
 import type { Client, ClientDashboard, OpsDashboardEnvelope } from '../types/ops';
 
-export async function fetchOpsDashboard(): Promise<ClientDashboard[]> {
-  const response = await api.get<OpsDashboardEnvelope>('/ops/dashboard');
+export async function fetchOpsDashboard(weekStart?: string): Promise<ClientDashboard[]> {
+  const params = weekStart ? { week_start: weekStart } : undefined;
+  const response = await api.get<OpsDashboardEnvelope>('/ops/dashboard', { params });
   return response.data.data;
 }
 

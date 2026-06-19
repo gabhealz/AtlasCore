@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta, timezone
+from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
@@ -134,6 +135,7 @@ async def _load_metrics_for_clients(
 
 @router.get("/dashboard", response_model=OpsDashboardEnvelope)
 async def get_ops_dashboard(
+    week_start: Optional[date] = Query(default=None),
     current_user: User = Depends(allow_read),
     db: AsyncSession = Depends(deps.get_db),
 ):
@@ -146,8 +148,11 @@ async def get_ops_dashboard(
     if not clients:
         return {"data": []}
 
-    today = date.today()
-    current_week_start = today - timedelta(days=today.weekday())
+    if week_start is not None:
+        current_week_start = week_start
+    else:
+        today = date.today()
+        current_week_start = today - timedelta(days=today.weekday())
     previous_week_start = current_week_start - timedelta(days=7)
 
     client_ids = [c.id for c in clients]
@@ -248,6 +253,7 @@ async def get_ops_dashboard(
 )
 async def get_client_dashboard(
     client_id: int,
+    week_start: Optional[date] = Query(default=None),
     current_user: User = Depends(allow_read),
     db: AsyncSession = Depends(deps.get_db),
 ):
@@ -256,8 +262,11 @@ async def get_client_dashboard(
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
 
-    today = date.today()
-    current_week_start = today - timedelta(days=today.weekday())
+    if week_start is not None:
+        current_week_start = week_start
+    else:
+        today = date.today()
+        current_week_start = today - timedelta(days=today.weekday())
 
     # 8 weeks history
     history = []

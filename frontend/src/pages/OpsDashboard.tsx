@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, DollarSign, Calendar, Activity, ChevronRight, TrendingUp, Plus } from 'lucide-react';
 import { fetchOpsDashboard } from '../lib/opsApi';
@@ -8,6 +8,31 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { DataTable } from '../components/ui/DataTable';
 import { KPICard } from '../components/ui/KPICard';
 import { NewClientModal } from '../components/ops/NewClientModal';
+import { OpsLtvPanel } from '../components/ops/OpsLtvPanel';
+
+/** Generate the last N Monday dates as week options */
+function generateWeekOptions(count: number): Array<{ label: string; value: string }> {
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, ...
+  // Days since last Monday (Sunday=6, Monday=0, ...)
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const currentMonday = new Date(today);
+  currentMonday.setDate(today.getDate() - daysToMonday);
+  currentMonday.setHours(0, 0, 0, 0);
+
+  const options: Array<{ label: string; value: string }> = [];
+  for (let i = 0; i < count; i++) {
+    const d = new Date(currentMonday);
+    d.setDate(currentMonday.getDate() - i * 7);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    const label = `Seg ${dd}/${mm}/${yyyy}`;
+    const value = `${yyyy}-${mm}-${dd}`;
+    options.push({ label, value });
+  }
+  return options;
+}
 
 export function OpsDashboard() {
   const [data, setData] = useState<ClientDashboard[]>([]);
@@ -20,10 +45,13 @@ export function OpsDashboard() {
   const [planFilter, setPlanFilter] = useState<string>('all');
   const [sortField, setSortField] = useState<string>('activity');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [selectedWeek, setSelectedWeek] = useState<string>('');
 
-  const load = useCallback(() => {
+  const weekOptions = useMemo(() => generateWeekOptions(12), []);
+
+  const load = useCallback((week?: string) => {
     setLoading(true);
-    fetchOpsDashboard()
+    fetchOpsDashboard(week || undefined)
       .then((res) => {
         if (!Array.isArray(res)) {
           setErrorMsg(`A API retornou algo inesperado: ${JSON.stringify(res)}`);
@@ -37,8 +65,8 @@ export function OpsDashboard() {
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    load(selectedWeek || undefined);
+  }, [load, selectedWeek]);
 
   if (errorMsg) {
     return (
@@ -197,8 +225,31 @@ export function OpsDashboard() {
         </div>
       </div>
 
+      {/* Week selector */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-medium text-subtle">Semana:</span>
+        <select
+          value={selectedWeek}
+          onChange={(e) => setSelectedWeek(e.target.value)}
+          className="border border-line rounded-lg bg-card text-ink text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand"
+        >
+          <option value="">Semana atual</option>
+          {weekOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+        {selectedWeek && (
+          <button
+            onClick={() => setSelectedWeek('')}
+            className="text-xs text-muted hover:text-ink underline"
+          >
+            Voltar para semana atual
+          </button>
+        )}
+      </div>
+
       {showNewClient && (
-        <NewClientModal onClose={() => setShowNewClient(false)} onCreated={load} />
+        <NewClientModal onClose={() => setShowNewClient(false)} onCreated={() => load(selectedWeek || undefined)} />
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -223,6 +274,8 @@ export function OpsDashboard() {
           icon={<Calendar className="w-5 h-5 text-sky-600" />}
         />
       </div>
+
+      <OpsLtvPanel clients={data} />
 
       <div className="flex flex-wrap items-center gap-2 bg-card border border-line rounded-xl px-4 py-3">
         <span className="text-xs font-semibold text-subtle uppercase tracking-wide mr-1">Filtros</span>
