@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.encryption import decrypt_value
+from app.models.client import Client  # noqa: F401 — força resolução do mapper Client↔IntegrationSetting
 from app.models.integration_setting import IntegrationSetting
 from app.models.metric_snapshot import MetricSnapshot
 from app.models.sync_log import SyncLog
@@ -159,54 +160,47 @@ def _upsert_metric_snapshot(
     target_date: date,
     data: dict,
 ):
-    """Create or update MetricSnapshot with data from the given platform."""
-    # Try to find existing snapshot for this client + date
+    """Upsert MetricSnapshot keyed by (client_id, week_start, source)."""
+    week_start = target_date - timedelta(days=target_date.weekday())
+
     existing = db.execute(
         select(MetricSnapshot).where(
             MetricSnapshot.client_id == client_id,
-            MetricSnapshot.date == target_date,
+            MetricSnapshot.week_start == week_start,
+            MetricSnapshot.source == platform,
         )
     ).scalars().first()
 
     if existing:
         snapshot = existing
     else:
-        # Calculate week_start
-        week_start = target_date - timedelta(days=target_date.weekday())
         snapshot = MetricSnapshot(
             client_id=client_id,
-            date=target_date,
             week_start=week_start,
-            ad_spend=0,
-            leads=0,
-            appointments=0,
-            revenue=0,
-            consultations=0,
+            source=platform,
         )
         db.add(snapshot)
 
-    # Update fields based on platform
     if platform in ("meta", "google"):
-        # Accumulate spend from both platforms
-        current_spend = float(snapshot.ad_spend or 0)
-        current_spend += data.get("spend", 0)
-        snapshot.ad_spend = current_spend
-
-        # Accumulate leads/conversions
-        current_leads = int(snapshot.leads or 0)
+        snapshot.ad_spend = (float(snapshot.ad_spend or 0)) + data.get("spend", 0)
+        snapshot.impressions = (snapshot.impressions or 0) + data.get("impressions", 0)
+        snapshot.clicks = (snapshot.clicks or 0) + data.get("clicks", 0)
+        if data.get("cpc"):
+            snapshot.cpc = data["cpc"]
+        if data.get("ctr"):
+            snapshot.ctr = data["ctr"]
         if platform == "meta":
-            current_leads += data.get("leads", 0)
+            snapshot.conversions = (snapshot.conversions or 0) + data.get("leads", 0)
         elif platform == "google":
-            current_leads += int(data.get("conversions", 0))
-        snapshot.leads = current_leads
+            snapshot.conversions = (snapshot.conversions or 0) + int(data.get("conversions", 0))
 
     elif platform == "ga4":
-        # GA4 conversions can supplement leads if no Tintim
-        ga4_conversions = data.get("conversions", 0)
-        if ga4_conversions > 0:
-            # Only update if current leads is 0 (Tintim takes priority)
-            if not snapshot.leads:
-                snapshot.leads = ga4_conversions
+        lp = data.get("lp_sessions") or data.get("sessions", 0)
+        if lp:
+            snapshot.lp_sessions = (snapshot.lp_sessions or 0) + lp
+        ga4_conv = data.get("conversions", 0)
+        if ga4_conv and not snapshot.conversions:
+            snapshot.conversions = ga4_conv
 
     db.flush()
 

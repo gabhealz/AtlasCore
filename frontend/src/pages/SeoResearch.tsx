@@ -44,31 +44,21 @@ type SearchData = {
 type SearchResponse = { data: SearchData };
 
 function formatVolume(value: number | null) {
-  if (value === null || value === undefined) {
-    return '—';
-  }
+  if (value === null || value === undefined) return '—';
   return value.toLocaleString('pt-BR');
 }
 
 function formatCpc(value: number | null) {
-  if (value === null || value === undefined) {
-    return '—';
-  }
+  if (value === null || value === undefined) return '—';
   return `R$ ${value.toFixed(2).replace('.', ',')}`;
 }
 
 function competitionBadge(competition: string | null) {
   const normalized = (competition || '').toUpperCase();
-  if (normalized === 'LOW') {
-    return 'bg-emerald-100 text-emerald-800';
-  }
-  if (normalized === 'MEDIUM') {
-    return 'bg-amber-100 text-amber-800';
-  }
-  if (normalized === 'HIGH') {
-    return 'bg-rose-100 text-rose-800';
-  }
-  return 'bg-gray-100 text-gray-700';
+  if (normalized === 'LOW') return 'bg-emerald-100 text-emerald-800';
+  if (normalized === 'MEDIUM') return 'bg-amber-100 text-amber-800';
+  if (normalized === 'HIGH') return 'bg-rose-100 text-rose-800';
+  return 'bg-elevated text-muted';
 }
 
 export function SeoResearch() {
@@ -99,7 +89,7 @@ export function SeoResearch() {
       });
       setData(response.data.data);
     } catch {
-      setError('Nao foi possivel concluir a pesquisa SEO.');
+      setError('Não foi possível concluir a pesquisa SEO.');
     } finally {
       setLoading(false);
     }
@@ -107,140 +97,122 @@ export function SeoResearch() {
 
   const internal = data?.internal;
   const hasInternal =
-    !!internal &&
-    (internal.clients.length > 0 || internal.onboardings.length > 0);
+    !!internal && (internal.clients.length > 0 || internal.onboardings.length > 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto flex max-w-5xl flex-col">
-        <header className="mb-6">
-          <p className="text-sm font-semibold uppercase tracking-wide text-brand">
-            Inteligencia SEO
-          </p>
-          <h1 className="mt-1 text-3xl font-bold text-gray-900">
-            Pesquisa de palavras-chave
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-gray-600">
-            Volume de busca, CPC e concorrencia via DataForSEO, reaproveitando o
-            cache do nosso banco para economizar API. Informe a especialidade
-            para cruzar com clientes e onboardings que ja atendemos.
-          </p>
-        </header>
+    <div className="py-8 space-y-6">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand mb-1">
+          Inteligência SEO
+        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-ink">
+          Pesquisa de palavras-chave
+        </h1>
+        <p className="mt-1 text-sm text-muted max-w-2xl">
+          Volume de busca, CPC e concorrência via DataForSEO, com cache interno para economizar API.
+          Informe a especialidade para cruzar com nossa base de clientes e onboardings.
+        </p>
+      </div>
 
-        <form
-          onSubmit={handleSearch}
-          className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
-        >
-          <div className="grid gap-4 md:grid-cols-[1fr_260px]">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Palavras-chave
-              </label>
-              <textarea
-                value={keywordsInput}
-                onChange={(event) => setKeywordsInput(event.target.value)}
-                rows={3}
-                placeholder="harmonizacao facial, botox, preenchimento labial"
-                className="mt-2 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Separe varias por virgula, ponto e virgula ou quebra de linha.
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Especialidade (opcional)
-              </label>
-              <input
-                type="text"
-                value={specialty}
-                onChange={(event) => setSpecialty(event.target.value)}
-                placeholder="dermatologia"
-                className="mt-2 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Cruza com nossa base de clientes/onboardings.
-              </p>
-            </div>
+      <form
+        onSubmit={handleSearch}
+        className="bg-card rounded-xl border border-line p-6 shadow-sm"
+      >
+        <div className="grid gap-4 md:grid-cols-[1fr_260px]">
+          <div>
+            <label className="block text-sm font-medium text-ink mb-1.5">
+              Palavras-chave
+            </label>
+            <textarea
+              value={keywordsInput}
+              onChange={(e) => setKeywordsInput(e.target.value)}
+              rows={3}
+              placeholder="harmonização facial, botox, preenchimento labial"
+              className="block w-full rounded-lg border border-line bg-base px-3 py-2 text-sm text-ink placeholder-subtle focus:outline-none focus:ring-2 focus:ring-brand"
+            />
+            <p className="mt-1 text-xs text-muted">
+              Separe por vírgula, ponto e vírgula ou quebra de linha.
+            </p>
           </div>
-
-          {error ? (
-            <div className="mt-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          ) : null}
-
-          <div className="mt-4 flex justify-end">
-            <button
-              type="submit"
-              disabled={loading}
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:bg-brand"
-            >
-              <Search className="mr-2 h-4 w-4" />
-              {loading ? 'Pesquisando...' : 'Pesquisar'}
-            </button>
+          <div>
+            <label className="block text-sm font-medium text-ink mb-1.5">
+              Especialidade (opcional)
+            </label>
+            <input
+              type="text"
+              value={specialty}
+              onChange={(e) => setSpecialty(e.target.value)}
+              placeholder="dermatologia"
+              className="block w-full rounded-lg border border-line bg-base px-3 py-2 text-sm text-ink placeholder-subtle focus:outline-none focus:ring-2 focus:ring-brand"
+            />
+            <p className="mt-1 text-xs text-muted">
+              Cruza com nossa base de clientes/onboardings.
+            </p>
           </div>
-        </form>
+        </div>
 
-        {data ? (
-          <>
-            <div className="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-              <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Resultados ({data.keywords.length})
-                </h2>
-                <span className="text-xs text-gray-500">
-                  location {data.location_code} · {data.language_code}
-                </span>
-              </div>
+        {error && (
+          <div className="mt-4 rounded-lg bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-700">
+            {error}
+          </div>
+        )}
 
-              {data.keywords.length === 0 ? (
-                <p className="px-6 py-6 text-sm text-gray-600">
-                  Nenhum dado retornado para essas palavras-chave.
-                </p>
-              ) : (
+        <div className="mt-4 flex justify-end">
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-brand text-onbrand hover:bg-brand-soft disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+          >
+            <Search className="w-4 h-4" />
+            {loading ? 'Pesquisando...' : 'Pesquisar'}
+          </button>
+        </div>
+      </form>
+
+      {data && (
+        <>
+          <div className="bg-card rounded-xl border border-line shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between border-b border-line px-6 py-4">
+              <h2 className="text-base font-semibold text-ink">
+                Resultados ({data.keywords.length})
+              </h2>
+              <span className="text-xs text-muted">
+                location {data.location_code} · {data.language_code}
+              </span>
+            </div>
+
+            {data.keywords.length === 0 ? (
+              <p className="px-6 py-6 text-sm text-muted">
+                Nenhum dado retornado para essas palavras-chave.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+                  <thead className="bg-elevated text-xs uppercase tracking-wide text-subtle">
                     <tr>
                       <th className="px-6 py-3 font-semibold">Palavra-chave</th>
-                      <th className="px-6 py-3 font-semibold">Volume/mes</th>
+                      <th className="px-6 py-3 font-semibold">Volume/mês</th>
                       <th className="px-6 py-3 font-semibold">CPC</th>
-                      <th className="px-6 py-3 font-semibold">Concorrencia</th>
+                      <th className="px-6 py-3 font-semibold">Concorrência</th>
                       <th className="px-6 py-3 font-semibold">Origem</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-line">
                     {data.keywords.map((row) => (
-                      <tr key={row.keyword}>
-                        <td className="px-6 py-3 font-medium text-gray-900">
-                          {row.keyword}
-                        </td>
-                        <td className="px-6 py-3 text-gray-700">
-                          {formatVolume(row.avg_monthly_searches)}
-                        </td>
-                        <td className="px-6 py-3 text-gray-700">
-                          {formatCpc(row.cpc)}
-                        </td>
+                      <tr key={row.keyword} className="hover:bg-elevated/50 transition-colors">
+                        <td className="px-6 py-3 font-medium text-ink">{row.keyword}</td>
+                        <td className="px-6 py-3 text-ink">{formatVolume(row.avg_monthly_searches)}</td>
+                        <td className="px-6 py-3 text-ink">{formatCpc(row.cpc)}</td>
                         <td className="px-6 py-3">
-                          <span
-                            className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${competitionBadge(row.competition)}`}
-                          >
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${competitionBadge(row.competition)}`}>
                             {row.competition || '—'}
                           </span>
                         </td>
                         <td className="px-6 py-3">
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
-                              row.from_cache
-                                ? 'bg-sky-100 text-sky-800'
-                                : 'bg-violet-100 text-violet-800'
-                            }`}
-                          >
-                            {row.from_cache ? (
-                              <Database className="h-3 w-3" />
-                            ) : (
-                              <Sparkles className="h-3 w-3" />
-                            )}
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            row.from_cache ? 'bg-sky-100 text-sky-800' : 'bg-violet-100 text-violet-800'
+                          }`}>
+                            {row.from_cache ? <Database className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />}
                             {row.from_cache ? 'Cache' : 'Novo'}
                           </span>
                         </td>
@@ -248,91 +220,74 @@ export function SeoResearch() {
                     ))}
                   </tbody>
                 </table>
-              )}
-            </div>
-
-            <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Nossa base interna
-                {internal?.specialty ? ` · ${internal.specialty}` : ''}
-              </h2>
-              {!internal?.specialty ? (
-                <p className="mt-2 text-sm text-gray-600">
-                  Informe uma especialidade na busca para cruzar com clientes e
-                  onboardings que ja atendemos.
-                </p>
-              ) : !hasInternal ? (
-                <p className="mt-2 text-sm text-gray-600">
-                  Ainda nao temos clientes ou onboardings registrados nessa
-                  especialidade.
-                </p>
-              ) : (
-                <div className="mt-4 grid gap-6 md:grid-cols-2">
-                  <div>
-                    <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                      <Users className="h-4 w-4 text-emerald-600" />
-                      Clientes ({internal.clients.length})
-                    </p>
-                    <ul className="mt-3 space-y-2">
-                      {internal.clients.map((client) => (
-                        <li
-                          key={client.id}
-                          className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
-                        >
-                          <span className="font-medium text-gray-900">
-                            {client.name}
-                          </span>
-                          <span className="ml-2 text-xs text-gray-500">
-                            {[client.city, client.state]
-                              .filter(Boolean)
-                              .join('/') || 'local nao informado'}
-                            {client.is_active ? '' : ' · inativo'}
-                          </span>
-                        </li>
-                      ))}
-                      {internal.clients.length === 0 ? (
-                        <li className="text-sm text-gray-500">Nenhum.</li>
-                      ) : null}
-                    </ul>
-                  </div>
-                  <div>
-                    <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                      <FileText className="h-4 w-4 text-brand" />
-                      Onboardings ({internal.onboardings.length})
-                    </p>
-                    <ul className="mt-3 space-y-2">
-                      {internal.onboardings.map((onboarding) => (
-                        <li
-                          key={onboarding.id}
-                          className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
-                        >
-                          <span className="font-medium text-gray-900">
-                            {onboarding.doctor_name}
-                          </span>
-                          <span className="ml-2 text-xs text-gray-500">
-                            #{onboarding.id} · {onboarding.status}
-                          </span>
-                        </li>
-                      ))}
-                      {internal.onboardings.length === 0 ? (
-                        <li className="text-sm text-gray-500">Nenhum.</li>
-                      ) : null}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {data.notes.length > 0 ? (
-              <div className="mt-4 rounded-md bg-amber-50 px-4 py-3 text-xs text-amber-800">
-                {data.notes.map((note, index) => (
-                  <p key={index}>{note}</p>
-                ))}
               </div>
-            ) : null}
-          </>
-        ) : null}
-      </div>
+            )}
+          </div>
+
+          <div className="bg-card rounded-xl border border-line p-6 shadow-sm">
+            <h2 className="text-base font-semibold text-ink">
+              Nossa base interna{internal?.specialty ? ` · ${internal.specialty}` : ''}
+            </h2>
+            {!internal?.specialty ? (
+              <p className="mt-2 text-sm text-muted">
+                Informe uma especialidade para cruzar com clientes e onboardings que já atendemos.
+              </p>
+            ) : !hasInternal ? (
+              <p className="mt-2 text-sm text-muted">
+                Ainda não temos clientes ou onboardings registrados nessa especialidade.
+              </p>
+            ) : (
+              <div className="mt-4 grid gap-6 md:grid-cols-2">
+                <div>
+                  <p className="flex items-center gap-2 text-sm font-semibold text-ink">
+                    <Users className="w-4 h-4 text-emerald-600" />
+                    Clientes ({internal.clients.length})
+                  </p>
+                  <ul className="mt-3 space-y-2">
+                    {internal.clients.map((client) => (
+                      <li key={client.id} className="rounded-lg border border-line bg-elevated px-3 py-2 text-sm">
+                        <span className="font-medium text-ink">{client.name}</span>
+                        <span className="ml-2 text-xs text-muted">
+                          {[client.city, client.state].filter(Boolean).join('/') || 'local não informado'}
+                          {client.is_active ? '' : ' · inativo'}
+                        </span>
+                      </li>
+                    ))}
+                    {internal.clients.length === 0 && (
+                      <li className="text-sm text-muted">Nenhum.</li>
+                    )}
+                  </ul>
+                </div>
+                <div>
+                  <p className="flex items-center gap-2 text-sm font-semibold text-ink">
+                    <FileText className="w-4 h-4 text-brand" />
+                    Onboardings ({internal.onboardings.length})
+                  </p>
+                  <ul className="mt-3 space-y-2">
+                    {internal.onboardings.map((onboarding) => (
+                      <li key={onboarding.id} className="rounded-lg border border-line bg-elevated px-3 py-2 text-sm">
+                        <span className="font-medium text-ink">{onboarding.doctor_name}</span>
+                        <span className="ml-2 text-xs text-muted">
+                          #{onboarding.id} · {onboarding.status}
+                        </span>
+                      </li>
+                    ))}
+                    {internal.onboardings.length === 0 && (
+                      <li className="text-sm text-muted">Nenhum.</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {data.notes.length > 0 && (
+            <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-800">
+              {data.notes.map((note, i) => <p key={i}>{note}</p>)}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
