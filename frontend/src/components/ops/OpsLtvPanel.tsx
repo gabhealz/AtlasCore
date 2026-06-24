@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { ClientDashboard } from '../../types/ops';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface OpsLtvPanelProps {
   clients: ClientDashboard[];
@@ -57,6 +58,62 @@ interface CohortRow {
   size: number;
   cohortStart: Date;
   retention: (number | null)[]; // index 0 = M1, ..., 11 = M12; null = future
+}
+
+// ─── churn chart ─────────────────────────────────────────────────────────────
+
+function ChurnChart({ clients, today }: { clients: ClientDashboard[]; today: Date }) {
+  const data = useMemo(() => {
+    const months: { label: string; churns: number; key: string }[] = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const SHORT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      months.push({ key: `${yyyy}-${mm}`, label: `${SHORT[d.getMonth()]}/${String(yyyy).slice(2)}`, churns: 0 });
+    }
+    for (const c of clients) {
+      if (c.client.is_active) continue;
+      const endStr = c.client.contract_end_date || c.client.updated_at;
+      if (!endStr) continue;
+      const end = new Date(endStr);
+      const key = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}`;
+      const m = months.find((x) => x.key === key);
+      if (m) m.churns += 1;
+    }
+    return months;
+  }, [clients, today]);
+
+  const totalChurns = data.reduce((s, m) => s + m.churns, 0);
+
+  if (totalChurns === 0) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-2xl font-bold text-emerald-600 mb-1">0 churns</p>
+        <p className="text-sm text-muted">Nenhum cliente churnou nos últimos 12 meses.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-muted">{totalChurns} churns nos últimos 12 meses</p>
+      <div className="h-48 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e7e9f2" />
+            <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#9aa1b4' }} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#9aa1b4' }} allowDecimals={false} />
+            <Tooltip
+              formatter={(v: number) => [`${v} cliente${v !== 1 ? 's' : ''}`, 'Churns']}
+              contentStyle={{ borderRadius: '8px', border: '1px solid #e7e9f2', background: '#ffffff' }}
+            />
+            <Bar dataKey="churns" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
 }
 
 // ─── component ───────────────────────────────────────────────────────────────
@@ -261,7 +318,7 @@ export function OpsLtvPanel({ clients }: OpsLtvPanelProps) {
 
         <div className="p-4">
           {activeTab === 'churn' ? (
-            <p className="text-sm text-muted text-center py-8">Em breve.</p>
+            <ChurnChart clients={clients} today={today} />
           ) : !hasEnoughData ? (
             <p className="text-sm text-muted text-center py-8">
               São necessários pelo menos 3 clientes com data de início de contrato para exibir a tabela de retenção.

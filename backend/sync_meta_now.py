@@ -18,6 +18,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from app.db import base as _base  # noqa: F401
 from app.core.config import settings
 from app.db.session import AsyncSessionLocal
+from app.models.campaign_snapshot import CampaignSnapshot
 from app.models.client import Client
 from app.models.metric_snapshot import MetricSnapshot
 
@@ -85,6 +86,41 @@ async def fetch_week(token: str, account_id: str, since: str, until: str) -> dic
     }
 
 
+async def fetch_campaigns(token: str, account_id: str, since: str, until: str) -> list[dict]:
+    """Busca breakdown por campanha (level=campaign) da mesma janela de tempo."""
+    url = f"{GRAPH}/act_{account_id}/insights"
+    params = {
+        "fields": "campaign_id,campaign_name,spend,impressions,clicks,cpc,ctr,actions",
+        "level": "campaign",
+        "time_range": json.dumps({"since": since, "until": until}),
+        "access_token": token,
+        "limit": 100,
+    }
+    async with httpx.AsyncClient(timeout=40) as cli:
+        r = await cli.get(url, params=params)
+        if r.status_code != 200:
+            return []
+        d = r.json()
+    campaigns = []
+    for row in d.get("data", []):
+        leads = sum(
+            int(float(a.get("value", 0)))
+            for a in row.get("actions", [])
+            if a.get("action_type") in LEAD_ACTIONS
+        )
+        campaigns.append({
+            "campaign_id": row.get("campaign_id", ""),
+            "campaign_name": row.get("campaign_name", "Campanha"),
+            "spend": float(row.get("spend", 0) or 0),
+            "impressions": int(row.get("impressions", 0) or 0),
+            "clicks": int(row.get("clicks", 0) or 0),
+            "cpc": float(row.get("cpc", 0) or 0),
+            "ctr": float(row.get("ctr", 0) or 0),
+            "conversions": leads,
+        })
+    return campaigns
+
+
 async def main() -> None:
     # Check if META_ACCESS_TOKEN looks like a user token (they expire in ~60 days).
     # Long-lived tokens start with "EAA" and are typically 150+ chars.
@@ -137,6 +173,31 @@ async def main() -> None:
                 synced += 1
                 logger.info("%s [%s]: R$%.2f | %s imp | %s cliques | %s leads",
                             c.name, monday, ins["spend"], ins["impressions"], ins["clicks"], ins["leads"])
+
+                # Sync campaign-level breakdown
+                try:
+                    campaigns = await fetch_campaigns(token, c.meta_account_id, monday.isoformat(), until.isoformat())
+                    for camp in campaigns:
+                        camp_stmt = pg_insert(CampaignSnapshot).values(
+                            client_id=c.id, week_start=monday, platform="meta",
+                            campaign_id=camp["campaign_id"], campaign_name=camp["campaign_name"],
+                            impressions=camp["impressions"], clicks=camp["clicks"],
+                            ctr=camp["ctr"], cpc=camp["cpc"], spend=camp["spend"],
+                            conversions=camp["conversions"],
+                        ).on_conflict_do_update(
+                            index_elements=["client_id", "week_start", "platform", "campaign_id"],
+                            set_={
+                                "campaign_name": camp["campaign_name"],
+                                "impressions": camp["impressions"], "clicks": camp["clicks"],
+                                "ctr": camp["ctr"], "cpc": camp["cpc"], "spend": camp["spend"],
+                                "conversions": camp["conversions"],
+                            },
+                        )
+                        await db.execute(camp_stmt)
+                    if campaigns:
+                        logger.info("  %s campanhas sincronizadas para %s", len(campaigns), c.name)
+                except Exception as exc:
+                    logger.warning("Erro ao sincronizar campanhas de %s: %s", c.name, exc)
         await db.commit()
         logger.info("Vinculados=%s | Snapshots sincronizados=%s | semanas=%s", linked, synced, len(weeks))
 
