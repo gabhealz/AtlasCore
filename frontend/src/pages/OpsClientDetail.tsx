@@ -1,6 +1,24 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Settings, PlusCircle, Pencil } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Settings, PlusCircle, Pencil, Calendar } from 'lucide-react';
+
+function generateWeekOptions(count: number): Array<{ label: string; value: string }> {
+  const today = new Date();
+  const daysToMonday = today.getDay() === 0 ? 6 : today.getDay() - 1;
+  const currentMonday = new Date(today);
+  currentMonday.setDate(today.getDate() - daysToMonday);
+  currentMonday.setHours(0, 0, 0, 0);
+  const options: Array<{ label: string; value: string }> = [];
+  for (let i = 0; i < count; i++) {
+    const d = new Date(currentMonday);
+    d.setDate(currentMonday.getDate() - i * 7);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    options.push({ label: `Seg ${dd}/${mm}/${yyyy}`, value: `${yyyy}-${mm}-${dd}` });
+  }
+  return options;
+}
 import { fetchClientDashboard } from '../lib/opsApi';
 import type { ClientDashboard, CampaignSnapshot } from '../types/ops';
 import { formatCurrency, formatNumber, formatPct } from '../lib/formatters';
@@ -30,12 +48,15 @@ export function OpsClientDetail() {
   const [showCampaigns, setShowCampaigns] = useState(false);
   const [showManual, setShowManual] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [selectedWeek, setSelectedWeek] = useState<string>('');
 
-  const load = useCallback(() => {
+  const weekOptions = useMemo(() => generateWeekOptions(16), []);
+
+  const load = useCallback((week?: string) => {
     if (!clientId) return;
     setLoading(true);
     setErrorMsg(null);
-    fetchClientDashboard(parseInt(clientId, 10))
+    fetchClientDashboard(parseInt(clientId, 10), week || undefined)
       .then(setData)
       .catch((err: { response?: { status?: number } }) => {
         const status = err?.response?.status;
@@ -47,8 +68,8 @@ export function OpsClientDetail() {
   }, [clientId]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    load(selectedWeek || undefined);
+  }, [load, selectedWeek]);
 
   if (loading) {
     return (
@@ -152,14 +173,39 @@ export function OpsClientDetail() {
         </div>
       </div>
 
+      {/* Week selector */}
+      <div className="flex items-center gap-3">
+        <Calendar className="w-4 h-4 text-subtle" />
+        <span className="text-sm font-medium text-subtle">Semana:</span>
+        <select
+          value={selectedWeek}
+          onChange={(e) => setSelectedWeek(e.target.value)}
+          className="border border-line rounded-lg bg-card text-ink text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand"
+        >
+          <option value="">Semana atual</option>
+          {weekOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+        {selectedWeek && (
+          <button
+            onClick={() => setSelectedWeek('')}
+            className="text-xs text-muted hover:text-ink underline"
+          >
+            Voltar para semana atual
+          </button>
+        )}
+      </div>
+
       {showEdit && (
         <EditClientModal client={client} onClose={() => setShowEdit(false)} onSaved={load} />
       )}
       {showManual && clientId && (
         <ManualMetricsModal
           clientId={parseInt(clientId, 10)}
+          weekStart={selectedWeek || undefined}
           onClose={() => setShowManual(false)}
-          onSaved={load}
+          onSaved={() => load(selectedWeek || undefined)}
         />
       )}
 

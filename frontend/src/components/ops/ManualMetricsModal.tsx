@@ -4,6 +4,7 @@ import { upsertSnapshot, type ManualSnapshotInput } from '../../lib/opsApi';
 
 interface Props {
   clientId: number;
+  weekStart?: string;
   onClose: () => void;
   onSaved: () => void;
 }
@@ -15,8 +16,8 @@ function currentMonday(): string {
   return d.toISOString().slice(0, 10);
 }
 
-export function ManualMetricsModal({ clientId, onClose, onSaved }: Props) {
-  const [form, setForm] = useState<ManualSnapshotInput>({ week_start: currentMonday() });
+export function ManualMetricsModal({ clientId, weekStart, onClose, onSaved }: Props) {
+  const [form, setForm] = useState<ManualSnapshotInput>({ week_start: weekStart || currentMonday() });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

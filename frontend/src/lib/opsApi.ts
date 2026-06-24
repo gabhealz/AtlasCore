@@ -65,9 +65,9 @@ export async function upsertSnapshot(clientId: number, data: ManualSnapshotInput
   });
 }
 
-export async function fetchClientDashboard(clientId: number): Promise<ClientDashboard> {
-  // P09 fix: endpoint now returns the object directly (no envelope)
-  const response = await api.get<ClientDashboard>(`/ops/clients/${clientId}/dashboard`);
+export async function fetchClientDashboard(clientId: number, weekStart?: string): Promise<ClientDashboard> {
+  const params = weekStart ? { week_start: weekStart } : undefined;
+  const response = await api.get<ClientDashboard>(`/ops/clients/${clientId}/dashboard`, { params });
   return response.data;
 }
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, DollarSign, Calendar, Activity, ChevronRight, TrendingUp, Plus } from 'lucide-react';
+import { Search, DollarSign, Calendar, Activity, ChevronRight, TrendingUp, Plus, Download } from 'lucide-react';
 import { fetchOpsDashboard } from '../lib/opsApi';
 import type { ClientDashboard } from '../types/ops';
 import { formatCurrency, formatNumber } from '../lib/formatters';
@@ -32,6 +32,31 @@ function generateWeekOptions(count: number): Array<{ label: string; value: strin
     options.push({ label, value });
   }
   return options;
+}
+
+function exportToCSV(rows: ClientDashboard[], weekLabel: string) {
+  const headers = ['Cliente', 'Plano', 'Status', 'Saúde', 'Tempo (meses)', 'Fee Mensal', 'Faturamento', 'Ad Spend', 'ROI', 'Consultas', 'LTV'];
+  const csvRows = rows.map(r => [
+    r.client.name,
+    r.client.plan_name || '',
+    r.client.is_draft ? 'Rascunho' : r.client.is_active ? 'Ativo' : 'Suspenso',
+    r.health_status,
+    r.client.tenure_months ?? '',
+    r.client.monthly_fee ?? '',
+    r.current_week?.revenue ?? '',
+    r.current_week?.ad_spend ?? '',
+    r.roi != null ? r.roi.toFixed(2) : '',
+    r.current_week?.bookings ?? '',
+    (r.client.tenure_months && r.client.monthly_fee) ? (r.client.tenure_months * r.client.monthly_fee).toFixed(2) : '',
+  ]);
+  const csv = [headers, ...csvRows].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `atlas-ops-${weekLabel || 'semana-atual'}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export function OpsDashboard() {
@@ -216,6 +241,12 @@ export function OpsDashboard() {
               className="block w-full pl-10 pr-3 py-2 border border-line rounded-lg leading-5 bg-card text-ink placeholder-subtle focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand sm:text-sm transition-shadow"
             />
           </div>
+          <button
+            onClick={() => exportToCSV(filteredData, selectedWeek)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-line bg-card text-muted hover:bg-elevated whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" /> Exportar CSV
+          </button>
           <button
             onClick={() => setShowNewClient(true)}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-brand text-onbrand hover:bg-brand-soft whitespace-nowrap"
