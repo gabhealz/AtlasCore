@@ -31,8 +31,6 @@ import { EditClientModal } from '../components/ops/EditClientModal';
 import { IbgeMarketPanel } from '../components/ops/IbgeMarketPanel';
 import { benchmarks, healthClasses, healthDot, type Diag } from '../lib/benchmarks';
 import {
-  AreaChart,
-  Area,
   Line,
   LineChart,
   XAxis,
