@@ -84,7 +84,7 @@ export function OpsClientDetail() {
       <div className="py-12 text-center">
         <p className="text-rose-600 mb-4">{errorMsg}</p>
         <button
-          onClick={load}
+          onClick={() => load(selectedWeek || undefined)}
           className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium bg-brand text-onbrand hover:bg-brand-soft transition-colors"
         >
           Tentar novamente
@@ -198,7 +198,7 @@ export function OpsClientDetail() {
       </div>
 
       {showEdit && (
-        <EditClientModal client={client} onClose={() => setShowEdit(false)} onSaved={load} />
+        <EditClientModal client={client} onClose={() => setShowEdit(false)} onSaved={() => load(selectedWeek || undefined)} />
       )}
       {showManual && clientId && (
         <ManualMetricsModal
