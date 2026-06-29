@@ -799,6 +799,21 @@ async def activate_client_from_onboarding(
     )
     client = existing.scalars().first()
 
+    # Campos opcionais (contrato + IDs de integracao) aplicados apenas quando
+    # vierem preenchidos, para nunca apagar dados ja existentes.
+    optional_fields = (
+        "plan_name",
+        "external_code",
+        "document",
+        "contract_start_date",
+        "contract_end_date",
+        "meta_account_id",
+        "google_account_id",
+        "ga4_property_id",
+        "ga4_measurement_id",
+        "tintim_id",
+    )
+
     if client is not None:
         # Completa o rascunho criado automaticamente.
         client.email = activation_data.email
@@ -822,6 +837,11 @@ async def activate_client_from_onboarding(
             is_draft=False,
         )
         db.add(client)
+
+    for field_name in optional_fields:
+        value = getattr(activation_data, field_name)
+        if value is not None and value != "":
+            setattr(client, field_name, value)
 
     onboarding.status = "COMPLETED"
     await db.commit()

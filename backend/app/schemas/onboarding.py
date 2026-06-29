@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
@@ -64,6 +64,20 @@ class OnboardingActivateClient(BaseModel):
     city: str
     state: str
     monthly_fee: float
+    # Contrato (opcional) — alimenta LTV/tempo de casa no Ops.
+    plan_name: str | None = None
+    external_code: str | None = None
+    document: str | None = None
+    contract_start_date: date | None = None
+    contract_end_date: date | None = None
+    # IDs de integracao por cliente (opcionais) — conectam o cliente aos tokens
+    # de plataforma ja configurados globalmente; os crons de sync passam a puxar
+    # este cliente automaticamente assim que os IDs existem.
+    meta_account_id: str | None = None
+    google_account_id: str | None = None
+    ga4_property_id: str | None = None
+    ga4_measurement_id: str | None = None
+    tintim_id: str | None = None
 
 
 class OnboardingDetailResponse(OnboardingBase):

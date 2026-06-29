@@ -18,7 +18,19 @@ export function ClientConversionForm({ onboardingId }: Props) {
     phone: '',
     city: '',
     state: '',
-    monthly_fee: ''
+    monthly_fee: '',
+    // Contrato (opcional)
+    plan_name: '',
+    external_code: '',
+    document: '',
+    contract_start_date: '',
+    contract_end_date: '',
+    // IDs de integracao (opcional)
+    meta_account_id: '',
+    google_account_id: '',
+    ga4_property_id: '',
+    ga4_measurement_id: '',
+    tintim_id: ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,10 +46,26 @@ export function ClientConversionForm({ onboardingId }: Props) {
     setError('');
 
     try {
-      const response = await api.post(`/onboardings/${onboardingId}/activate_client`, {
-        ...formData,
-        monthly_fee: parseFloat(formData.monthly_fee.replace(',', '.')) || 0
-      });
+      // So envia campos opcionais quando preenchidos (datas vazias quebrariam
+      // a validacao de date no backend).
+      const payload: Record<string, unknown> = {
+        email: formData.email,
+        phone: formData.phone,
+        city: formData.city,
+        state: formData.state,
+        monthly_fee: parseFloat(formData.monthly_fee.replace(',', '.')) || 0,
+      };
+      const optionalKeys = [
+        'plan_name', 'external_code', 'document',
+        'contract_start_date', 'contract_end_date',
+        'meta_account_id', 'google_account_id', 'ga4_property_id',
+        'ga4_measurement_id', 'tintim_id',
+      ] as const;
+      for (const key of optionalKeys) {
+        const value = formData[key].trim();
+        if (value) payload[key] = value;
+      }
+      const response = await api.post(`/onboardings/${onboardingId}/activate_client`, payload);
       
       const clientId = response.data.client_id;
       // Navigate to the ops dashboard detail page for this client
@@ -147,6 +175,45 @@ export function ClientConversionForm({ onboardingId }: Props) {
             />
           </div>
         </div>
+
+        <details className="rounded-lg border border-line bg-elevated/40 p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-ink">
+            Integracoes & contrato (opcional) — deixe o cliente 100% pronto no Ops
+          </summary>
+          <p className="mt-2 text-xs text-muted">
+            Preencha os IDs por cliente para os syncs (Meta, Google Ads, GA4,
+            Tintim) puxarem os dados automaticamente. Os tokens das plataformas
+            ja sao globais. GA4 ainda exige adicionar o e-mail do robo como
+            Visualizador na propriedade.
+          </p>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {([
+              ['plan_name', 'Plano / contrato', 'AQF, Pareto...'],
+              ['external_code', 'Codigo do contrato', '2026/00046'],
+              ['document', 'CPF/CNPJ', ''],
+              ['contract_start_date', 'Inicio do contrato', 'date'],
+              ['contract_end_date', 'Fim do contrato', 'date'],
+              ['meta_account_id', 'Meta Ad Account ID', 'act_123...'],
+              ['google_account_id', 'Google Ads Customer ID', '123-456-7890'],
+              ['ga4_property_id', 'GA4 Property ID (numerico)', '123456789'],
+              ['ga4_measurement_id', 'GA4 Measurement ID', 'G-XXXX'],
+              ['tintim_id', 'Tintim ID', ''],
+            ] as const).map(([name, label, hint]) => (
+              <div key={name}>
+                <label htmlFor={name} className="block text-sm font-medium text-ink">{label}</label>
+                <input
+                  type={hint === 'date' ? 'date' : 'text'}
+                  name={name}
+                  id={name}
+                  value={formData[name]}
+                  onChange={handleChange}
+                  placeholder={hint === 'date' ? '' : hint}
+                  className="mt-1 block w-full rounded-md border-line shadow-sm focus:border-brand focus:ring-brand sm:text-sm p-2.5 border"
+                />
+              </div>
+            ))}
+          </div>
+        </details>
 
         <div className="pt-4 border-t border-line">
           <button
