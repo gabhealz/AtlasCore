@@ -1,3 +1,4 @@
+from .commercial_intel import build_commercial_intel_system_prompt
 from .copywriter import build_copywriter_system_prompt
 from .html_developer import build_html_developer_system_prompt
 from .researcher import build_researcher_system_prompt
@@ -6,6 +7,7 @@ from .script_writer import build_script_writer_system_prompt
 from .strategist import build_strategist_system_prompt
 
 __all__ = [
+    "build_commercial_intel_system_prompt",
     "build_copywriter_system_prompt",
     "build_html_developer_system_prompt",
     "build_researcher_system_prompt",

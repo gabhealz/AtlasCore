@@ -13,6 +13,15 @@ from app.agents.orchestrator import (
 )
 from app.agents.runner import AgentRunner
 from app.api import deps
+from app.schemas.access_checklist import (
+    ACCESS_CHECKLIST_ITEMS,
+    AccessChecklistEnvelope,
+    AccessChecklistResponse,
+    AccessChecklistSchemaEnvelope,
+    AccessChecklistUpdate,
+    dump_checklist_state,
+    load_checklist_state,
+)
 from app.schemas.intake import (
     INTAKE_GROUPS,
     IntakeEnvelope,
@@ -61,6 +70,7 @@ from app.services.pipeline_service import PipelineService
 router = APIRouter()
 
 TEXT_DELIVERABLE_ORDER = [
+    "commercial_intel",
     "research_report",
 ]
 LANDING_PAGE_HTML_KIND = "landing_page_html"
@@ -343,6 +353,7 @@ def _serialize_intake(onboarding: Onboarding) -> IntakeResponse:
         status=onboarding.status,
         fields=load_intake_fields(onboarding.intake_data),
         extracted=is_extracted(onboarding.intake_data),
+        saved=bool(onboarding.intake_data),
     )
 
 
@@ -430,6 +441,57 @@ async def update_onboarding_intake(
     await db.commit()
     await db.refresh(onboarding)
     return {"data": _serialize_intake(onboarding)}
+
+
+@router.get("/access-checklist/schema", response_model=AccessChecklistSchemaEnvelope)
+async def get_access_checklist_schema(
+    current_user: User = Depends(allow_read),
+):
+    """Catalogo de itens do checklist de Contas & Acessos (para o frontend)."""
+    del current_user
+    return {"data": ACCESS_CHECKLIST_ITEMS}
+
+
+@router.get(
+    "/{onboarding_id}/access-checklist",
+    response_model=AccessChecklistEnvelope,
+)
+async def get_onboarding_access_checklist(
+    onboarding_id: int,
+    current_user: User = Depends(allow_read),
+    db: AsyncSession = Depends(deps.get_db),
+):
+    onboarding = await _get_onboarding_or_404(db=db, onboarding_id=onboarding_id)
+    return {
+        "data": AccessChecklistResponse(
+            onboarding_id=onboarding.id,
+            state=load_checklist_state(onboarding.access_checklist),
+        )
+    }
+
+
+@router.put(
+    "/{onboarding_id}/access-checklist",
+    response_model=AccessChecklistEnvelope,
+)
+async def update_onboarding_access_checklist(
+    onboarding_id: int,
+    checklist_in: AccessChecklistUpdate,
+    current_user: User = Depends(allow_write),
+    db: AsyncSession = Depends(deps.get_db),
+):
+    onboarding = await _get_onboarding_or_404(
+        db=db, onboarding_id=onboarding_id, for_update=True
+    )
+    onboarding.access_checklist = dump_checklist_state(checklist_in.state)
+    await db.commit()
+    await db.refresh(onboarding)
+    return {
+        "data": AccessChecklistResponse(
+            onboarding_id=onboarding.id,
+            state=load_checklist_state(onboarding.access_checklist),
+        )
+    }
 
 
 @router.post(

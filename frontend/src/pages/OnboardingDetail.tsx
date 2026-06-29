@@ -22,6 +22,7 @@ import { api } from '../lib/api';
 import { ClientConversionForm } from '../components/onboarding/ClientConversionForm';
 import { MarkdownView } from '../components/MarkdownView';
 import IntakeForm from '../components/IntakeForm';
+import AccessChecklist from '../components/AccessChecklist';
 
 type UploadedAsset = {
   id: number;
@@ -200,6 +201,7 @@ const ONBOARDING_TABS: Array<{
 ];
 
 const PIPELINE_STAGES: Array<{ key: string; label: string }> = [
+  { key: 'commercial_intel', label: 'Comercial' },
   { key: 'researcher', label: 'Pesquisa' },
   { key: 'strategist', label: 'Estrategia' },
   { key: 'copywriter', label: 'Copy' },
@@ -398,6 +400,8 @@ function formatPipelineStepLabel(stepName: string | null | undefined) {
   const knownLabels: Record<string, string> = {
     pipeline_start: 'inicio do pipeline',
     llm_runner_probe: 'teste inicial do runner',
+    commercial_intel: 'analista comercial',
+    commercial_intel_review: 'revisao CFM da inteligencia comercial',
     researcher: 'pesquisador',
     researcher_review: 'revisao CFM do pesquisador',
     strategist: 'estrategista',
@@ -541,6 +545,29 @@ export default function OnboardingDetail() {
   );
   const [pipelineErrorMessage, setPipelineErrorMessage] = useState('');
   const [pipelineSuccessMessage, setPipelineSuccessMessage] = useState('');
+  const [intakeSaved, setIntakeSaved] = useState(false);
+  const refreshIntakeSaved = useRef<() => void>(() => undefined);
+  useEffect(() => {
+    if (!hasValidOnboardingId) {
+      return;
+    }
+    let cancelled = false;
+    const fetchSaved = () => {
+      api
+        .get(`/onboardings/${onboardingId}/intake`)
+        .then((response) => {
+          if (!cancelled) {
+            setIntakeSaved(Boolean(response.data.data.saved));
+          }
+        })
+        .catch(() => undefined);
+    };
+    refreshIntakeSaved.current = fetchSaved;
+    fetchSaved();
+    return () => {
+      cancelled = true;
+    };
+  }, [hasValidOnboardingId, onboardingId]);
   const [isStartingPipeline, setIsStartingPipeline] = useState(false);
   const [isLoadingPipelineStatus, setIsLoadingPipelineStatus] = useState(
     hasValidOnboardingId && onboardingStatusFromState === null,
@@ -1338,7 +1365,7 @@ export default function OnboardingDetail() {
   // Apenas o documento base e obrigatorio para iniciar a esteira. Imagens e
   // CTAs sao recomendados (o agente HTML os usa quando existem) mas nao
   // bloqueiam a geracao.
-  const pipelineInputsReady = hasBaseDocument;
+  const pipelineInputsReady = hasBaseDocument && intakeSaved;
   const pipelineButtonLabel = isStartingPipeline
     ? 'Iniciando pipeline...'
     : !hasValidOnboardingId || resolvedPipelineStatusLoading
@@ -1374,6 +1401,12 @@ export default function OnboardingDetail() {
       label: 'Documento base ou transcricao',
       description: 'Briefing, entrevista, pesquisa ou materiais do cliente.',
       done: hasBaseDocument,
+      optional: false,
+    },
+    {
+      label: 'Formulario de lacunas (AQF)',
+      description: 'Extraia dos documentos e salve os dados estruturados do cliente.',
+      done: intakeSaved,
       optional: false,
     },
     {
@@ -2188,6 +2221,7 @@ export default function OnboardingDetail() {
           <IntakeForm
             onboardingId={onboardingId}
             onChanged={() => {
+              refreshIntakeSaved.current();
               api
                 .get(`/onboardings/${onboardingId}`)
                 .then((response) => {
@@ -2196,6 +2230,10 @@ export default function OnboardingDetail() {
                 .catch(() => undefined);
             }}
           />
+        ) : null}
+
+        {hasValidOnboardingId ? (
+          <AccessChecklist onboardingId={onboardingId} />
         ) : null}
 
         {LANDING_PAGE_FEATURES_ENABLED ? (

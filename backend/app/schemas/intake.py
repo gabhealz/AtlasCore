@@ -200,6 +200,9 @@ class IntakeResponse(BaseModel):
     status: str
     fields: dict[str, str | None]
     extracted: bool
+    # True quando ja existe intake salvo (extraido ou preenchido) — usado pelo
+    # frontend para liberar o botao de iniciar a esteira.
+    saved: bool = False
 
     model_config = ConfigDict(from_attributes=False)
 

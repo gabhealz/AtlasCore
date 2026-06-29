@@ -18,4 +18,8 @@ class Onboarding(Base):
     # com {chave_do_campo: valor|null}. Preenchido pelo extrator e validado pelo
     # operador antes de liberar a esteira de IA.
     intake_data = Column(Text, nullable=True)
+    # Estado do checklist operacional de Contas & Acessos (seção 2): JSON
+    # serializado {chave_do_item: bool}. Apoio operacional do time, nao bloqueia
+    # a esteira de IA.
+    access_checklist = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

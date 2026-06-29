@@ -12,6 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.prompts import (
+    build_commercial_intel_system_prompt,
     build_copywriter_system_prompt,
     build_html_developer_system_prompt,
     build_researcher_system_prompt,
@@ -339,6 +340,12 @@ class ResearcherQualityError(ValueError):
 LANDING_PAGE_HTML_KIND = "landing_page_html"
 
 MAKER_STEPS: tuple[MakerStep, ...] = (
+    MakerStep(
+        step_name="commercial_intel",
+        agent_name="commercial_intel",
+        document_kind="commercial_intel",
+        prompt_builder=build_commercial_intel_system_prompt,
+    ),
     MakerStep(
         step_name="researcher",
         agent_name="researcher",
