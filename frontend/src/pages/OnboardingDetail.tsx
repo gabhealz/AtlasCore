@@ -21,6 +21,7 @@ import {
 import { api } from '../lib/api';
 import { ClientConversionForm } from '../components/onboarding/ClientConversionForm';
 import { MarkdownView } from '../components/MarkdownView';
+import IntakeForm from '../components/IntakeForm';
 
 type UploadedAsset = {
   id: number;
@@ -2182,6 +2183,20 @@ export default function OnboardingDetail() {
             </div>
           </form>
         </div>
+
+        {hasValidOnboardingId ? (
+          <IntakeForm
+            onboardingId={onboardingId}
+            onChanged={() => {
+              api
+                .get(`/onboardings/${onboardingId}`)
+                .then((response) => {
+                  setPipelineStatus(response.data.data.status);
+                })
+                .catch(() => undefined);
+            }}
+          />
+        ) : null}
 
         {LANDING_PAGE_FEATURES_ENABLED ? (
           <>
