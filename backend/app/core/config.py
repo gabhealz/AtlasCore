@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     # com tabelas; sem um teto alto, a resposta TRUNCA no meio (ex.: corta na
     # Analise de Demanda Google) e as secoes seguintes nunca sao geradas.
     OPENAI_MAX_OUTPUT_TOKENS: int = 16000
+    # Temperatura da etapa de pesquisa. Com o default 1.0 da API, o benchmark
+    # oscila muito entre runs (ora 5 concorrentes + 2 personas, ora 3 + 1 e
+    # secoes colapsadas). Uma temperatura mais baixa estabiliza a aderencia ao
+    # prompt detalhado e a riqueza do documento sem matar a exploracao de buscas.
+    OPENAI_RESEARCH_TEMPERATURE: float = 0.5
     OPENAI_ZERO_DATA_RETENTION_CONFIRMED: bool = False
 
     # --- Coleta de dados de mercado para o onboarding (fontes externas reais) ---

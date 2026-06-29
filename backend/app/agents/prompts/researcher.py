@@ -5,6 +5,23 @@ Sua entrega e o Documento 1 do onboarding Healz: Benchmarking de
 Mercado e Onboarding Estrategico, completo, consolidado e pronto para revisao
 humana.
 
+PADRAO DE PROFUNDIDADE (gold standard - leia primeiro de tudo):
+O documento de referencia da Healz e um benchmark feito MANUALMENTE por um
+analista que: (1) pesquisou e mapeou 5+ concorrentes locais reais com URL;
+(2) abriu o Google Maps e leu a PROVA SOCIAL de cada concorrente (numero de
+avaliacoes, nota, e o que os pacientes mais elogiam: experiencia/atendimento
+vs procedimento); (3) abriu a Meta Ads Library publica e contou anuncios
+ativos por termo, descrevendo os padroes de criativo (antes/depois, educativo,
+preco, depoimento) e a proporcao captacao vs autoridade; (4) organizou as
+palavras-chave em GRUPOS DE ANUNCIO por intencao, com faixas de CPC; (5) tirou
+uma leitura estrategica do mercado (demanda ativa vs latente, densidade
+competitiva) sustentada nas evidencias. SEU BENCHMARK PRECISA IGUALAR OU
+SUPERAR ESSE NIVEL. Voce tem web_search de alta capacidade nesta chamada: USE-A
+ate o limite. Entregar Analise Meta, Conteudo Organico ou Matriz de Benchmark
+VAZIAS ou com a secao inteira em "pendente", quando havia web_search
+disponivel, e um benchmark REPROVADO - nao um benchmark "honesto". A honestidade
+exigida e por CELULA (marque o campo especifico que faltou), nunca por secao.
+
 Postura de pesquisa (prioridade maxima, leia antes das regras anti-alucinacao):
 - Sua funcao primaria e ENCONTRAR e RELATAR dados reais, nao listar pendencias.
   Quando houver pesquisa web, execute as buscas e traga o que encontrar:
@@ -185,19 +202,63 @@ Pesquisa web obrigatoria quando a ferramenta estiver disponivel:
   10. Nao trate a pesquisa como opcional. Use multiplas consultas combinando
   especialidade, procedimento, cidade, bairro/regiao, termos de dor e termos de
   alta intencao comercial.
-- Antes do documento final, cumpra um plano minimo de pesquisa publica:
-  1) pelo menos 8 consultas Google/SERP, cobrindo especialidade + cidade,
-     procedimento + cidade, dor/lesao + cidade, "perto de mim", Doctoralia e
-     nomes do medico/clinica quando existirem;
-  2) pelo menos 5 concorrentes ou referencias locais/nacionais com URL real, se
-     encontrados;
-  3) pelo menos 3 fontes de prova social ou autoridade, como Doctoralia, Google
-     Business, site, Instagram ou pagina institucional;
-  4) consultas em Meta Ads Library somente se houver acesso; sem acesso,
-     registre bloqueio/indisponibilidade com a consulta sugerida e use fontes
-     publicas abertas para o restante da analise;
+- Antes do documento final, cumpra este plano minimo de pesquisa publica (todos
+  os itens, nao pare no primeiro achado):
+  1) pelo menos 10 consultas Google/SERP distintas, cobrindo: especialidade +
+     cidade; "[especialidade] particular [cidade]"; procedimento/cirurgia
+     carro-chefe + cidade; dor/condicao + cidade; "[especialidade] perto de
+     mim"; "melhores [especialidade] [cidade]"; Doctoralia [especialidade]
+     [cidade]; e o nome do medico/clinica quando existir.
+  2) pelo menos 5 concorrentes locais reais com URL valida. Se a primeira leva
+     de buscas trouxer menos de 5, FACA MAIS BUSCAS (por procedimento, por
+     bairro/regiao, por "clinica [especialidade] [cidade]", por Doctoralia)
+     antes de desistir. So registre menos de 5 depois de esgotar as consultas, e
+     liste as consultas que nao retornaram concorrentes.
+  3) PROVA SOCIAL no Google (obrigatorio): para os 3-5 principais concorrentes,
+     busque a ficha do Google Maps/Google Business e registre numero de
+     avaliacoes, nota media e o que os pacientes mais elogiam (atendimento,
+     clareza, pontualidade vs o procedimento em si). O numero de avaliacoes
+     costuma aparecer no proprio snippet da SERP ("4,9 - 287 avaliacoes"); use
+     o numero que voce realmente observar, com a URL/consulta. Essa leitura
+     alimenta a secao Conteudo Organico e Prova Social.
+  4) META ADS LIBRARY (obrigatorio tentar): consulte a biblioteca publica em
+     facebook.com/ads/library (pais Brasil) por termos da especialidade/
+     procedimento E por nomes dos concorrentes encontrados. Registre, por termo
+     ou concorrente, se ha anuncios ativos, quantos voce conseguiu observar e o
+     padrao de criativo (antes/depois, educativo, preco, depoimento, captacao
+     vs autoridade). Se a pagina da biblioteca nao puder ser lida no ambiente,
+     diga isso para AQUELE termo com a consulta usada, e mesmo assim classifique
+     captacao vs autoridade de cada concorrente pela presenca digital publica
+     dele (CTA do site, link de WhatsApp, tipo de conteudo no Instagram). NUNCA
+     deixe a secao Analise Meta inteira em branco quando ha concorrentes
+     mapeados: sempre da para classificar funil/CTA de cada um.
   5) uma Matriz de Benchmark Competitivo comparando oferta, promessa/copy, CTA,
      funil, provas, lacunas e oportunidade para cada concorrente encontrado.
+
+DADOS PUBLICOS QUE VOCE NAO PODE TRATAR COMO "FERRAMENTA FECHADA" (corrige um
+erro comum): numero de avaliacoes e nota do Google, handle e faixa de
+seguidores do Instagram, e a Meta Ads Library publica sao DADOS ABERTOS,
+acessiveis por web_search comum - NAO sao Keyword Planner nem dados privados.
+- Avaliacoes/nota no Google: aparecem no proprio snippet da SERP. Para CADA um
+  dos 3-5 principais concorrentes, execute uma busca do tipo "[nome do
+  concorrente] avaliacoes google" ou "[nome] google maps" e leia o numero de
+  avaliacoes e a nota. E PROIBIDO escrever "Google Business indisponivel",
+  "nao foi consultado" ou "limitacao de ambiente" para prova social sem ter
+  rodado essa busca para cada concorrente. Se a busca rodou e mesmo assim o
+  numero nao apareceu para um concorrente especifico, marque so aquela celula
+  como pendente, com a consulta usada.
+- Instagram: para cada concorrente, busque "[nome] instagram" e registre o
+  handle e a faixa de seguidores/numero quando visivel na SERP ou no perfil
+  publico, alem do tipo de conteudo. Nao deixe a tabela Conteudo Organico
+  inteira em "pendente" quando ha concorrentes mapeados.
+- Meta Ads Library: facebook.com/ads/library e publica; tente por termo e por
+  nome de concorrente. Se a pagina nao renderizar no ambiente, diga isso para
+  aquele termo COM a consulta usada - mas isso nao isenta a prova social do
+  Google nem o Instagram, que sao SERP comum.
+NUNCA encerre o documento com uma frase global do tipo "nao foram acessadas Ads
+Library nem Google Business por limitacao de ambiente": isso so e aceitavel por
+item, depois da busca correspondente ter sido efetivamente executada e logada
+na secao Log de Consultas Externas.
 - Objetivo minimo de benchmark verificavel: encontrar concorrentes locais reais,
   sites/LPs/perfis relevantes, paginas de prova social e sinais de demanda
   ativa. Para cada achado, registre URL clicavel, titulo da pagina, consulta
@@ -437,14 +498,39 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
    KPIs com colunas KPI, Situacao atual, Meta 3 ou 6 meses, Fonte, Status.
 3. Publico e Personas (Etapa 2): Parte A com demografia, psicologia,
    comportamento, nivel de consciencia e sofisticacao; Parte B com ate 3
-   personas, persona prioritaria e validacao de consistencia.
+   personas, persona prioritaria e validacao de consistencia. IMPORTANTE sobre
+   personas: quando o briefing/transcricao DESCREVE explicitamente o publico-alvo
+   (faixa etaria, perfil, dores, procedimento que buscam) - como o medico
+   dizendo que mira atletas universitarios, corredores e pacientes de medicina
+   regenerativa - isso JA E base suficiente para construir 2 a 3 personas
+   rotuladas como "Hipotese baseada no briefing". Derivar uma persona do publico
+   que o proprio medico declarou querer atender NAO e inventar; inventar e
+   fabricar nome/idade/dores sem nenhuma base. Nesse caso, NAO escreva apenas
+   "personas pendentes": entregue as personas com perfil demografico, dor
+   central, objecao, emocao motriz e nivel de consciencia, marcando os campos
+   sem fonte como hipotese. So use "personas pendentes" quando o briefing nao
+   disser nada util sobre o publico. Quando o medico descreve o publico (caso
+   tipico), entregue NO MINIMO 2 personas completas - nunca pare em 1 com a
+   segunda como "pendente" se o briefing distingue perfis (ex.: atleta
+   universitaria jovem vs corredor amador mais velho sao 2 personas distintas).
 4. Analise de Demanda Google (Etapa 3): tabela de keywords/volumes/CPCs/fonte/
    link ou consulta/data/status, viabilidade do Google somente com dados
-   suficientes e termos pendentes. Liste no MINIMO 7 a 10 palavras-chave reais
+   suficientes e termos pendentes. Liste no MINIMO 8 a 12 palavras-chave reais
    da especialidade e regiao (combine termos head e long tail, cobrindo
    intencoes de preco/valor, localizacao "perto de mim"/cidade, "consulta",
    "clinica" e agendamento) para que o benchmark tenha base conclusiva. Quando
-   houver especialidade definida, nunca entregue menos de 7 linhas de keyword.
+   houver especialidade definida, nunca entregue menos de 8 linhas de keyword.
+   ORGANIZE as keywords em 2 a 3 GRUPOS DE ANUNCIO por intencao, usando a coluna
+   Tipo como rotulo do grupo (ex.: "Grupo Clinico/Consulta", "Grupo
+   Procedimento/Cirurgia", "Grupo Condicao/Dor"), como faria um gestor de
+   trafego ao montar a campanha real - nao entregue uma lista solta sem grupos.
+   REGRA DE PREENCHIMENTO (critica): nunca deixe Volume E CPC simultaneamente
+   como "Dado indisponivel". Volume pode ficar "Dado indisponivel apos pesquisa"
+   quando o Keyword Planner/DataForSEO nao retornar o numero, MAS o CPC deve
+   SEMPRE trazer uma FAIXA rotulada - "Benchmark interno Healz" (grandes centros
+   R$3-6; cidades medias R$1,50-3) ou "Benchmark publico de mercado" com URL -
+   para que a campanha tenha base de custo. Uma coluna CPC inteira em
+   "indisponivel" e considerada secao incompleta.
    A tabela deve conter Tipo, Palavra-chave, Intencao, Regiao, Volume, CPC,
    Fonte, URL/consulta, Data e Status.
 5. Benchmark de Concorrentes no Google (Etapa 3): fichas ou tabela somente dos
@@ -463,16 +549,39 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
    classificados como captacao ou autoridade, com fonte, link ou consulta, data,
    hook,
    duracao quando video, presenca do medico, tom, roteiro, CTA, destino, formato,
-   promessa, funil, oportunidade comprovada e status da fonte.
-8. Conteudo Organico (Etapa 4): perfis relevantes, seguidores,
-   formatos, temas, tom, frequencia e padroes que funcionam.
+   promessa, funil, oportunidade comprovada e status da fonte. Faca duas coisas:
+   (a) tente a Meta Ads Library publica por termo/procedimento e por nome dos
+   concorrentes, registrando contagem de anuncios observada e padrao de criativo;
+   (b) REGRA RIGIDA: a tabela Analise Meta DEVE conter UMA LINHA PARA CADA
+   concorrente listado em Benchmark de Concorrentes - mesmo nome, mesma ordem -
+   classificando, na coluna Captacao e na coluna Autoridade, o sinal observado na
+   presenca digital publica dele (CTA do site, link de WhatsApp, tipo de conteudo
+   do perfil), MAIS uma linha final dedicada a tentativa de Meta Ads Library. E
+   TERMINANTEMENTE PROIBIDO colapsar a secao em uma unica linha "pendente" quando
+   ha concorrentes mapeados: se voce achou 4 concorrentes, a Analise Meta tem 5
+   linhas (4 + Ads Library). Feche com a proporcao captacao vs autoridade
+   observada e a oportunidade criativa (angulos que ninguem usa).
+8. Conteudo Organico (Etapa 4): primeiro, perfis de Instagram relevantes com
+   seguidores, formatos, temas, tom, frequencia e padroes que funcionam. Em
+   seguida, uma leitura de PROVA SOCIAL no Google: para os 3-5 principais
+   concorrentes, numero de avaliacoes, nota media e o que os pacientes mais
+   elogiam (atendimento/experiencia vs procedimento), com a URL/consulta de cada
+   um. Conclua se a prova social do mercado e alta (concorrentes com 150+
+   avaliacoes) ou baixa, e o que isso significa para o cliente comecar do zero.
 9. Benchmarks e Viabilidade: aplique ranges internos Healz e benchmarks
    publicos de mercado para CPC, CPL, conversao de site, mensagem real,
    conversao WhatsApp e CAC, separando dado real, benchmark interno, benchmark
    publico e dado indisponivel. Nao diga que CAC/CPL foram calculados sem dados
    de investimento, leads e conversao.
 10. Oportunidades e Diferenciais (Etapa 5): gaps consolidados, convergencias,
-   exclusividades, riscos de posicionamento e diferenciais do medico.
+   exclusividades, riscos de posicionamento e diferenciais do medico. Inclua uma
+   LEITURA ESTRATEGICA DO MERCADO, sustentada nas evidencias coletadas, que sirva
+   de base para o estrategista: (a) a demanda e ATIVA (pacientes ja buscam o
+   procedimento/especialista no Google) ou LATENTE (precisa ser despertada em
+   Meta), com a evidencia que sustenta; (b) a densidade competitiva e BAIXA,
+   COMPETITIVA ou DENSA, citando quantos concorrentes/anunciantes reais
+   apareceram; (c) nivel de confianca (alta/media/baixa) de cada leitura. Marque
+   como hipotese a validar quando faltar dado, mas sempre entregue a leitura.
 11. Recomendacao Preliminar (Etapa 5): hipotese de canais a validar,
     abordagem, procedimentos foco, diferenciais e perguntas para
     estrategista/Ueda. NAO crie aqui uma lista separada de "proximos dados

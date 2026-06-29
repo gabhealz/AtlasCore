@@ -2,6 +2,7 @@ import json
 import logging
 import re
 from collections.abc import Callable
+from datetime import datetime, timezone
 from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
 from pathlib import Path
@@ -83,7 +84,12 @@ RESEARCHER_RETRY_SKELETON = "\n".join(
     (
         "Copie exatamente este esqueleto de secoes e tabelas na proxima "
         "resposta. Nao renomeie headings, nao transforme tabela obrigatoria "
-        "em paragrafo e nao use celulas vazias.",
+        "em paragrafo e nao use celulas vazias. Preserve a RIQUEZA do rascunho "
+        "anterior: nas secoes Analise Meta e Conteudo Organico gere UMA LINHA "
+        "POR CONCORRENTE do Benchmark de Concorrentes (classificando captacao "
+        "vs autoridade pela presenca digital), alem da linha de Meta Ads "
+        "Library; NUNCA colapse essas secoes em uma unica linha pendente. "
+        "Mantenha as 2 personas e os grupos de anuncio ja construidos.",
         "",
         "## Resumo Executivo",
         "",
@@ -1652,10 +1658,15 @@ def _repair_researcher_markdown_content(markdown_content: str) -> str:
         trailing_pipe = raw_line.rstrip().endswith("|")
         cells = raw_line.strip().strip("|").split("|")
         repaired_cells = []
+        today_str = datetime.now(timezone.utc).strftime("%d/%m/%Y")
         for cell in cells:
             stripped_cell = cell.strip()
             if _normalize_for_quality_checks(stripped_cell) == "dado pendente":
                 stripped_cell = placeholder_status
+            # Datas relativas em celulas de tabela ("Hoje"/"Ontem") quebram a
+            # validacao de rastreabilidade; normaliza para a data absoluta.
+            if _normalize_for_quality_checks(stripped_cell) in {"hoje", "ontem"}:
+                stripped_cell = today_str
             if stripped_cell in {"", "-", "—", "–", "â€”", "â€“"}:
                 repaired_cells.append(f" {placeholder_status} ")
             else:

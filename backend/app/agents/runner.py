@@ -298,6 +298,8 @@ class AgentRunner:
             "input": user_prompt,
             # Teto alto para o documento de 14 secoes nao truncar no meio.
             "max_output_tokens": settings.OPENAI_MAX_OUTPUT_TOKENS,
+            # Temperatura mais baixa estabiliza a riqueza/aderencia entre runs.
+            "temperature": settings.OPENAI_RESEARCH_TEMPERATURE,
             "tools": [
                 {
                     "type": "web_search",
