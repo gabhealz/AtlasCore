@@ -6,12 +6,29 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.orchestrator import (
+    _build_transcription_context,
     bootstrap_pipeline,
     get_next_step_name,
     get_step_output_kind,
 )
+from app.agents.runner import AgentRunner
 from app.api import deps
-from app.services.usage_service import summarize_onboarding_cost
+from app.schemas.intake import (
+    INTAKE_GROUPS,
+    IntakeEnvelope,
+    IntakeResponse,
+    IntakeSchemaEnvelope,
+    IntakeUpdate,
+)
+from app.services.asset_service import AssetService
+from app.services.intake_service import (
+    dump_intake_data,
+    extract_intake_fields,
+    is_extracted,
+    load_intake_fields,
+    normalize_intake_fields,
+)
+from app.services.usage_service import record_usage, summarize_onboarding_cost
 from app.models.onboarding import Onboarding
 from app.models.uploaded_asset import UploadedAsset
 from app.models.user import User
@@ -119,6 +136,13 @@ async def _ensure_pipeline_inputs_ready(
     missing_items = []
     if not has_document:
         missing_items.append("ao menos 1 documento base ou transcricao")
+
+    onboarding = await _get_onboarding_or_404(db=db, onboarding_id=onboarding_id)
+    if not onboarding.intake_data:
+        missing_items.append(
+            "o formulario de lacunas (extraia e salve os dados do AQF antes de "
+            "iniciar a esteira)"
+        )
 
     if missing_items:
         _raise_api_error(
@@ -308,6 +332,104 @@ async def create_onboarding(
     await db.commit()
     await db.refresh(onboarding)
     return {"data": onboarding}
+
+
+AWAITING_INTAKE_STATUS = "AWAITING_INTAKE"
+
+
+def _serialize_intake(onboarding: Onboarding) -> IntakeResponse:
+    return IntakeResponse(
+        onboarding_id=onboarding.id,
+        status=onboarding.status,
+        fields=load_intake_fields(onboarding.intake_data),
+        extracted=is_extracted(onboarding.intake_data),
+    )
+
+
+@router.get("/intake/schema", response_model=IntakeSchemaEnvelope)
+async def get_intake_schema(
+    current_user: User = Depends(allow_read),
+):
+    """Catalogo de grupos/campos do formulario de lacunas (para o frontend)."""
+    del current_user
+    return {"data": INTAKE_GROUPS}
+
+
+@router.get("/{onboarding_id}/intake", response_model=IntakeEnvelope)
+async def get_onboarding_intake(
+    onboarding_id: int,
+    current_user: User = Depends(allow_read),
+    db: AsyncSession = Depends(deps.get_db),
+):
+    onboarding = await _get_onboarding_or_404(db=db, onboarding_id=onboarding_id)
+    return {"data": _serialize_intake(onboarding)}
+
+
+@router.post("/{onboarding_id}/intake/extract", response_model=IntakeEnvelope)
+async def extract_onboarding_intake(
+    onboarding_id: int,
+    current_user: User = Depends(allow_write),
+    db: AsyncSession = Depends(deps.get_db),
+):
+    """Le as transcricoes/documentos e preenche o maximo do formulario; o que
+    nao for encontrado fica como lacuna para o operador. Move para
+    AWAITING_INTAKE. Mescla com valores ja informados (nao sobrescreve o que o
+    operador ja preencheu manualmente)."""
+    onboarding = await _get_onboarding_or_404(
+        db=db, onboarding_id=onboarding_id, for_update=True
+    )
+    asset_service = AssetService()
+    transcription_context = await _build_transcription_context(
+        db=db,
+        onboarding_id=onboarding_id,
+        asset_service=asset_service,
+    )
+    extracted_fields, run_result = await extract_intake_fields(
+        transcription_context=transcription_context,
+        runner=AgentRunner(),
+        onboarding_id=onboarding_id,
+    )
+    if run_result is not None:
+        try:
+            await record_usage(db=db, onboarding_id=onboarding_id, result=run_result)
+        except Exception:  # noqa: BLE001 - telemetria nao bloqueia
+            pass
+
+    # Mescla: mantem o que o operador ja preencheu; a extracao so preenche vazios.
+    current = load_intake_fields(onboarding.intake_data)
+    merged = {
+        key: (current.get(key) or extracted_fields.get(key))
+        for key in {*current, *extracted_fields}
+    }
+    onboarding.intake_data = dump_intake_data(merged, extracted=True)
+    if onboarding.status in {"PENDING", AWAITING_INTAKE_STATUS}:
+        onboarding.status = AWAITING_INTAKE_STATUS
+    await db.commit()
+    await db.refresh(onboarding)
+    return {"data": _serialize_intake(onboarding)}
+
+
+@router.put("/{onboarding_id}/intake", response_model=IntakeEnvelope)
+async def update_onboarding_intake(
+    onboarding_id: int,
+    intake_in: IntakeUpdate,
+    current_user: User = Depends(allow_write),
+    db: AsyncSession = Depends(deps.get_db),
+):
+    """Salva o formulario preenchido pelo operador. Deixa o onboarding pronto
+    para iniciar a esteira (volta para PENDING se estava em AWAITING_INTAKE)."""
+    onboarding = await _get_onboarding_or_404(
+        db=db, onboarding_id=onboarding_id, for_update=True
+    )
+    fields = normalize_intake_fields(intake_in.fields)
+    onboarding.intake_data = dump_intake_data(
+        fields, extracted=is_extracted(onboarding.intake_data)
+    )
+    if onboarding.status == AWAITING_INTAKE_STATUS:
+        onboarding.status = "PENDING"
+    await db.commit()
+    await db.refresh(onboarding)
+    return {"data": _serialize_intake(onboarding)}
 
 
 @router.post(

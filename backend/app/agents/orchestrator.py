@@ -39,6 +39,7 @@ from app.services.html_validation_service import (
     HTMLValidationError,
     validate_generated_html,
 )
+from app.services.intake_service import load_intake_fields, render_intake_context
 from app.services.learning_service import build_learning_context
 from app.services.market_research import collect_market_data
 from app.services.usage_service import record_usage
@@ -1038,6 +1039,7 @@ def _build_maker_user_prompt(
     review_feedback: str | None = None,
     human_feedback: str | None = None,
     step_specific_context: str | None = None,
+    intake_context: str | None = None,
 ) -> str:
     previous_documents_block = ""
     selected_documents = _select_documents_for_step(
@@ -1056,6 +1058,10 @@ def _build_maker_user_prompt(
         previous_documents_block = (
             "\n\nDocumentos anteriores do pipeline:\n" + "\n\n".join(previous_sections)
         )
+
+    intake_context_block = ""
+    if intake_context:
+        intake_context_block = f"\n\n{intake_context}"
 
     step_specific_context_block = ""
     if step_specific_context:
@@ -1091,6 +1097,7 @@ def _build_maker_user_prompt(
         f"{_build_onboarding_data_inventory()}\n\n"
         "Transcricoes e documentos base:\n"
         f"{transcription_context}"
+        f"{intake_context_block}"
         f"{previous_documents_block}"
         f"{step_specific_context_block}"
         f"{human_feedback_block}"
@@ -1951,6 +1958,12 @@ async def bootstrap_pipeline(
                 onboarding_id=onboarding_id,
                 asset_service=asset_service,
             )
+            # Insumos estruturados do AQF (formulario de lacunas), injetados em
+            # TODAS as etapas para que budget/ticket/endereco/operacao cheguem
+            # a todos os agentes.
+            intake_context = render_intake_context(
+                load_intake_fields(onboarding.intake_data)
+            )
             required_css_ids: list[str] = []
             approved_documents = await generated_document_service.list_documents(
                 db=db,
@@ -2025,6 +2038,7 @@ async def bootstrap_pipeline(
                         review_feedback=rewrite_feedback,
                         human_feedback=human_feedback,
                         step_specific_context=step_specific_context,
+                        intake_context=intake_context,
                     ),
                     response_format=_build_step_response_format(current_step),
                     enable_web_search=current_step.step_name == "researcher",

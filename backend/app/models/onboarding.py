@@ -14,4 +14,8 @@ class Onboarding(Base):
     differentials = Column(Text, nullable=True)
     tone_of_voice = Column(Text, nullable=True)
     status = Column(String, default="PENDING", nullable=False)
+    # Insumos estruturados do método AQF (formulário de lacunas): JSON serializado
+    # com {chave_do_campo: valor|null}. Preenchido pelo extrator e validado pelo
+    # operador antes de liberar a esteira de IA.
+    intake_data = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
