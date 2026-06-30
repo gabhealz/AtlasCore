@@ -39,6 +39,7 @@ from app.services.intake_service import (
 )
 from app.services.usage_service import record_usage, summarize_onboarding_cost
 from app.models.onboarding import Onboarding
+from app.models.pipeline_event import PipelineEvent
 from app.models.uploaded_asset import UploadedAsset
 from app.models.user import User
 from app.schemas.generated_document import (
@@ -328,6 +329,38 @@ async def get_onboardings(
     result = await db.execute(select(Onboarding).order_by(Onboarding.created_at.desc()))
     onboardings = result.scalars().all()
     return {"data": onboardings}
+
+
+@router.get("/{onboarding_id}/events")
+async def list_onboarding_events(
+    onboarding_id: int,
+    current_user: User = Depends(allow_read),
+    db: AsyncSession = Depends(deps.get_db),
+):
+    """Eventos do pipeline (log) para acompanhamento ao vivo via polling — usado
+    quando o SSE nao passa pelo proxy. Ordem cronologica, ultimos 80."""
+    del current_user
+    result = await db.execute(
+        select(PipelineEvent)
+        .where(PipelineEvent.onboarding_id == onboarding_id)
+        .order_by(PipelineEvent.created_at.asc(), PipelineEvent.id.asc())
+        .limit(80)
+    )
+    events = result.scalars().all()
+    return {
+        "data": [
+            {
+                "id": event.id,
+                "step_name": event.step_name,
+                "from_status": event.from_status,
+                "to_status": event.to_status,
+                "trigger": (event.payload or {}).get("trigger"),
+                "attempt_count": (event.payload or {}).get("attempt_count"),
+                "created_at": event.created_at,
+            }
+            for event in events
+        ]
+    }
 
 
 @router.get("/{onboarding_id}", response_model=OnboardingDetailEnvelope)

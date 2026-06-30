@@ -469,6 +469,65 @@ function getPipelineTriggerLabel(trigger: string | null | undefined) {
   }
 }
 
+function formatPipelineLogLine(event: {
+  step_name: string;
+  to_status: string;
+  trigger: string | null;
+}): string {
+  const step = formatPipelineStepLabel(event.step_name);
+  switch (event.trigger) {
+    case 'manual_start':
+      return 'Pipeline iniciado';
+    case 'agent_step_started':
+      return `IA escrevendo: ${step}`;
+    case 'agent_step_completed':
+      return `IA concluiu: ${step}`;
+    case 'review_step_started':
+      return `Checker CFM revisando: ${step}`;
+    case 'review_step_approved':
+      return `Checker CFM aprovou: ${step}`;
+    case 'review_step_rejected':
+      return `Checker CFM pediu reescrita: ${step}`;
+    case 'human_review_approved':
+      return `Voce aprovou: ${step}`;
+    case 'human_review_rejected':
+      return `Voce recusou: ${step}`;
+    case 'researcher_quality_validation_rejected':
+      return `Validacao pediu para refazer: ${step}`;
+    case 'agent_runner_failed':
+    case 'agent_output_invalid':
+    case 'html_validation_failed':
+    case 'review_rewrite_limit_exceeded':
+      return `Parou em: ${step}`;
+    default:
+      if (event.to_status === 'AWAITING_REVIEW') {
+        return `Pronto para sua revisao: ${step}`;
+      }
+      if (event.to_status === 'PENDING_CLIENT_CREATION') {
+        return 'Esteira concluida — pronta para criar o cliente';
+      }
+      if (event.to_status === 'FAILED') {
+        return `Falhou em: ${step}`;
+      }
+      return `${step} — ${getOnboardingStatusLabel(event.to_status)}`;
+  }
+}
+
+function formatLogTime(value: string | null | undefined): string {
+  if (!value) {
+    return '';
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return '';
+  }
+  return parsed.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
 function formatDateTimeLabel(value: string | null | undefined) {
   if (!value) {
     return 'Sem atualizacao recebida ainda';
@@ -1328,6 +1387,48 @@ export default function OnboardingDetail() {
     return () => clearInterval(interval);
   }, [hasValidOnboardingId, onboardingId, resolvedPipelineStatus]);
 
+  // Log do pipeline (o "logzinho" do que esta acontecendo): busca os eventos do
+  // backend e atualiza a cada 3s enquanto a IA trabalha. Alimenta o card ao vivo
+  // sem depender do SSE.
+  const [pipelineLog, setPipelineLog] = useState<
+    Array<{
+      id: number;
+      step_name: string;
+      from_status: string;
+      to_status: string;
+      trigger: string | null;
+      attempt_count?: number | null;
+      created_at: string;
+    }>
+  >([]);
+  useEffect(() => {
+    if (!hasValidOnboardingId) {
+      return;
+    }
+    let cancelled = false;
+    const fetchLog = () => {
+      api
+        .get<{ data: typeof pipelineLog }>(`/onboardings/${onboardingId}/events`)
+        .then((response) => {
+          if (!cancelled) {
+            setPipelineLog(response.data.data ?? []);
+          }
+        })
+        .catch(() => undefined);
+    };
+    fetchLog();
+    const interval =
+      resolvedPipelineStatus === 'RUNNING'
+        ? setInterval(fetchLog, 3000)
+        : undefined;
+    return () => {
+      cancelled = true;
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [hasValidOnboardingId, onboardingId, resolvedPipelineStatus]);
+
   const pipelineFailureMessage =
     resolvedPipelineStatus === 'FAILED' && latestPipelineEvent?.to_status === 'FAILED'
       ? latestPipelineEvent.error_message ??
@@ -2008,6 +2109,55 @@ export default function OnboardingDetail() {
                 </p>
                 <p className="mt-1 text-xs text-gray-500">{pipelineModelLabel}</p>
               </div>
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Log do que está acontecendo
+              </p>
+              {resolvedPipelineStatus === 'RUNNING' ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-brand">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />
+                  ao vivo
+                </span>
+              ) : null}
+            </div>
+            <div className="mt-2 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-gray-900 p-3 font-mono text-xs text-gray-100">
+              {pipelineLog.length === 0 ? (
+                <p className="text-gray-400">
+                  Nenhum evento ainda. Quando a esteira rodar, cada passo aparece
+                  aqui em tempo real.
+                </p>
+              ) : (
+                <ul className="space-y-1">
+                  {pipelineLog.map((event) => {
+                    const tone =
+                      event.to_status === 'FAILED'
+                        ? 'text-rose-400'
+                        : event.to_status === 'AWAITING_REVIEW'
+                          ? 'text-amber-300'
+                          : event.to_status === 'PENDING_CLIENT_CREATION'
+                            ? 'text-emerald-300'
+                            : 'text-sky-300';
+                    return (
+                      <li key={event.id} className="flex gap-2">
+                        <span className="shrink-0 text-gray-500">
+                          {formatLogTime(event.created_at)}
+                        </span>
+                        <span className={tone}>
+                          {formatPipelineLogLine(event)}
+                          {typeof event.attempt_count === 'number' &&
+                          event.attempt_count > 1
+                            ? ` (tentativa ${event.attempt_count})`
+                            : ''}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </div>
           </div>
 
