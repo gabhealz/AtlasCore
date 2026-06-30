@@ -44,6 +44,7 @@ from app.services.html_validation_service import (
 from app.services.intake_service import load_intake_fields, render_intake_context
 from app.services.learning_service import build_learning_context
 from app.services.market_research import collect_market_data
+from app.services.market_research import specialty_benchmarks
 from app.services.usage_service import record_apify_usage, record_usage
 from app.services.pipeline_service import (
     PIPELINE_AWAITING_REVIEW_STATUS,
@@ -705,6 +706,17 @@ async def _build_market_data_context(
         )
 
     context = collected.to_prompt_context()
+
+    # Fallback de CPC/CTR/CPL por especialidade (mini-banco Healz): injeta sempre,
+    # rotulado, para o agente usar numero ANCORADO no real da operacao quando o
+    # DataForSEO/Apify nao retornarem volume/CPC — em vez de faixa generica.
+    try:
+        bench = specialty_benchmarks.lookup(onboarding.specialty)
+        bench_block = specialty_benchmarks.render_prompt_block(bench)
+        context = f"{context}\n\n{bench_block}" if context else bench_block
+    except Exception:  # noqa: BLE001 - fallback nunca bloqueia
+        logger.exception("Specialty benchmark fallback failed.")
+
     return context or None
 
 

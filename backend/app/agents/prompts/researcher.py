@@ -371,23 +371,23 @@ na secao Log de Consultas Externas.
   baseada no briefing" quando nao houver evidencia externa suficiente. Nao use
   "Consciente do Problema", "moderado" ou persona validada como fato sem fonte.
 
-Benchmarks internos da Healz para calibragem:
-- Google Search CTR saudavel: 5% a 10%.
-- Google CPC em cidades medias: R$ 1,50 a R$ 3,00.
-- Google CPC em grandes centros: R$ 3,00 a R$ 6,00.
-- Conversao de LP para clique no WhatsApp: >20% excelente, 15%-20% bom,
-  10%-15% atencao, <10% preocupante.
-- CPL esperado: cidades medias R$ 10 a R$ 15; grandes centros R$ 15 a R$ 40.
-- Custo por mensagem real no WhatsApp: R$ 20 a R$ 40.
-- Aproveitamento WhatsApp: >50% bom, <50% preocupante.
-- Conversao WhatsApp para consulta: >30% excelente, 20%-30% bom, 15%-20%
-  atencao, <15% critico.
-- CAC esperado: consultas via convenio R$ 20 a R$ 50; consultas particulares
-  R$ 70 a R$ 120; procedimentos/cirurgias devem ser calculados por ticket e
-  margem, sem range fixo.
-- Meta Ads CTR de referencia: 1% a 2,5%; CPC da Meta nao tem range fixo; taxa
-  de conversao de LP tende a ser 20%-30% menor que Google; custo por seguidor
-  em audiencia ate R$ 5.
+Benchmarks Healz para calibragem (PRIORIDADE: se o contexto trouxer o bloco
+"BENCHMARK HEALZ POR ESPECIALIDADE", use os numeros DELE — sao ancorados no real
+e ajustados pela especialidade; os valores abaixo sao a base blended):
+- Google Ads (MEDIDO na operacao real Healz, abr-jun/2026): CTR 4,5% a 7%
+  (mediana ~5,8%); CPC R$ 3,10 a R$ 5,50 (mediana ~R$ 4,10). CPL estimado
+  R$ 20 a R$ 50 (derivado do CPC real / conversao de LP de 8-20%).
+- Meta Ads (MEDIDO, real): CTR 2,0% a 3,5% (mediana ~2,9%); CPC R$ 0,30 a
+  R$ 1,20 (mediana ~R$ 0,60; ponderado por gasto ~R$ 1,00).
+- O CPC varia por ESPECIALIDADE; quando houver o bloco por especialidade no
+  contexto, rotule como "Benchmark Healz por especialidade" e use-o.
+- Funil (ESTIMATIVA, ainda SEM medicao real na operacao — pendente do tracking
+  de WhatsApp/Tintim; rotule como estimativa a validar): conversao de LP para
+  clique no WhatsApp ~15-25% (bom >20%); conversao WhatsApp para consulta
+  ~20-35% (bom >30%).
+- CAC: estimar pelo CPL acima dividido pela conversao WhatsApp->consulta; para
+  procedimentos/cirurgias, calcular por ticket e margem. Marcar como estimativa
+  enquanto nao houver dado real de agendamento.
 
 Etapa 1 - Definicao do Objetivo:
 Objetivo: alinhar expectativas, entender o que o cliente busca com a agencia,
@@ -593,10 +593,12 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
    REGRA DE PREENCHIMENTO (critica): nunca deixe Volume E CPC simultaneamente
    como "Dado indisponivel". Volume pode ficar "Dado indisponivel apos pesquisa"
    quando o Keyword Planner/DataForSEO nao retornar o numero, MAS o CPC deve
-   SEMPRE trazer uma FAIXA rotulada - "Benchmark interno Healz" (grandes centros
-   R$3-6; cidades medias R$1,50-3) ou "Benchmark publico de mercado" com URL -
-   para que a campanha tenha base de custo. Uma coluna CPC inteira em
-   "indisponivel" e considerada secao incompleta.
+   SEMPRE trazer uma FAIXA rotulada - use o bloco "BENCHMARK HEALZ POR
+   ESPECIALIDADE" do contexto (rotule "Benchmark Healz por especialidade"); na
+   ausencia dele, a base real Google CPC R$3,10-5,50 (rotule "Benchmark interno
+   Healz") ou "Benchmark publico de mercado" com URL - para que a campanha tenha
+   base de custo. Uma coluna CPC inteira em "indisponivel" e considerada secao
+   incompleta.
    A tabela deve conter Tipo, Palavra-chave, Intencao, Regiao, Volume, CPC,
    Fonte, URL/consulta, Data e Status.
 5. Benchmark de Concorrentes no Google (Etapa 3): fichas ou tabela somente dos

@@ -224,17 +224,25 @@ Riscos de execucao (gaps de posicionamento, prova social, endereco/raio nao
 definido, ticket nao confirmado, secretariado, infra tecnica de tracking) e os
 proximos passos objetivos para o time Healz, em ordem.
 
-Benchmarks internos Healz para a conta de viabilidade e os KPIs:
-- Google: CTR 5%-10%; CPC R$1,50-3,00 (cidades medias) / R$3-6 (grandes centros);
-  conversao de LP para clique no WhatsApp >20% excelente, 15-20% bom, 10-15%
-  atencao, <10% critico; CPL R$10-15 (medias) / R$15-40 (grandes); aproveitamento
-  do WhatsApp (msg/clique) >50% bom.
-- Meta: CTR 1%-2,5%; conversao de LP ~20-30% menor que Google; custo por
-  seguidor ate R$5.
-- Fundo de funil (ambos): conversao WhatsApp->consulta >30% excelente, 20-30%
-  bom, 15-20% atencao, <15% critico.
-- CAC: convenio R$20-50; particular R$70-120; procedimentos/cirurgias calcular
-  por ticket e margem (sem range fixo).
+Benchmarks Healz para a conta de viabilidade e os KPIs. PRIORIDADE: se o
+Documento 1 (benchmarking) trouxer "Benchmark Healz por especialidade" ou dados
+reais de CPC/volume, USE-OS — sao mais especificos. Os numeros abaixo sao a BASE
+REAL da operacao Healz (blended de ~84 semanas-cliente Google e 44 Meta,
+abr-jun/2026, metric_snapshots) e servem de ancora/fallback:
+- Google Ads (MEDIDO, real): CTR 4,5%-7% (mediana ~5,8%); CPC R$3,10-5,50
+  (mediana ~R$4,10). CPL estimado R$20-50 (derivado do CPC real / conversao de
+  LP de 8-20% — a conversao em si ainda nao e medida na operacao).
+- Meta Ads (MEDIDO, real): CTR 2,0%-3,5% (mediana ~2,9%); CPC R$0,30-1,20
+  (mediana ~R$0,60; ponderado por gasto ~R$1,00).
+- Estes valores variam por ESPECIALIDADE (estetica/plastica disputam mais o
+  clique -> CPC maior; pediatria/clinico -> menor). Quando o Documento 1 trouxer
+  o "Benchmark Healz por especialidade", prefira-o.
+- Funil (ESTIMATIVA — ainda SEM medicao real na operacao, pendente do tracking de
+  Tintim/WhatsApp; rotule como estimativa a validar): conversao LP->clique no
+  WhatsApp ~15-25% (bom >20%); conversao WhatsApp->consulta ~20-35% (bom >30%).
+- CAC: estimar pelo CPL acima dividido pela conversao WhatsApp->consulta; para
+  procedimentos/cirurgias, calcular por ticket e margem (sem range fixo).
+  Marque CAC como estimativa enquanto nao houver dado real de agendamento.
 
 O `title` deve ser nominal, ex.: "Estrategia de Aquisicao - [Nome do Medico]".
 Responda somente no formato JSON solicitado.
