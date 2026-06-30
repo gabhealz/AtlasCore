@@ -72,6 +72,9 @@ router = APIRouter()
 TEXT_DELIVERABLE_ORDER = [
     "commercial_intel",
     "research_report",
+    "strategy_plan",
+    "copy_deck",
+    "secretary_script",
 ]
 LANDING_PAGE_HTML_KIND = "landing_page_html"
 
@@ -224,13 +227,25 @@ def _validate_human_review_state(onboarding: Onboarding) -> None:
         )
 
 
+# Estados em que os entregaveis ja existem e podem ser lidos. O pipeline real
+# termina em PENDING_CLIENT_CREATION (todos os docs aprovados) e depois COMPLETED
+# (cliente ativado no Ops); "APPROVED" e legado. Antes so "APPROVED" era aceito,
+# o que travava a visualizacao para sempre (o status nunca chega a APPROVED).
+DELIVERY_VIEWABLE_STATUSES = {
+    "APPROVED",
+    "PENDING_CLIENT_CREATION",
+    "COMPLETED",
+}
+
+
 def _validate_delivery_state(onboarding: Onboarding) -> None:
-    if onboarding.status != "APPROVED":
+    if onboarding.status not in DELIVERY_VIEWABLE_STATUSES:
         _raise_api_error(
             status_code=status.HTTP_400_BAD_REQUEST,
             error_code="INVALID_PIPELINE_STATE",
             message=(
-                "Os entregaveis finais so ficam disponiveis apos a aprovacao final."
+                "Os entregaveis finais ficam disponiveis depois que a esteira "
+                "conclui (aprovacao da ultima etapa)."
             ),
             extra_detail={"current_status": onboarding.status},
         )

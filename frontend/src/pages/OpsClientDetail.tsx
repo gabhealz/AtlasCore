@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Settings, PlusCircle, Pencil, Calendar } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Settings, PlusCircle, Pencil, Calendar, FileText } from 'lucide-react';
 
 function generateWeekOptions(count: number): Array<{ label: string; value: string }> {
   const today = new Date();
@@ -146,6 +146,15 @@ export function OpsClientDetail() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {client.onboarding_id ? (
+            <Link
+              to={`/onboarding/${client.onboarding_id}/delivery`}
+              className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium border border-line text-muted bg-card hover:bg-elevated transition-colors"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Entregáveis do onboarding
+            </Link>
+          ) : null}
           <button
             onClick={() => setShowEdit(true)}
             className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${

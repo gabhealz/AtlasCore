@@ -1,5 +1,7 @@
 export interface Client {
   id: number;
+  /** Onboarding de origem — link para ver os entregáveis salvos do projeto. */
+  onboarding_id?: number | null;
   name: string;
   specialty?: string;
   city?: string;

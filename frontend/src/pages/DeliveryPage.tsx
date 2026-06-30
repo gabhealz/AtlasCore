@@ -95,6 +95,8 @@ function getOnboardingStatusLabel(status: string) {
 
 function getDeliverableLabel(documentKind: string) {
   switch (documentKind) {
+    case 'commercial_intel':
+      return 'Inteligência Comercial';
     case 'research_report':
       return 'Benchmarking';
     case 'strategy_plan':
@@ -227,7 +229,12 @@ export default function DeliveryPage() {
   useEffect(() => {
     let isCancelled = false;
 
-    if (!hasValidOnboardingId || pipelineStatus !== 'APPROVED') {
+    if (
+      !hasValidOnboardingId ||
+      !['APPROVED', 'PENDING_CLIENT_CREATION', 'COMPLETED'].includes(
+        pipelineStatus ?? '',
+      )
+    ) {
       return () => {
         isCancelled = true;
       };
@@ -497,16 +504,21 @@ export default function DeliveryPage() {
         {hasValidOnboardingId &&
         !isLoadingPipelineStatus &&
         pipelineStatus !== null &&
-        pipelineStatus !== 'APPROVED' ? (
+        !['APPROVED', 'PENDING_CLIENT_CREATION', 'COMPLETED'].includes(
+          pipelineStatus,
+        ) ? (
           <div className="mt-6 rounded-xl border border-dashed border-amber-300 bg-amber-50 p-6 text-sm text-amber-800 shadow">
-            O Benchmarking final so fica disponivel quando o onboarding chega ao estado `APPROVED`. No
-            momento, este projeto esta em ` {resolvedStatusLabel} `.
+            Os entregaveis ficam disponiveis depois que a esteira conclui (quando
+            a ultima etapa e aprovada). No momento, este projeto esta em
+            ` {resolvedStatusLabel} `.
           </div>
         ) : null}
 
         {hasValidOnboardingId &&
         !isLoadingPipelineStatus &&
-        pipelineStatus === 'APPROVED' &&
+        ['APPROVED', 'PENDING_CLIENT_CREATION', 'COMPLETED'].includes(
+          pipelineStatus ?? '',
+        ) &&
         !statusErrorMessage ? (
           <div className="mt-6 grid gap-5">
             {LANDING_PAGE_FEATURES_ENABLED ? (

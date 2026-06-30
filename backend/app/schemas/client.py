@@ -53,6 +53,7 @@ class ClientUpdate(BaseModel):
 
 class ClientResponse(ClientBase):
     id: int
+    onboarding_id: int | None = None
     is_active: bool
     is_draft: bool = False
     created_at: datetime

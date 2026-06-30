@@ -1459,11 +1459,16 @@ export default function OnboardingDetail() {
   };
   const flowDone = {
     insumos: pipelineInputsReady,
-    esteira: ['AWAITING_REVIEW', 'PENDING_CLIENT_CREATION', 'APPROVED'].includes(
+    esteira: [
+      'AWAITING_REVIEW',
+      'PENDING_CLIENT_CREATION',
+      'APPROVED',
+      'COMPLETED',
+    ].includes(status),
+    revisao: ['PENDING_CLIENT_CREATION', 'APPROVED', 'COMPLETED'].includes(
       status,
     ),
-    revisao: ['PENDING_CLIENT_CREATION', 'APPROVED'].includes(status),
-    entrega: status === 'APPROVED',
+    entrega: ['APPROVED', 'COMPLETED'].includes(status),
   };
   const flowSteps = [
     { id: 'sec-insumos', label: 'Insumos & Formulário', done: flowDone.insumos },
@@ -1477,7 +1482,7 @@ export default function OnboardingDetail() {
       ? 'sec-esteira'
       : status === 'AWAITING_REVIEW'
         ? 'sec-revisao'
-        : ['PENDING_CLIENT_CREATION', 'APPROVED'].includes(status)
+        : ['PENDING_CLIENT_CREATION', 'APPROVED', 'COMPLETED'].includes(status)
           ? 'sec-entrega'
           : 'sec-esteira';
 
@@ -1679,29 +1684,46 @@ export default function OnboardingDetail() {
                   Tudo aprovado! Ative o cliente
                 </h2>
                 <p className="mt-1 max-w-2xl text-sm text-gray-600">
-                  Os documentos do onboarding estão prontos. Finalize criando o
-                  cliente no Ops com os dados de contrato e integrações.
+                  Os documentos do onboarding estão prontos e salvos. Leia os
+                  entregáveis e finalize criando o cliente no Ops.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => scrollToSection('sec-entrega')}
-                className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
-              >
-                Ir para Entrega &amp; Cliente
-              </button>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(`/onboarding/${onboardingId}/delivery`, {
+                      state: { onboardingStatus: status },
+                    })
+                  }
+                  className="inline-flex items-center justify-center rounded-md border border-emerald-300 bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-50"
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  Abrir entregáveis
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollToSection('sec-entrega')}
+                  className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+                >
+                  Ativar cliente
+                </button>
+              </div>
             </div>
-          ) : status === 'APPROVED' ? (
+          ) : status === 'APPROVED' || status === 'COMPLETED' ? (
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
-                  Finalizado
+                  {status === 'COMPLETED' ? 'Cliente ativo no Ops' : 'Finalizado'}
                 </p>
                 <h2 className="mt-1 text-2xl font-bold text-gray-900">
-                  Onboarding aprovado
+                  {status === 'COMPLETED'
+                    ? 'Onboarding concluído'
+                    : 'Onboarding aprovado'}
                 </h2>
                 <p className="mt-1 max-w-2xl text-sm text-gray-600">
-                  Abra os entregáveis finais para ler e copiar.
+                  Os documentos ficam salvos neste projeto. Abra os entregáveis
+                  para ler e copiar quando quiser.
                 </p>
               </div>
               <button
