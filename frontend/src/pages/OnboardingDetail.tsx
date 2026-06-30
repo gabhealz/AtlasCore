@@ -355,12 +355,12 @@ function getStreamConnectionBadgeColor(status: StreamConnectionStatus) {
     case 'connecting':
       return 'bg-sky-100 text-sky-800';
     case 'reconnecting':
-      return 'bg-amber-100 text-amber-800';
+      return 'bg-sky-100 text-sky-800';
     case 'unavailable':
-      return 'bg-rose-100 text-rose-800';
+      return 'bg-sky-100 text-sky-800';
     case 'idle':
     default:
-      return 'bg-gray-100 text-gray-700';
+      return 'bg-sky-100 text-sky-800';
   }
 }
 
