@@ -400,6 +400,9 @@ function formatPipelineStepLabel(stepName: string | null | undefined) {
   const knownLabels: Record<string, string> = {
     pipeline_start: 'inicio do pipeline',
     llm_runner_probe: 'teste inicial do runner',
+    intake_extraction: 'extracao de insumos',
+    profile_extraction: 'extracao de perfil',
+    apify_benchmark: 'coleta Apify (Maps + Instagram)',
     commercial_intel: 'analista comercial',
     commercial_intel_review: 'revisao CFM da inteligencia comercial',
     researcher: 'pesquisador',
@@ -1649,8 +1652,8 @@ export default function OnboardingDetail() {
                     key={step.step_name}
                     className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm"
                   >
-                    <span className="font-medium text-gray-800">
-                      {step.step_name}
+                    <span className="font-medium capitalize text-gray-800">
+                      {formatPipelineStepLabel(step.step_name)}
                     </span>
                     <span className="text-gray-600">
                       US$ {step.cost_usd.toFixed(4)}

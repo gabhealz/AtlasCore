@@ -617,13 +617,18 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
 8. Conteudo Organico (Etapa 4): primeiro, perfis de Instagram relevantes com
    seguidores, formatos, temas, tom, frequencia e padroes que funcionam. Use o @
    real (link de Instagram) e o numero de Seguidores da tabela do Google Maps
-   injetada quando disponiveis; complemente com web_search o que faltar. Em
-   seguida, uma leitura de PROVA SOCIAL no Google: para os 3-5 principais
-   concorrentes, numero de avaliacoes, nota media e o que os pacientes mais
-   elogiam (atendimento/experiencia vs procedimento), reaproveitando os numeros
-   ja transcritos da tabela de concorrentes. Conclua se a prova social do mercado
-   e alta (concorrentes com 150+ avaliacoes) ou baixa, e o que isso significa
-   para o cliente comecar do zero.
+   injetada quando disponiveis; complemente com web_search o que faltar.
+   OBRIGATORIO: logo APOS a tabela de Conteudo Organico, escreva um paragrafo
+   iniciado por "**Leitura de prova social do mercado:**" que (a) cite NOMINALMENTE
+   os 2-3 concorrentes com MAIS avaliacoes e os numeros reais (ex.: "Dr. Gilberto
+   Nakama 359 e Dr. Marcelo Kohara 173 avaliacoes"); (b) conclua de forma
+   inequivoca se a prova social do mercado e ALTA (varios concorrentes com 150+
+   avaliacoes), MEDIA ou BAIXA; (c) traduza isso em implicacao estrategica para o
+   cliente - tipicamente, em mercado com prova social alta e o cliente comecando
+   do zero (sem avaliacoes proprias), a captacao de avaliacoes no Google
+   Business deve ser prioridade desde a semana 1, e a landing page nao pode
+   apoiar a conversao em prova social que ainda nao existe. Nao deixe essa leitura
+   apenas implicita na tabela.
 9. Benchmarks e Viabilidade: aplique ranges internos Healz e benchmarks
    publicos de mercado para CPC, CPL, conversao de site, mensagem real,
    conversao WhatsApp e CAC, separando dado real, benchmark interno, benchmark
@@ -700,9 +705,12 @@ Templates minimos obrigatorios:
   ` Copy | Funil | Fonte | URL/consulta | Data | Status |`.
   Quando a tabela do Google Maps tiver sido injetada no bloco de DADOS DE
   MERCADO, preencha Nota Google, Avaliacoes e Instagram (@) com os valores REAIS
-  dela (verbatim) e Fonte "Fonte externa verificada (Google Maps)". Sem a tabela
-  injetada e sem dado no SERP, use "Dado pendente de validacao externa" apenas na
-  celula faltante; nunca remova as colunas Nota Google e Avaliacoes.
+  dela (verbatim) e Fonte "Fonte externa verificada (Google Maps)". A coluna
+  URL/consulta DEVE conter o SITE do concorrente (coluna Site da tabela injetada,
+  ou a URL achada na web_search) - nunca "Dado pendente" quando o site existe.
+  Sem a tabela injetada e sem dado no SERP, use "Dado pendente de validacao
+  externa" apenas na celula faltante; nunca remova as colunas Nota Google e
+  Avaliacoes.
 - A secao "Matriz de Benchmark Competitivo" sempre deve conter uma tabela
   Markdown com estes cabecalhos literais, mesmo quando nenhum concorrente
   verificavel for encontrado: `| Concorrente | URL | Palavra-chave que encontrou |`
