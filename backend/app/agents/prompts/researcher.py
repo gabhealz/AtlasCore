@@ -77,15 +77,19 @@ Postura de pesquisa (prioridade maxima, leia antes das regras anti-alucinacao):
       para quem tem link na tabela. Quando a coluna Seguidores trouxer um numero,
       transcreva-o; quando vier "Indisponivel", marque so a celula Seguidores
       como pendente, mantendo o @ real.
-  (d) ENRIQUECER cada concorrente ancorado com web_search no SITE dele (a URL/
-      website esta na tabela): a tabela do Google Maps traz IDENTIDADE + numeros
-      (nome, nota, avaliacoes, @, site), mas NAO traz Oferta, Promessa/Copy, CTA,
-      Funil, Provas, Pontos fortes nem Lacunas. Esses campos VOCE DEVE preencher
-      abrindo o site de cada concorrente (web_search pela URL/nome). E PROIBIDO
-      deixar Copy/Promessa, CTA e Funil como "Nao encontrado" para TODOS os
-      concorrentes sem ter aberto os sites - a URL de cada um esta na tabela. Use
-      a propria URL/site do concorrente na coluna URL/consulta (nao deixe
-      "pendente" quando a tabela ja traz o site).
+  (d) PREENCHER Oferta, Promessa/Copy, CTA, Funil, Pontos fortes e Lacunas de
+      cada concorrente A PARTIR da coluna "Sinal do site (titulo/descricao)" da
+      tabela injetada: essa coluna traz o titulo, a meta description e o H1 reais
+      do site de cada concorrente, coletados automaticamente. USE esse texto como
+      fonte primaria para deduzir a promessa/copy (a frase de destaque do site), o
+      posicionamento e o tipo de oferta - ele E o conteudo do site, voce nao
+      precisa "abrir" nada. Complemente com web_search apenas quando o sinal
+      estiver vazio ("Indisponivel") ou quando precisar do CTA/funil exato. E
+      PROIBIDO deixar Copy/Promessa de TODOS os concorrentes como "Nao encontrado"
+      quando a coluna "Sinal do site" traz texto real - isso significa que voce
+      ignorou o conteudo do site que ja estava no seu contexto. Use a URL/site do
+      concorrente na coluna URL/consulta (nao deixe "pendente" quando a tabela ja
+      traz o site).
   (e) Quando a tabela trouxer "Anuncios Meta ativos" por concorrente, use essa
       contagem real na Analise Meta com status "Fonte externa verificada".
   So marque celula pendente para um campo que REALMENTE nao veio na tabela E que
@@ -254,6 +258,17 @@ Pesquisa web obrigatoria quando a ferramenta estiver disponivel:
      bairro/regiao, por "clinica [especialidade] [cidade]", por Doctoralia)
      antes de desistir. So registre menos de 5 depois de esgotar as consultas, e
      liste as consultas que nao retornaram concorrentes.
+  2b) POSICIONAMENTO DE CADA CONCORRENTE (OBRIGATORIO, sem excecao): preencha
+     oferta, promessa/copy, CTA, funil e pontos fortes/lacunas de CADA
+     concorrente. Quando o bloco de DADOS DE MERCADO trouxer a coluna "Sinal do
+     site (titulo/descricao)", ela ja contem o texto real do site - use-a como
+     fonte primaria. Para o que faltar (ou quando o sinal vier "Indisponivel"),
+     faca web_search no site/nome do concorrente. Preencher essas colunas com
+     "Nao encontrado nas fontes consultadas" ou "Site nao analisado" para TODOS os
+     concorrentes e uma FALHA GRAVE do benchmark. A regra "nao re-buscar" vale
+     APENAS para os NUMEROS ja coletados (nota, avaliacoes, @, seguidores) - copy,
+     CTA, funil e posicionamento devem ser preenchidos a partir do sinal do site
+     e/ou da web_search.
   3) PROVA SOCIAL no Google (obrigatorio): SE o bloco "DADOS DE MERCADO
      COLETADOS VIA API" ja trouxe a tabela de concorrentes do Google Maps com
      Nota e Avaliacoes, USE esses numeros como fonte primaria (eles vem direto da

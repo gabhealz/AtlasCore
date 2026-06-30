@@ -69,6 +69,10 @@ class Competitor:
     facebook_url: str | None
     address: str | None
     meta_ads_count: int | None = None
+    # Trecho do site do concorrente (titulo/meta description/H1) coletado por
+    # fetch direto - materia-prima para o agente preencher copy/CTA/posicionamento
+    # de forma deterministica (em vez de depender de ele abrir cada site).
+    site_snippet: str | None = None
 
     def rating_text(self) -> str:
         if self.rating is None:
@@ -145,7 +149,7 @@ class CollectedMarketData:
             )
             lines.append(
                 "| Concorrente | Nota Google | Avaliações | Instagram | "
-                "Seguidores | Facebook | Site | Categoria |"
+                "Seguidores | Site | Categoria | Sinal do site (titulo/descricao) |"
             )
             lines.append("|---|---|---|---|---|---|---|---|")
             for comp in self.competitors:
@@ -158,9 +162,9 @@ class CollectedMarketData:
                             comp.reviews_text(),
                             _escape_cell(comp.instagram_url or "Indisponivel"),
                             comp.followers_text(),
-                            _escape_cell(comp.facebook_url or "Indisponivel"),
                             _escape_cell(comp.website or "Indisponivel"),
                             _escape_cell(comp.category or "Nao informado"),
+                            _escape_cell(comp.site_snippet or "Indisponivel"),
                         )
                     )
                     + " |"

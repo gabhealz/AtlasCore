@@ -159,18 +159,27 @@ async def fetch_competitors(
                 f"com '{local}'; mantendo a lista completa."
             )
 
-    # Enriquecimento de seguidores (Rota B): preenche instagram_followers a partir
-    # dos @ ja resolvidos pelo Maps. Best-effort, nunca bloqueia.
-    if settings.apify_instagram_enabled:
-        try:
-            ig_count = await _enrich_instagram_followers(competitors)
-            if ig_count:
-                notes.append(
-                    f"Apify Instagram: seguidores coletados de {ig_count} perfil(is)."
-                )
-        except Exception as exc:  # noqa: BLE001 - enriquecimento e best-effort
-            logger.warning("Apify Instagram enrichment failed: %s", exc)
-            notes.append(f"Apify Instagram: enriquecimento de seguidores falhou: {exc}")
+    # Enriquecimento em paralelo: (1) seguidores do Instagram a partir dos @
+    # resolvidos pelo Maps (Apify), e (2) trecho do site de cada concorrente
+    # (fetch direto, gratis) para alimentar copy/posicionamento de forma
+    # deterministica. Best-effort, nunca bloqueia.
+    async def _ig():
+        if not settings.apify_instagram_enabled:
+            return 0
+        return await _enrich_instagram_followers(competitors)
+
+    ig_res, site_res = await asyncio.gather(
+        _ig(), _enrich_site_snippets(competitors), return_exceptions=True
+    )
+    if isinstance(ig_res, BaseException):
+        logger.warning("Apify Instagram enrichment failed: %s", ig_res)
+        notes.append(f"Apify Instagram: enriquecimento de seguidores falhou: {ig_res}")
+    elif ig_res:
+        notes.append(f"Apify Instagram: seguidores coletados de {ig_res} perfil(is).")
+    if isinstance(site_res, BaseException):
+        logger.warning("Site snippet enrichment failed: %s", site_res)
+    elif site_res:
+        notes.append(f"Sites dos concorrentes lidos: {site_res}.")
 
     return competitors, notes
 
@@ -271,6 +280,82 @@ async def _enrich_instagram_followers(competitors: list[Competitor]) -> int:
             comp.instagram_followers = followers
             enriched += 1
     return enriched
+
+
+async def _enrich_site_snippets(competitors: list[Competitor]) -> int:
+    """Le o site de cada concorrente (fetch direto, gratis) e extrai um sinal de
+    posicionamento (titulo + meta description + primeiro H1). Best-effort por
+    site; retorna quantos foram lidos. Materia-prima para copy/posicionamento."""
+    targets = [c for c in competitors if c.website]
+    if not targets:
+        return 0
+
+    async def one(comp: Competitor):
+        snippet = await _fetch_site_snippet(comp.website or "")
+        if snippet:
+            comp.site_snippet = snippet
+            return 1
+        return 0
+
+    results = await asyncio.gather(
+        *(one(c) for c in targets), return_exceptions=True
+    )
+    return sum(r for r in results if isinstance(r, int))
+
+
+async def _fetch_site_snippet(url: str) -> str | None:
+    if not url.lower().startswith(("http://", "https://")):
+        url = "https://" + url
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+        )
+    }
+    try:
+        async with httpx.AsyncClient(
+            timeout=10, follow_redirects=True, headers=headers
+        ) as client:
+            r = await client.get(url)
+    except httpx.HTTPError:
+        return None
+    if r.status_code != 200 or not r.text:
+        return None
+    html = r.text[:200000]
+    title = _re_first(r"<title[^>]*>(.*?)</title>", html)
+    desc = _re_first(
+        r'<meta[^>]+name=["\']description["\'][^>]+content=["\'](.*?)["\']', html
+    ) or _re_first(
+        r'<meta[^>]+content=["\'](.*?)["\'][^>]+name=["\']description["\']', html
+    )
+    h1 = _re_first(r"<h1[^>]*>(.*?)</h1>", html)
+    parts = [p for p in (title, desc, h1) if p]
+    if not parts:
+        return None
+    # Deduplica e limita.
+    seen: list[str] = []
+    for p in parts:
+        p = _clean_html_text(p)
+        if p and p not in seen:
+            seen.append(p)
+    snippet = " | ".join(seen)
+    return snippet[:260] if snippet else None
+
+
+def _re_first(pattern: str, text: str) -> str | None:
+    import re
+
+    m = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
+    return m.group(1) if m else None
+
+
+def _clean_html_text(text: str) -> str:
+    import html as _html
+    import re
+
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = _html.unescape(text)
+    return " ".join(text.split())
 
 
 async def fetch_meta_ads(
