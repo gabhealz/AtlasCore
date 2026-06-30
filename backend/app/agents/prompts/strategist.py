@@ -137,9 +137,17 @@ valor sem ferir o CFM.
 
 ## Mapa de Campanhas
 Tabela: Nome da campanha | Plataforma | Tipo (consultas/servico/audiencia/
-remarketing) | Objetivo | Orcamento diario (R$). Os nomes devem seguir um padrao
-de nomenclatura consistente; se a nomenclatura oficial Healz nao estiver no
-contexto, proponha um padrao claro e rotule como "padrao sugerido — validar".
+remarketing) | Objetivo | Orcamento diario (R$) | Orcamento mensal (R$ = diario x
+30). Os nomes devem seguir um padrao de nomenclatura consistente; se a
+nomenclatura oficial Healz nao estiver no contexto, proponha um padrao claro e
+rotule como "padrao sugerido — validar".
+RESTRICAO DE CONSISTENCIA (obrigatoria): a SOMA dos orcamentos mensais de TODAS
+as campanhas DEVE ser igual ao orcamento mensal total de midia informado (a
+diferenca aceitavel e ate ~5%). Logo abaixo da tabela, escreva a linha
+"Soma mensal: R$ X (orcamento total informado: R$ Y)" e confirme que batem.
+Se nao houver orcamento informado, marque pendencia critica e nao invente valores.
+A divisao por canal (Parte 1) e a soma desta tabela tem que contar a MESMA
+historia — nunca um numero no texto e outro na tabela.
 
 ## Estrutura Detalhada por Campanha
 Para cada campanha, detalhe os conjuntos/grupos de anuncio em tabela:
@@ -173,11 +181,38 @@ de objetivo/metas e proximos passos em linguagem acessivel.
 
 ## KPIs, Metas e Viabilidade
 Tabela: Metrica | Definicao | Meta/benchmark | Fonte. Aplique os benchmarks
-internos Healz e faca a conta de viabilidade orcamento -> leads -> pacientes
-(orcamento / CPL estimado = leads; leads x taxa de conversao do secretariado =
-pacientes/mes). Rotule todo numero estimado como "Benchmark interno Healz" ou
-"Benchmark de mercado". Se a meta calculada nao tiver folga ante o orcamento,
-diga isso com transparencia (faixa de validacao, nao volume garantido).
+internos Healz para CTR, CPC, CPL, conversao de LP->WhatsApp, conversao
+WhatsApp->consulta e CAC. Rotule todo numero estimado como "Benchmark interno
+Healz" ou "Benchmark de mercado".
+
+## Memoria de Calculo do Orcamento (orcamento -> pacientes)
+Esta e a secao mais importante para o medico e para o Ueda: mostre a conta
+COMPLETA e HONESTA de quantos pacientes o orcamento realmente sustenta. Passos
+obrigatorios, em ordem, com cada numero rotulado pela fonte:
+1. Ponto de partida: orcamento mensal total de midia (o valor informado).
+2. CPL estimado: escolha UM valor central de CPL e explique POR QUE esse numero
+   (faixa-piso AQF de R$30-80 para particular; ajuste para cima quando o Doc 1
+   classificou o mercado como competitivo/denso; cruze com o CPC do Doc 1:
+   CPC x (1 / taxa de conversao de LP) = CPL implicado). Mostre a faixa e o
+   numero central.
+3. Leads/mes = orcamento mensal / CPL central. Mostre a conta.
+4. Pacientes/mes = leads x taxa de conversao WhatsApp->consulta do secretariado
+   (use o benchmark interno; deixe claro qual taxa usou). Mostre a conta.
+5. Apresente o resultado como FAIXA realista (cenario conservador e otimista),
+   NUNCA como numero garantido.
+6. Reconciliacao com a meta do cliente: compare o resultado da conta com a META
+   declarada na reuniao comercial (ex.: "10 pacientes/semana"). Se a conta der
+   MENOS que a meta declarada, diga isso de forma transparente e explique que a
+   meta declarada exigiria mais orcamento OU melhor conversao — NAO infle a
+   projecao para casar com a meta. Indique qual e o gargalo provavel (verba de
+   midia, conversao da pagina/Fator 3, ou conversao do secretariado/Fator 6).
+7. "O que muda se a meta nao for atingida": se o CPL vier dentro do esperado e
+   ainda assim os agendamentos ficarem abaixo, o gargalo NAO e a verba — e
+   conversao de pagina ou de secretariado; aumentar orcamento nesse cenario so
+   queima dinheiro no mesmo gargalo. Diga isso explicitamente.
+A conta aqui tem que ser ARITMETICAMENTE CONSISTENTE com o Mapa de Campanhas (o
+mesmo orcamento mensal total) e com a divisao por canal. Numeros que nao fecham
+sao reprovacao.
 
 ## Checkpoints das Primeiras Semanas
 Tabela: Periodo | O que validar | Por que (qual fator/risco do diagnostico) |

@@ -50,6 +50,22 @@ Lista de frases/expressoes do proprio cliente (entre aspas, quando possivel),
 diferenciais que ele declarou sobre si mesmo, e o que ele rejeita/quer evitar.
 Material para a Big Idea e o tom da copy.
 
+## Posicionamento e Diferenciais
+- Por que o medico escolheu a especialidade / o que o move (motivacao declarada).
+- Diferenciais que ele atribui a si mesmo (tecnica, abordagem, atendimento,
+  filosofia) — em palavras dele quando possivel.
+- Concorrentes/referencias que ele admira ou de quem quer se diferenciar, se citou.
+- Posicionamento desejado (como quer ser percebido pelo paciente).
+Marque "(inferencia)" quando ler nas entrelinhas. Esta secao alimenta diretamente
+o posicionamento da estrategia e a Big Idea da copy.
+
+## Jornada e Objecoes do Paciente (na visao do medico)
+- Perfil do paciente ideal descrito pelo medico (quem ele quer atrair).
+- Dores/situacao tipica com que o paciente chega (o que ele ja tentou, medos).
+- Objecoes comuns que o medico observa (preco, medo de cirurgia, tempo, etc.).
+- Gatilho de decisao: o que costuma fazer o paciente escolher/agir.
+So registre o que aparecer nas fontes; marque o que faltar como pendencia.
+
 ## Pendencias e Pontos a Confirmar
 O que ficou em aberto na reuniao e precisa ser confirmado com o cliente ou na
 proxima conversa (ex.: ticket, endereco do consultorio, Doctoralia vs WhatsApp).
