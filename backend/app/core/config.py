@@ -93,8 +93,9 @@ class Settings(BaseSettings):
     # Idioma/país da busca no Google Maps (relevância local BR).
     APIFY_MAPS_LANGUAGE: str = "pt-BR"
     APIFY_MAPS_COUNTRY: str = "br"
-    # Timeout das chamadas Apify (scrapers levam mais que as APIs REST comuns).
-    APIFY_TIMEOUT_SECONDS: float = 120
+    # Timeout das chamadas Apify (scrapers levam mais que as APIs REST comuns;
+    # o cold-start do actor de Maps sozinho já fica ~80s, e 6 places somam mais).
+    APIFY_TIMEOUT_SECONDS: float = 180
 
     # Email (Brevo transactional API)
     BREVO_API_KEY: str = ""

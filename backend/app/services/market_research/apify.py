@@ -93,7 +93,13 @@ async def fetch_competitors(
         ) as client:
             response = await client.post(
                 url,
-                params={"token": settings.APIFY_TOKEN},
+                params={
+                    "token": settings.APIFY_TOKEN,
+                    # Garante os itens inline no corpo (JSON limpo, sem campos
+                    # internos/vazios). Sem isso o sync pode devolver corpo vazio.
+                    "format": "json",
+                    "clean": "true",
+                },
                 json=body,
             )
     except httpx.HTTPError as exc:
