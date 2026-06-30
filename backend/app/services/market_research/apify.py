@@ -16,13 +16,15 @@ Nunca levanta exceção: em qualquer erro retorna lista vazia + uma nota.
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import unicodedata
 from typing import Any
 
 import httpx
 
 from app.core.config import settings
-from app.services.market_research.base import Competitor
+from app.services.market_research.base import Competitor, MetaAd
 
 logger = logging.getLogger(__name__)
 
@@ -136,7 +138,258 @@ async def fetch_competitors(
             f"Apify Google Maps: resultados sem dados utilizaveis para '{query}'."
         ]
 
-    return competitors, []
+    notes: list[str] = []
+
+    # Filtro geografico: o Google Maps as vezes devolve lugares de outras cidades/
+    # estados. Mantem apenas os cuja ficha de endereco contem a cidade buscada;
+    # se isso esvaziar tudo (formato de endereco atipico), mantem a lista original.
+    if local:
+        filtered = [c for c in competitors if _address_in_city(c.address, local)]
+        dropped = len(competitors) - len(filtered)
+        if filtered:
+            if dropped:
+                notes.append(
+                    f"Apify Google Maps: {dropped} concorrente(s) de fora de "
+                    f"'{local}' descartado(s) por filtro geografico."
+                )
+            competitors = filtered
+        else:
+            notes.append(
+                "Apify Google Maps: filtro geografico nao casou nenhum endereco "
+                f"com '{local}'; mantendo a lista completa."
+            )
+
+    # Enriquecimento de seguidores (Rota B): preenche instagram_followers a partir
+    # dos @ ja resolvidos pelo Maps. Best-effort, nunca bloqueia.
+    if settings.apify_instagram_enabled:
+        try:
+            ig_count = await _enrich_instagram_followers(competitors)
+            if ig_count:
+                notes.append(
+                    f"Apify Instagram: seguidores coletados de {ig_count} perfil(is)."
+                )
+        except Exception as exc:  # noqa: BLE001 - enriquecimento e best-effort
+            logger.warning("Apify Instagram enrichment failed: %s", exc)
+            notes.append(f"Apify Instagram: enriquecimento de seguidores falhou: {exc}")
+
+    return competitors, notes
+
+
+def _norm(text: str | None) -> str:
+    """Lowercase + remove acentos para comparacao tolerante."""
+    if not text:
+        return ""
+    decomposed = unicodedata.normalize("NFKD", text)
+    no_accents = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
+    return no_accents.lower().strip()
+
+
+def _address_in_city(address: str | None, city: str) -> bool:
+    """True se o endereco do place contem a cidade buscada (sem acento/caixa)."""
+    if not address:
+        # Sem endereco nao da pra confirmar; nao descarta (mantem benefit-of-doubt).
+        return True
+    return _norm(city) in _norm(address)
+
+
+def _handle_from_instagram_url(url: str | None) -> str | None:
+    """https://www.instagram.com/diego.ortopedia/ -> diego.ortopedia."""
+    if not url:
+        return None
+    cleaned = url.split("?")[0].rstrip("/")
+    if "instagram.com/" not in cleaned.lower():
+        return None
+    handle = cleaned.rsplit("/", 1)[-1].strip()
+    # Ignora paths que nao sao perfis (reel, p, explore, etc.).
+    if not handle or handle.lower() in {"reel", "p", "explore", "stories", "tv"}:
+        return None
+    return handle
+
+
+async def _enrich_instagram_followers(competitors: list[Competitor]) -> int:
+    """Preenche instagram_followers nos competitors que tem @ resolvido.
+
+    Chama o actor de perfil do Instagram com a lista de usernames e mescla o
+    followersCount de volta por handle. Retorna quantos perfis foram enriquecidos.
+    """
+    handle_by_comp: dict[str, Competitor] = {}
+    usernames: list[str] = []
+    for comp in competitors:
+        handle = _handle_from_instagram_url(comp.instagram_url)
+        if handle and handle.lower() not in handle_by_comp:
+            handle_by_comp[handle.lower()] = comp
+            usernames.append(handle)
+
+    if not usernames:
+        return 0
+
+    actor = _actor_path(settings.APIFY_INSTAGRAM_FOLLOWERS_ACTOR)
+    url = f"{_BASE}/{actor}/run-sync-get-dataset-items"
+    body = {"usernames": usernames}
+
+    async with httpx.AsyncClient(timeout=settings.APIFY_TIMEOUT_SECONDS) as client:
+        response = await client.post(
+            url,
+            params={
+                "token": settings.APIFY_TOKEN,
+                "format": "json",
+                "clean": "true",
+            },
+            json=body,
+        )
+
+    if response.status_code not in (200, 201):
+        logger.warning(
+            "Apify Instagram returned %s: %s",
+            response.status_code,
+            _extract_error(response),
+        )
+        return 0
+
+    try:
+        items = response.json()
+    except ValueError:
+        return 0
+    if not isinstance(items, list):
+        return 0
+
+    enriched = 0
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        handle = _first_str(item, ("username", "handle", "ownerUsername"))
+        followers = _as_int(
+            _first_val(
+                item,
+                ("followersCount", "followers", "followersCountText", "edge_followed_by"),
+            )
+        )
+        if handle is None or followers is None:
+            continue
+        comp = handle_by_comp.get(handle.lower())
+        if comp is not None and comp.instagram_followers is None:
+            comp.instagram_followers = followers
+            enriched += 1
+    return enriched
+
+
+async def fetch_meta_ads(
+    *,
+    search_term: str | None,
+    limit: int,
+) -> tuple[list[MetaAd], list[str]]:
+    """Conta/colhe anuncios ativos na Meta Ad Library (BR) por termo, via Apify.
+
+    A API oficial da Meta volta vazia p/ anuncio comercial BR; o scraper le a UI
+    publica. Best-effort: qualquer erro -> lista vazia + nota. Usado para alimentar
+    a secao Analise Meta com densidade de anuncios real do nicho.
+    """
+    if not settings.apify_meta_ads_enabled:
+        return [], []
+    term = (search_term or "").strip()
+    if not term:
+        return [], []
+
+    actor = _actor_path(settings.APIFY_META_ADS_ACTOR)
+    url = f"{_BASE}/{actor}/run-sync-get-dataset-items"
+    library_url = (
+        "https://www.facebook.com/ads/library/"
+        "?active_status=active&ad_type=all&country=BR"
+        f"&q={httpx.QueryParams({'q': term})['q']}"
+        "&search_type=keyword_unordered"
+    )
+    count = max(1, min(limit, 50))
+    body = {
+        "startUrls": [{"url": library_url, "method": "GET"}],
+        "count": count,
+        "activeStatus": "active",
+    }
+
+    try:
+        async with httpx.AsyncClient(
+            timeout=settings.APIFY_TIMEOUT_SECONDS
+        ) as client:
+            response = await client.post(
+                url,
+                params={
+                    "token": settings.APIFY_TOKEN,
+                    "format": "json",
+                    "clean": "true",
+                },
+                json=body,
+            )
+    except httpx.HTTPError as exc:
+        logger.warning("Apify Meta Ads request failed: %s", exc)
+        return [], [f"Apify Meta Ads indisponivel (erro de conexao): {exc}"]
+
+    if response.status_code not in (200, 201):
+        detail = _extract_error(response)
+        logger.warning("Apify Meta Ads returned %s: %s", response.status_code, detail)
+        return [], [
+            f"Apify Meta Ads retornou erro HTTP {response.status_code}: {detail}"
+        ]
+
+    try:
+        items = response.json()
+    except ValueError:
+        return [], ["Apify Meta Ads retornou resposta nao-JSON."]
+    if not isinstance(items, list) or not items:
+        return [], [
+            f"Apify Meta Ads: nenhum anuncio ativo encontrado para '{term}'."
+        ]
+
+    ads: list[MetaAd] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        ad = _parse_meta_ad(item)
+        if ad is not None:
+            ads.append(ad)
+    return ads, []
+
+
+def _parse_meta_ad(item: dict[str, Any]) -> MetaAd | None:
+    snapshot = item.get("snapshot") if isinstance(item.get("snapshot"), dict) else {}
+    page_name = (
+        _first_str(item, ("pageName", "page_name"))
+        or _first_str(snapshot, ("page_name", "pageName"))
+    )
+    body = (
+        _first_str(snapshot, ("body", "caption", "title"))
+        or _first_str(item, ("adText", "body", "text"))
+        or "Anuncio sem texto extraido"
+    )
+    if isinstance(item.get("snapshot", {}), dict):
+        body_field = item["snapshot"].get("body")
+        if isinstance(body_field, dict):
+            body = body_field.get("text") or body
+    cta = (
+        _first_str(snapshot, ("cta_text", "ctaText"))
+        or _first_str(item, ("ctaText", "cta_text"))
+        or "Nao informado"
+    )
+    platforms = item.get("publisherPlatform") or item.get("publisher_platform")
+    if isinstance(platforms, list):
+        platforms_text = ", ".join(str(p) for p in platforms)
+    else:
+        platforms_text = str(platforms) if platforms else "Nao informado"
+    started = _first_str(
+        item, ("startDate", "start_date", "startDateFormatted", "adDeliveryStartTime")
+    ) or "Nao informado"
+    snapshot_url = (
+        _first_str(item, ("url", "adLibraryUrl", "snapshotUrl"))
+        or "https://www.facebook.com/ads/library/"
+    )
+    if page_name is None:
+        page_name = "Pagina nao identificada"
+    return MetaAd(
+        page_name=page_name,
+        body=body,
+        cta_title=cta,
+        platforms=platforms_text,
+        started_at=started,
+        snapshot_url=snapshot_url,
+    )
 
 
 def _parse_place(item: dict[str, Any]) -> Competitor | None:

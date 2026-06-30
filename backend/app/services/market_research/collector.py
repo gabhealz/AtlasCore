@@ -47,7 +47,17 @@ async def collect_market_data(
     max_items = max(1, settings.MARKET_DATA_MAX_ITEMS)
     meta_terms = (meta_search_terms or specialty or "").strip()
 
-    meta_task = meta_ad_library.fetch_meta_ads(meta_terms, limit=max_items)
+    # Anuncios na Meta: a API oficial volta vazia p/ comercial BR, entao quando o
+    # scraper Apify esta ligado preferimos ele (le a UI publica); senao, oficial.
+    if settings.apify_meta_ads_enabled:
+        meta_task = apify.fetch_meta_ads(
+            search_term=meta_terms,
+            limit=settings.APIFY_META_ADS_MAX_PER_PAGE,
+        )
+        meta_source_label = "Meta Ad Library (Apify)"
+    else:
+        meta_task = meta_ad_library.fetch_meta_ads(meta_terms, limit=max_items)
+        meta_source_label = "Meta Ad Library"
     keyword_task = _collect_keywords(keywords, limit=max_items)
     competitors_task = apify.fetch_competitors(
         specialty=specialty,
@@ -68,8 +78,9 @@ async def collect_market_data(
         ads, notes = meta_result
         data.meta_ads.extend(ads)
         data.notes.extend(notes)
+        data.apify_meta_ads = len(ads) if meta_source_label.endswith("(Apify)") else 0
         if ads:
-            data.sources_used.append("Meta Ad Library")
+            data.sources_used.append(meta_source_label)
 
     if isinstance(competitors_result, BaseException):
         logger.warning("Apify collection raised: %s", competitors_result)
@@ -80,6 +91,10 @@ async def collect_market_data(
         competitors, notes = competitors_result
         data.competitors.extend(competitors)
         data.notes.extend(notes)
+        data.apify_places = len(competitors)
+        data.apify_ig_profiles = sum(
+            1 for c in competitors if c.instagram_followers is not None
+        )
         if competitors:
             data.sources_used.append("Google Maps (Apify)")
 

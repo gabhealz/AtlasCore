@@ -96,6 +96,26 @@ class Settings(BaseSettings):
     # Timeout das chamadas Apify (scrapers levam mais que as APIs REST comuns;
     # o cold-start do actor de Maps sozinho já fica ~80s, e 6 places somam mais).
     APIFY_TIMEOUT_SECONDS: float = 180
+    # Enriquecimento de seguidores do Instagram (Rota B): a partir dos @ que o
+    # Maps resolveu, busca o nº de seguidores de cada perfil. Actor pay-per-result.
+    APIFY_INSTAGRAM_FOLLOWERS_ACTOR: str = "apify/instagram-profile-scraper"
+    APIFY_INSTAGRAM_ENABLED: bool = True
+    # Contagem de anúncios ativos na Meta Ad Library (via Apify, que raspa a UI
+    # pública - a API oficial volta vazia p/ comercial BR). DESLIGADO por padrão:
+    # o actor facebook-ads-scraper via run-sync leva >180s (cold E warm) e
+    # bloquearia a coleta a cada run sem retorno. Religar só com um actor mais
+    # leve ou via run assíncrono (start + poll) fora do caminho crítico.
+    APIFY_META_ADS_ACTOR: str = "apify/facebook-ads-scraper"
+    APIFY_META_ADS_ENABLED: bool = False
+    # Máximo de anúncios coletados por concorrente (só precisamos da contagem +
+    # alguns exemplos de criativo; manter baixo p/ custo/latência).
+    APIFY_META_ADS_MAX_PER_PAGE: int = 10
+    # Custo estimado por place do Maps (pay-per-result) p/ telemetria de custo.
+    APIFY_COST_PER_PLACE_USD: float = 0.0072
+    # Custo estimado por perfil de Instagram enriquecido.
+    APIFY_COST_PER_IG_PROFILE_USD: float = 0.0023
+    # Custo estimado por anúncio coletado na Meta Ad Library.
+    APIFY_COST_PER_META_AD_USD: float = 0.0020
 
     # Email (Brevo transactional API)
     BREVO_API_KEY: str = ""
@@ -159,6 +179,14 @@ class Settings(BaseSettings):
     @property
     def apify_enabled(self) -> bool:
         return bool(self.APIFY_TOKEN.strip())
+
+    @property
+    def apify_instagram_enabled(self) -> bool:
+        return self.apify_enabled and self.APIFY_INSTAGRAM_ENABLED
+
+    @property
+    def apify_meta_ads_enabled(self) -> bool:
+        return self.apify_enabled and self.APIFY_META_ADS_ENABLED
 
     @property
     def google_ads_keywords_enabled(self) -> bool:

@@ -68,6 +68,7 @@ class Competitor:
     instagram_followers: int | None
     facebook_url: str | None
     address: str | None
+    meta_ads_count: int | None = None
 
     def rating_text(self) -> str:
         if self.rating is None:
@@ -84,6 +85,11 @@ class Competitor:
             return "Indisponivel"
         return f"{self.instagram_followers:,}".replace(",", ".")
 
+    def meta_ads_text(self) -> str:
+        if self.meta_ads_count is None:
+            return "Indisponivel"
+        return f"{self.meta_ads_count:,}".replace(",", ".")
+
 
 @dataclass(slots=True)
 class CollectedMarketData:
@@ -92,6 +98,11 @@ class CollectedMarketData:
     competitors: list[Competitor] = field(default_factory=list)
     sources_used: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
+    # Contadores de itens cobrados pela Apify (pay-per-result), para telemetria
+    # de custo. Preenchidos pelo cliente Apify; usados pelo orquestrador.
+    apify_places: int = 0
+    apify_ig_profiles: int = 0
+    apify_meta_ads: int = 0
 
     @property
     def has_data(self) -> bool:
@@ -127,9 +138,10 @@ class CollectedMarketData:
             lines.append("")
             lines.append(
                 "Concorrentes reais (Google Maps - nota, nº de avaliações e "
-                "redes sociais extraídas do site). Use estes nomes e numeros "
-                "REAIS na matriz de concorrentes e na prova social; o link do "
-                "Instagram resolve o @ de cada concorrente:"
+                "seguidores do Instagram extraídos do perfil). Use estes nomes e "
+                "numeros REAIS (verbatim) na tabela de concorrentes e na prova "
+                "social; o link do Instagram resolve o @ de cada concorrente. "
+                "NÃO re-busque nem altere estes números:"
             )
             lines.append(
                 "| Concorrente | Nota Google | Avaliações | Instagram | "

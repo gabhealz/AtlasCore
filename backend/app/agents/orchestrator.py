@@ -44,7 +44,7 @@ from app.services.html_validation_service import (
 from app.services.intake_service import load_intake_fields, render_intake_context
 from app.services.learning_service import build_learning_context
 from app.services.market_research import collect_market_data
-from app.services.usage_service import record_usage
+from app.services.usage_service import record_apify_usage, record_usage
 from app.services.pipeline_service import (
     PIPELINE_AWAITING_REVIEW_STATUS,
     PipelineService,
@@ -109,8 +109,8 @@ RESEARCHER_RETRY_SKELETON = "\n".join(
         "",
         "## Benchmark de Concorrentes",
         (
-            "| Concorrente | Instagram | Meta | Destino | Copy | Funil | Fonte | "
-            "URL/consulta | Data | Status |"
+            "| Concorrente | Nota Google | Avaliacoes | Instagram | Meta | "
+            "Destino | Copy | Funil | Fonte | URL/consulta | Data | Status |"
         ),
         "",
         "## Matriz de Benchmark Competitivo",
@@ -186,16 +186,17 @@ RESEARCHER_MISSING_SECTION_TEMPLATES = {
     "Benchmark de Concorrentes": "\n".join(
         (
             (
-                "| Concorrente | Instagram | Meta | Destino | Copy | Funil | "
-                "Fonte | URL/consulta | Data | Status |"
+                "| Concorrente | Nota Google | Avaliacoes | Instagram | Meta | "
+                "Destino | Copy | Funil | Fonte | URL/consulta | Data | Status |"
             ),
-            "|---|---|---|---|---|---|---|---|---|---|",
+            "|---|---|---|---|---|---|---|---|---|---|---|---|",
             (
                 "| Dado pendente de validacao externa | Dado pendente de validacao "
                 "externa | Dado pendente de validacao externa | Dado pendente "
                 "de validacao externa | Dado pendente de validacao externa | "
-                "Dado pendente de validacao externa | Google Search | Consulta "
-                "sugerida por especialidade + cidade | Dado pendente de "
+                "Dado pendente de validacao externa | Dado pendente de validacao "
+                "externa | Dado pendente de validacao externa | Google Search | "
+                "Consulta sugerida por especialidade + cidade | Dado pendente de "
                 "validacao externa | Dado pendente de validacao externa |"
             ),
         )
@@ -376,13 +377,15 @@ MAKER_STEPS: tuple[MakerStep, ...] = (
         document_kind="secretary_script",
         prompt_builder=build_script_writer_system_prompt,
     ),
-    MakerStep(
-        step_name="html_developer",
-        agent_name="html_developer",
-        document_kind=LANDING_PAGE_HTML_KIND,
-        prompt_builder=build_html_developer_system_prompt,
-        output_kind="html",
-    ),
+    # Etapa de HTML (landing page) DESATIVADA por ora - vira feature futura.
+    # O pipeline finaliza apos o script_writer e segue para criacao do cliente.
+    # MakerStep(
+    #     step_name="html_developer",
+    #     agent_name="html_developer",
+    #     document_kind=LANDING_PAGE_HTML_KIND,
+    #     prompt_builder=build_html_developer_system_prompt,
+    #     output_kind="html",
+    # ),
 )
 
 STEP_BY_NAME = {step.step_name: step for step in MAKER_STEPS}
@@ -667,13 +670,15 @@ async def _build_market_data_context(
     *,
     city: str | None = None,
     keywords: list[str] | None = None,
+    db: AsyncSession | None = None,
 ) -> str | None:
     """Coleta dados de mercado reais e os renderiza para injetar no prompt.
 
     Usa as keywords extraidas do briefing (alto volume, sem cidade) quando
     disponiveis; senao cai no fallback derivado da especialidade. Nunca propaga
     excecao: qualquer falha resulta em contexto vazio (None) e o pipeline segue
-    apenas com web_search.
+    apenas com web_search. Quando `db` e fornecido, registra o custo Apify
+    (pay-per-result) na telemetria para somar ao custo do onboarding.
     """
     seed_keywords = keywords if keywords else _build_market_seed_keywords(onboarding)
     try:
@@ -689,6 +694,15 @@ async def _build_market_data_context(
             extra={"onboarding_id": onboarding.id},
         )
         return None
+
+    if db is not None:
+        await record_apify_usage(
+            db,
+            onboarding_id=onboarding.id,
+            places=collected.apify_places,
+            ig_profiles=collected.apify_ig_profiles,
+            meta_ads=collected.apify_meta_ads,
+        )
 
     context = collected.to_prompt_context()
     return context or None
@@ -2010,6 +2024,7 @@ async def bootstrap_pipeline(
                     onboarding,
                     city=detected_city,
                     keywords=detected_keywords,
+                    db=db,
                 )
             elif current_step.output_kind == "html":
                 step_specific_context, required_css_ids = (

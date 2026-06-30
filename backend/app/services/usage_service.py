@@ -5,10 +5,55 @@ import logging
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.models.llm_usage_event import LLMUsageEvent
 from app.services.llm_pricing import estimate_cost
 
 logger = logging.getLogger(__name__)
+
+
+async def record_apify_usage(
+    db: AsyncSession,
+    *,
+    onboarding_id: int,
+    places: int = 0,
+    ig_profiles: int = 0,
+    meta_ads: int = 0,
+) -> None:
+    """Registra o custo da coleta Apify (Google Maps + Instagram + Meta Ads) como
+    uma linha na telemetria, para aparecer somado no custo do onboarding.
+
+    Apify e pay-per-result: custo = nº de itens coletados x preço unitário. Os
+    'tokens' ficam zerados (nao e LLM). Best-effort: nunca quebra o pipeline."""
+    if not (places or ig_profiles or meta_ads):
+        return
+    try:
+        cost = (
+            places * settings.APIFY_COST_PER_PLACE_USD
+            + ig_profiles * settings.APIFY_COST_PER_IG_PROFILE_USD
+            + meta_ads * settings.APIFY_COST_PER_META_AD_USD
+        )
+        db.add(
+            LLMUsageEvent(
+                onboarding_id=onboarding_id,
+                step_name="apify_benchmark",
+                agent_name="apify",
+                model="apify-actor",
+                input_tokens=0,
+                output_tokens=0,
+                web_searches=0,
+                cost_usd=round(cost, 6),
+            )
+        )
+        await db.commit()
+    except Exception:  # noqa: BLE001 - telemetria nunca bloqueia o pipeline
+        logger.exception(
+            "Falha ao registrar uso de Apify (onboarding=%s).", onboarding_id
+        )
+        try:
+            await db.rollback()
+        except Exception:  # noqa: BLE001
+            pass
 
 
 async def record_usage(
