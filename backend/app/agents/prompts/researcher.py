@@ -590,15 +590,25 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
    Tipo como rotulo do grupo (ex.: "Grupo Clinico/Consulta", "Grupo
    Procedimento/Cirurgia", "Grupo Condicao/Dor"), como faria um gestor de
    trafego ao montar a campanha real - nao entregue uma lista solta sem grupos.
-   REGRA DE PREENCHIMENTO (critica): nunca deixe Volume E CPC simultaneamente
-   como "Dado indisponivel". Volume pode ficar "Dado indisponivel apos pesquisa"
-   quando o Keyword Planner/DataForSEO nao retornar o numero, MAS o CPC deve
-   SEMPRE trazer uma FAIXA rotulada - use o bloco "BENCHMARK HEALZ POR
-   ESPECIALIDADE" do contexto (rotule "Benchmark Healz por especialidade"); na
-   ausencia dele, a base real Google CPC R$3,10-5,50 (rotule "Benchmark interno
-   Healz") ou "Benchmark publico de mercado" com URL - para que a campanha tenha
-   base de custo. Uma coluna CPC inteira em "indisponivel" e considerada secao
-   incompleta.
+   REGRA DE PREENCHIMENTO do Volume/CPC — CADEIA DE FALLBACK, nesta ordem exata:
+   (1) DADO REAL: se o bloco "DADOS DE MERCADO COLETADOS VIA API" trouxer Volume/
+   CPC do DataForSEO/Keyword Planner, use o numero real (fonte "DataForSEO",
+   status "Fonte externa verificada").
+   (2) WEB_SEARCH (benchmark publico): se nao houver dado real, FACA web_search
+   por uma referencia publica de CPC/CTR/volume da especialidade no Brasil
+   (relatorios de agencias, artigos de Google Ads/SEO, estudos de mercado). SO
+   VALE com URL real e clicavel (http/https) + data + escopo; rotule a Fonte como
+   "Benchmark publico de mercado" e ponha a URL na coluna URL/consulta. E
+   PROIBIDO inventar um numero sem fonte citavel — sem URL, este passo NAO conta.
+   (3) MINI-BANCO HEALZ: se a web_search nao trouxer fonte citavel, use o bloco
+   "BENCHMARK HEALZ POR ESPECIALIDADE" do contexto (rotule "Benchmark Healz por
+   especialidade"); na ausencia dele, a base real Google CPC R$3,10-5,50 (rotule
+   "Benchmark interno Healz").
+   Volume pode ficar "Dado indisponivel apos pesquisa" se nenhuma das 3 trouxer,
+   MAS o CPC SEMPRE deve ter um valor rotulado por UMA dessas tres fontes (na
+   ordem). Uma coluna CPC inteira em "indisponivel" e considerada secao
+   incompleta. Sempre deixe claro na coluna Fonte/Status QUAL das tres origens
+   sustenta cada celula.
    A tabela deve conter Tipo, Palavra-chave, Intencao, Regiao, Volume, CPC,
    Fonte, URL/consulta, Data e Status.
 5. Benchmark de Concorrentes no Google (Etapa 3): fichas ou tabela somente dos
