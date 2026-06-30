@@ -3,7 +3,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   FileText,
-  FileUp,
   FolderOpen,
   MousePointerClick,
   PlayCircle,
@@ -159,7 +158,9 @@ const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
 const ALLOWED_EXTENSIONS = ['.pdf', '.txt', '.docx'];
 const IMAGE_ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif'];
 const CSS_ID_PATTERN = /^[a-z][a-z0-9_-]*$/;
-const LANDING_PAGE_FEATURES_ENABLED = true;
+// Landing page (HTML) desativada por ora — esconde uploads de imagem/CTA que so
+// servem ao agente de HTML. Religar quando a feature de landing voltar.
+const LANDING_PAGE_FEATURES_ENABLED = false;
 const IMAGE_CATEGORY_OPTIONS: Array<{
   value: AssetCategory;
   label: string;
@@ -187,18 +188,6 @@ const IMAGE_CATEGORY_OPTIONS: Array<{
   },
 ];
 
-type OnboardingTab = 'overview' | 'inputs' | 'pipeline' | 'review';
-
-const ONBOARDING_TABS: Array<{
-  id: OnboardingTab;
-  label: string;
-  icon: typeof FolderOpen;
-}> = [
-  { id: 'overview', label: 'Visao Geral', icon: FolderOpen },
-  { id: 'inputs', label: 'Insumos', icon: FileUp },
-  { id: 'pipeline', label: 'Esteira de IA', icon: PlayCircle },
-  { id: 'review', label: 'Revisao', icon: CheckCircle2 },
-];
 
 const PIPELINE_STAGES: Array<{ key: string; label: string }> = [
   { key: 'commercial_intel', label: 'Comercial' },
@@ -206,7 +195,6 @@ const PIPELINE_STAGES: Array<{ key: string; label: string }> = [
   { key: 'strategist', label: 'Estrategia' },
   { key: 'copywriter', label: 'Copy' },
   { key: 'script_writer', label: 'Script' },
-  { key: 'html_developer', label: 'Landing HTML' },
 ];
 
 function PipelineTimeline({
@@ -381,14 +369,14 @@ function getStreamConnectionLabel(status: StreamConnectionStatus) {
     case 'connected':
       return 'Tempo real conectado';
     case 'connecting':
-      return 'Conectando stream';
+      return 'Conectando...';
     case 'reconnecting':
-      return 'Reconectando stream';
+      return 'Atualizando automaticamente';
     case 'unavailable':
-      return 'Stream indisponivel';
+      return 'Atualizando automaticamente';
     case 'idle':
     default:
-      return 'Stream em espera';
+      return 'Atualizando automaticamente';
   }
 }
 
@@ -1297,8 +1285,6 @@ export default function OnboardingDetail() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<OnboardingTab>('overview');
-  const hasPendingReview = resolvedPipelineStatus === 'AWAITING_REVIEW';
   const [reviewPreview, setReviewPreview] = useState(true);
   const [onboardingCost, setOnboardingCost] = useState<CostSummary | null>(null);
 
@@ -1323,6 +1309,25 @@ export default function OnboardingDetail() {
       cancelled = true;
     };
   }, [hasValidOnboardingId, onboardingId, resolvedPipelineStatus]);
+
+  // Tempo real SEM depender do SSE (bloqueado pelo proxy): enquanto a IA trabalha
+  // (status RUNNING), re-busca o status a cada 3s para a tela "andar" sozinha e
+  // revelar a revisao assim que a etapa pausar, sem o usuario precisar atualizar.
+  useEffect(() => {
+    if (!hasValidOnboardingId || resolvedPipelineStatus !== 'RUNNING') {
+      return;
+    }
+    const interval = setInterval(() => {
+      api
+        .get(`/onboardings/${onboardingId}`)
+        .then((response) => {
+          setPipelineStatus(response.data.data.status);
+        })
+        .catch(() => undefined);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [hasValidOnboardingId, onboardingId, resolvedPipelineStatus]);
+
   const pipelineFailureMessage =
     resolvedPipelineStatus === 'FAILED' && latestPipelineEvent?.to_status === 'FAILED'
       ? latestPipelineEvent.error_message ??
@@ -1446,6 +1451,36 @@ export default function OnboardingDetail() {
         pendingPreparationItems.length === 1 ? '' : 's'
       }`;
 
+  const status = resolvedPipelineStatus ?? '';
+  const scrollToSection = (sectionId: string) => {
+    document
+      .getElementById(sectionId)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const flowDone = {
+    insumos: pipelineInputsReady,
+    esteira: ['AWAITING_REVIEW', 'PENDING_CLIENT_CREATION', 'APPROVED'].includes(
+      status,
+    ),
+    revisao: ['PENDING_CLIENT_CREATION', 'APPROVED'].includes(status),
+    entrega: status === 'APPROVED',
+  };
+  const flowSteps = [
+    { id: 'sec-insumos', label: 'Insumos & Formulário', done: flowDone.insumos },
+    { id: 'sec-esteira', label: 'Esteira de IA', done: flowDone.esteira },
+    { id: 'sec-revisao', label: 'Revisão', done: flowDone.revisao },
+    { id: 'sec-entrega', label: 'Entrega & Cliente', done: flowDone.entrega },
+  ];
+  const activeFlowId = !flowDone.insumos
+    ? 'sec-insumos'
+    : status === 'RUNNING'
+      ? 'sec-esteira'
+      : status === 'AWAITING_REVIEW'
+        ? 'sec-revisao'
+        : ['PENDING_CLIENT_CREATION', 'APPROVED'].includes(status)
+          ? 'sec-entrega'
+          : 'sec-esteira';
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto flex max-w-5xl flex-col">
@@ -1486,36 +1521,212 @@ export default function OnboardingDetail() {
           </div>
         </header>
 
-        <nav className="mb-6 flex flex-wrap gap-1 rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
-          {ONBOARDING_TABS.map((tab) => {
-            const isActive = activeTab === tab.id;
-            const showReviewDot = tab.id === 'review' && hasPendingReview;
+        {/* Stepper de fases — sempre visivel, guia e leva direto a secao */}
+        <nav className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {flowSteps.map((step, index) => {
+            const isActive = step.id === activeFlowId;
             return (
               <button
-                key={tab.id}
+                key={step.id}
                 type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                onClick={() => scrollToSection(step.id)}
+                className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
                   isActive
-                    ? 'bg-brand text-white shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? 'border-brand bg-brand/5 shadow-sm'
+                    : step.done
+                      ? 'border-emerald-200 bg-emerald-50 hover:bg-emerald-100'
+                      : 'border-gray-200 bg-white hover:bg-gray-50'
                 }`}
               >
-                <tab.icon className="h-4 w-4" />
-                {tab.label}
-                {showReviewDot ? (
-                  <span
-                    className={`ml-1 h-2 w-2 rounded-full ${
-                      isActive ? 'bg-white' : 'bg-rose-500'
-                    }`}
-                  />
-                ) : null}
+                <span
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                    step.done
+                      ? 'bg-emerald-500 text-white'
+                      : isActive
+                        ? 'bg-brand text-white'
+                        : 'bg-gray-200 text-gray-600'
+                  }`}
+                >
+                  {step.done ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
+                </span>
+                <span
+                  className={`text-sm font-medium ${
+                    isActive ? 'text-brand' : 'text-gray-700'
+                  }`}
+                >
+                  {step.label}
+                </span>
               </button>
             );
           })}
         </nav>
 
-        <div className={activeTab === 'overview' ? '' : 'hidden'}>
+        {/* Hero "proximo passo" — sempre diz a UNICA acao de agora */}
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          {!pipelineInputsReady ? (
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-amber-600">
+                  Próximo passo
+                </p>
+                <h2 className="mt-1 text-2xl font-bold text-gray-900">
+                  Complete os insumos do onboarding
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm text-gray-600">
+                  Anexe ao menos uma transcrição/documento base e salve o
+                  formulário de lacunas. Só então a IA pode começar.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => scrollToSection('sec-insumos')}
+                className="inline-flex items-center justify-center rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-soft"
+              >
+                <FolderOpen className="mr-2 h-4 w-4" />
+                Ir para os insumos
+              </button>
+            </div>
+          ) : status === 'PENDING' || status === 'FAILED' ? (
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                  Próximo passo
+                </p>
+                <h2 className="mt-1 text-2xl font-bold text-gray-900">
+                  {status === 'FAILED'
+                    ? 'Tentar gerar o Benchmarking de novo'
+                    : 'Gerar o Benchmarking'}
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm text-gray-600">
+                  A IA roda Comercial → Pesquisa → Estratégia → Copy → Script,
+                  com revisão sua a cada etapa. Você acompanha aqui ao vivo.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleStartPipeline}
+                disabled={isStartingPipeline}
+                className="inline-flex items-center justify-center rounded-md bg-brand px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <PlayCircle className="mr-2 h-5 w-5" />
+                {isStartingPipeline
+                  ? 'Iniciando...'
+                  : status === 'FAILED'
+                    ? 'Tentar novamente'
+                    : 'Gerar Benchmark'}
+              </button>
+            </div>
+          ) : status === 'RUNNING' ? (
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-4">
+                <span className="mt-1 h-6 w-6 shrink-0 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                    A IA está trabalhando
+                  </p>
+                  <h2 className="mt-1 text-2xl font-bold text-gray-900">
+                    {pipelineLastStepLabel
+                      ? `Gerando: ${pipelineLastStepLabel}`
+                      : 'Gerando os documentos do onboarding...'}
+                  </h2>
+                  <p className="mt-1 max-w-2xl text-sm text-gray-600">
+                    Esta tela atualiza sozinha a cada poucos segundos. Quando uma
+                    etapa ficar pronta, ela aparece aqui para você revisar.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => scrollToSection('sec-esteira')}
+                className="inline-flex items-center justify-center rounded-md border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                Ver a esteira
+              </button>
+            </div>
+          ) : status === 'AWAITING_REVIEW' ? (
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-violet-600">
+                  Sua vez
+                </p>
+                <h2 className="mt-1 text-2xl font-bold text-gray-900">
+                  Revisar:{' '}
+                  {reviewDocument
+                    ? formatPipelineStepLabel(reviewDocument.step_name)
+                    : 'etapa atual'}
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm text-gray-600">
+                  A IA pausou e está esperando você. Leia, edite se quiser, e
+                  aprove para a IA seguir — ou recuse com um feedback.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => scrollToSection('sec-revisao')}
+                className="inline-flex items-center justify-center rounded-md bg-violet-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-violet-700"
+              >
+                <CheckCircle2 className="mr-2 h-5 w-5" />
+                Revisar agora
+              </button>
+            </div>
+          ) : status === 'PENDING_CLIENT_CREATION' ? (
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
+                  Benchmark concluído
+                </p>
+                <h2 className="mt-1 text-2xl font-bold text-gray-900">
+                  Tudo aprovado! Ative o cliente
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm text-gray-600">
+                  Os documentos do onboarding estão prontos. Finalize criando o
+                  cliente no Ops com os dados de contrato e integrações.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => scrollToSection('sec-entrega')}
+                className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+              >
+                Ir para Entrega &amp; Cliente
+              </button>
+            </div>
+          ) : status === 'APPROVED' ? (
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
+                  Finalizado
+                </p>
+                <h2 className="mt-1 text-2xl font-bold text-gray-900">
+                  Onboarding aprovado
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm text-gray-600">
+                  Abra os entregáveis finais para ler e copiar.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(`/onboarding/${onboardingId}/delivery`, {
+                    state: { onboardingStatus: status },
+                  })
+                }
+                className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+              >
+                <FileText className="mr-2 h-5 w-5" />
+                Abrir entregáveis
+              </button>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600">
+              Acompanhe o andamento deste onboarding pelas seções abaixo.
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-6">
+
+        <div id="sec-entrega" className="order-4 scroll-mt-4">
 
         {resolvedPipelineStatus === 'PENDING_CLIENT_CREATION' && (
           <div className="mb-6">
@@ -1523,38 +1734,7 @@ export default function OnboardingDetail() {
           </div>
         )}
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-lg bg-white p-6 shadow">
-            <div className="mb-4 inline-flex rounded-full bg-brand/10 p-3 text-brand-soft">
-              <FileUp className="h-5 w-5" />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900">
-              {justCreated
-                ? 'Proximo passo: upload de transcricoes'
-                : 'Proxima etapa planejada'}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Envie transcricoes em PDF, DOCX ou TXT para alimentar o pipeline
-              de IA com o contexto do cliente.
-            </p>
-          </div>
-
-          <div className="rounded-lg bg-white p-6 shadow">
-            <div className="mb-4 inline-flex rounded-full bg-gray-100 p-3 text-gray-700">
-              <FolderOpen className="h-5 w-5" />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900">
-              Estado atual do onboarding
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              {justCreated
-                ? 'O projeto ja esta pronto para receber a primeira transcricao. Depois disso, as proximas historias vao expandir o restante do onboarding.'
-                : 'A abertura direta pelo dashboard continua neutra: voce pode anexar novas transcricoes sem que a tela sugira uma criacao recente.'}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 rounded-xl bg-white p-6 shadow">
+        <div className="rounded-xl bg-white p-6 shadow">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
@@ -1702,14 +1882,14 @@ export default function OnboardingDetail() {
         ) : null}
         </div>
 
-        <div className={activeTab === 'pipeline' ? '' : 'hidden'}>
+        <div id="sec-esteira" className="order-2 scroll-mt-4">
         <div className="rounded-xl bg-white p-6 shadow">
           <p className="text-sm font-semibold uppercase tracking-wide text-brand">
             Esteira de agentes
           </p>
           <p className="mb-5 mt-1 text-sm text-gray-600">
-            Sequencia: pesquisa, estrategia, copy, script e landing HTML, com
-            revisor CFM e aprovacao humana a cada etapa.
+            Sequência: comercial, pesquisa, estratégia, copy e script, com revisor
+            CFM e aprovação humana a cada etapa.
           </p>
           <PipelineTimeline
             currentStepName={
@@ -1834,7 +2014,7 @@ export default function OnboardingDetail() {
 
         </div>
 
-        <div className={activeTab === 'review' ? '' : 'hidden'}>
+        <div id="sec-revisao" className="order-3 scroll-mt-4">
         <div className="mt-6 rounded-xl bg-white p-6 shadow">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -2123,7 +2303,7 @@ export default function OnboardingDetail() {
 
         </div>
 
-        <div className={activeTab === 'inputs' ? '' : 'hidden'}>
+        <div id="sec-insumos" className="order-1 scroll-mt-4">
         <div className="mt-6 rounded-xl bg-white p-6 shadow">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -2714,6 +2894,7 @@ export default function OnboardingDetail() {
             </div>
           </div>
         ) : null}
+        </div>
         </div>
       </div>
     </div>
