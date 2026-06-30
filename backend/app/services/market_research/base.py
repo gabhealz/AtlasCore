@@ -55,15 +55,47 @@ class MetaAd:
 
 
 @dataclass(slots=True)
+class Competitor:
+    """Concorrente real coletado do Google Maps (via Apify), com nota, nº de
+    avaliações e links de redes sociais (Instagram/Facebook) extraídos do site."""
+
+    name: str
+    rating: float | None
+    reviews_count: int | None
+    category: str | None
+    website: str | None
+    instagram_url: str | None
+    instagram_followers: int | None
+    facebook_url: str | None
+    address: str | None
+
+    def rating_text(self) -> str:
+        if self.rating is None:
+            return "Indisponivel"
+        return f"{self.rating:.1f}".replace(".", ",")
+
+    def reviews_text(self) -> str:
+        if self.reviews_count is None:
+            return "Indisponivel"
+        return f"{self.reviews_count:,}".replace(",", ".")
+
+    def followers_text(self) -> str:
+        if self.instagram_followers is None:
+            return "Indisponivel"
+        return f"{self.instagram_followers:,}".replace(",", ".")
+
+
+@dataclass(slots=True)
 class CollectedMarketData:
     keywords: list[KeywordMetric] = field(default_factory=list)
     meta_ads: list[MetaAd] = field(default_factory=list)
+    competitors: list[Competitor] = field(default_factory=list)
     sources_used: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
     @property
     def has_data(self) -> bool:
-        return bool(self.keywords or self.meta_ads)
+        return bool(self.keywords or self.meta_ads or self.competitors)
 
     def to_prompt_context(self) -> str:
         """Renderiza o bloco que sera injetado no prompt do researcher.
@@ -90,6 +122,37 @@ class CollectedMarketData:
 
         if self.sources_used:
             lines.append("Fontes ativas: " + ", ".join(self.sources_used) + ".")
+
+        if self.competitors:
+            lines.append("")
+            lines.append(
+                "Concorrentes reais (Google Maps - nota, nº de avaliações e "
+                "redes sociais extraídas do site). Use estes nomes e numeros "
+                "REAIS na matriz de concorrentes e na prova social; o link do "
+                "Instagram resolve o @ de cada concorrente:"
+            )
+            lines.append(
+                "| Concorrente | Nota Google | Avaliações | Instagram | "
+                "Seguidores | Facebook | Site | Categoria |"
+            )
+            lines.append("|---|---|---|---|---|---|---|---|")
+            for comp in self.competitors:
+                lines.append(
+                    "| "
+                    + " | ".join(
+                        (
+                            _escape_cell(comp.name),
+                            comp.rating_text(),
+                            comp.reviews_text(),
+                            _escape_cell(comp.instagram_url or "Indisponivel"),
+                            comp.followers_text(),
+                            _escape_cell(comp.facebook_url or "Indisponivel"),
+                            _escape_cell(comp.website or "Indisponivel"),
+                            _escape_cell(comp.category or "Nao informado"),
+                        )
+                    )
+                    + " |"
+                )
 
         if self.keywords:
             lines.append("")

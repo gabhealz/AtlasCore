@@ -14,7 +14,12 @@ import asyncio
 import logging
 
 from app.core.config import settings
-from app.services.market_research import dataforseo, google_keywords, meta_ad_library
+from app.services.market_research import (
+    apify,
+    dataforseo,
+    google_keywords,
+    meta_ad_library,
+)
 from app.services.market_research.base import CollectedMarketData
 
 logger = logging.getLogger(__name__)
@@ -25,6 +30,7 @@ async def collect_market_data(
     specialty: str | None,
     keywords: list[str],
     meta_search_terms: str | None = None,
+    city: str | None = None,
 ) -> CollectedMarketData:
     data = CollectedMarketData()
 
@@ -32,6 +38,7 @@ async def collect_market_data(
         settings.meta_ad_library_enabled
         or settings.dataforseo_enabled
         or settings.google_ads_keywords_enabled
+        or settings.apify_enabled
     )
     if not any_source_configured:
         # Nenhuma credencial: nao injeta nada, pipeline segue so com web_search.
@@ -42,10 +49,17 @@ async def collect_market_data(
 
     meta_task = meta_ad_library.fetch_meta_ads(meta_terms, limit=max_items)
     keyword_task = _collect_keywords(keywords, limit=max_items)
+    competitors_task = apify.fetch_competitors(
+        specialty=specialty,
+        city=city,
+        limit=settings.APIFY_MAPS_MAX_PLACES,
+    )
 
-    results = await asyncio.gather(meta_task, keyword_task, return_exceptions=True)
+    results = await asyncio.gather(
+        meta_task, keyword_task, competitors_task, return_exceptions=True
+    )
 
-    meta_result, keyword_result = results
+    meta_result, keyword_result, competitors_result = results
 
     if isinstance(meta_result, BaseException):
         logger.warning("Meta collection raised: %s", meta_result)
@@ -56,6 +70,18 @@ async def collect_market_data(
         data.notes.extend(notes)
         if ads:
             data.sources_used.append("Meta Ad Library")
+
+    if isinstance(competitors_result, BaseException):
+        logger.warning("Apify collection raised: %s", competitors_result)
+        data.notes.append(
+            f"Apify Google Maps falhou inesperadamente: {competitors_result}"
+        )
+    else:
+        competitors, notes = competitors_result
+        data.competitors.extend(competitors)
+        data.notes.extend(notes)
+        if competitors:
+            data.sources_used.append("Google Maps (Apify)")
 
     if isinstance(keyword_result, BaseException):
         logger.warning("Keyword collection raised: %s", keyword_result)

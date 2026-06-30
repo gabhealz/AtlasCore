@@ -681,6 +681,7 @@ async def _build_market_data_context(
             specialty=onboarding.specialty,
             keywords=seed_keywords,
             meta_search_terms=onboarding.specialty,
+            city=city,
         )
     except Exception:  # noqa: BLE001 - coleta e best-effort, nunca bloqueia
         logger.exception(

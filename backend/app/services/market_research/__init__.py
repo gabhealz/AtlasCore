@@ -13,6 +13,7 @@ com web_search). Nada aqui deve levantar excecao para o orquestrador.
 
 from app.services.market_research.base import (
     CollectedMarketData,
+    Competitor,
     KeywordMetric,
     MetaAd,
 )
@@ -20,6 +21,7 @@ from app.services.market_research.collector import collect_market_data
 
 __all__ = [
     "CollectedMarketData",
+    "Competitor",
     "KeywordMetric",
     "MetaAd",
     "collect_market_data",

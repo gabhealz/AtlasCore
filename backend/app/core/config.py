@@ -81,6 +81,21 @@ class Settings(BaseSettings):
     # Timeout das chamadas HTTP de coleta de mercado.
     MARKET_DATA_TIMEOUT_SECONDS: float = 30
 
+    # Apify: scraper de Google Maps (concorrentes reais + nota + nº de avaliações
+    # + links de Instagram/Facebook via social enrichment). Token GLOBAL da agência
+    # (free tier $5/mês). Quando vazio, a fonte é ignorada e o pipeline segue só
+    # com web_search/DataForSEO. Resolve o "@" do concorrente sem saber de antemão.
+    APIFY_TOKEN: str = ""
+    # Actor do Google Maps com enriquecimento de contatos/redes. Formato user/actor.
+    APIFY_GOOGLE_MAPS_ACTOR: str = "compass/crawler-google-places"
+    # Máximo de concorrentes (places) coletados por busca.
+    APIFY_MAPS_MAX_PLACES: int = 6
+    # Idioma/país da busca no Google Maps (relevância local BR).
+    APIFY_MAPS_LANGUAGE: str = "pt-BR"
+    APIFY_MAPS_COUNTRY: str = "br"
+    # Timeout das chamadas Apify (scrapers levam mais que as APIs REST comuns).
+    APIFY_TIMEOUT_SECONDS: float = 120
+
     # Email (Brevo transactional API)
     BREVO_API_KEY: str = ""
     # URL base da aplicação frontend (usada em links de email)
@@ -139,6 +154,10 @@ class Settings(BaseSettings):
         return bool(
             self.DATAFORSEO_LOGIN.strip() and self.DATAFORSEO_PASSWORD.strip()
         )
+
+    @property
+    def apify_enabled(self) -> bool:
+        return bool(self.APIFY_TOKEN.strip())
 
     @property
     def google_ads_keywords_enabled(self) -> bool:
