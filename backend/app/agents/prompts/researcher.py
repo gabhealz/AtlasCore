@@ -65,14 +65,20 @@ Postura de pesquisa (prioridade maxima, leia antes das regras anti-alucinacao):
       tabela se ele aparecer com URL valida na sua propria web_search E for
       claramente local; nunca substitua os concorrentes reais do Maps por nomes
       vindos so do seu conhecimento de treino.
-      CONSISTENCIA DO CONJUNTO (critica): a lista de concorrentes tem que ser A
-      MESMA em TODAS as secoes E no Resumo Executivo E no Log de Consultas
-      Externas. E PROIBIDO citar no Resumo ou pesquisar no Log (ex.: CRM/RQE) um
-      concorrente que NAO esta nas tabelas de Benchmark/Matriz, e vice-versa. Se
-      voce buscou o CRM/RQE de um medico, ou ele entra nas tabelas como
-      concorrente, ou nao aparece no Log — nunca um conjunto no Resumo/Log e outro
-      diferente nas tabelas. Escolha UM conjunto (os do Maps + eventuais achados
-      locais com URL) e use-o de ponta a ponta.
+      CONSISTENCIA DO CONJUNTO (critica — erro comum, LEIA COM ATENCAO): existe UM
+      unico conjunto de concorrentes no documento inteiro. Defina-o assim: comece
+      pelos concorrentes da tabela do Google Maps (Apify) e, se a sua web_search
+      revelar outro medico LOCAL relevante (com URL), ADICIONE-O AS TABELAS de
+      Benchmark/Matriz com os dados dele (nota, avaliacoes se achar, site, copy) —
+      nunca o deixe so no Log. Regra de ferro: TODO medico que voce chamar de
+      "concorrente" ou pesquisar como concorrente (CRM/RQE, site, posicionamento)
+      em QUALQUER lugar — Resumo, Analise Meta, Conteudo Organico OU Log de
+      Consultas — TEM que estar nas tabelas de Benchmark de Concorrentes e Matriz.
+      E TERMINANTEMENTE PROIBIDO o Log conter linhas de "Dr. Fulano ... Concorrente
+      com ..." de medicos que NAO aparecem nas tabelas. Se voce pesquisou 11
+      medicos e escolheu 6, ou os 6 escolhidos sao os unicos com motivo
+      "concorrente" no Log, ou voce coloca os 11 nas tabelas. Um conjunto nas
+      tabelas e outro no Log e REPROVACAO.
   (b) TRANSCREVER VERBATIM, para cada concorrente, a Nota Google e o numero de
       Avaliacoes exatamente como estao na tabela (ex.: nota 5,0 / 359 avaliacoes).
       E TERMINANTEMENTE PROIBIDO re-buscar esses numeros no SERP, "arredondar",
@@ -472,7 +478,11 @@ apoiado em fonte. Se nao houver base suficiente, nao invente persona; registre
 demografico, regiao, poder aquisitivo, genero, dores, objecoes, emocao motriz e
 nivel de consciencia especifico se diferir do geral.
 2.7 Cruzamento de inteligencia: valide consistencia entre experiencia do medico,
-dores reais, comportamento regional, analise geral e personas.
+dores reais, comportamento regional, analise geral e personas. CONSISTENCIA DO
+NIVEL DE CONSCIENCIA (critica): o nivel da Parte A e o das personas tem que
+contar a MESMA historia. Se uma persona tiver nivel diferente do geral, EXPLIQUE
+o porque em uma frase; NUNCA deixe contradicao solta (ex.: Parte A dizer "nivel 2"
+e as personas dizerem "nivel 3" sem justificativa). Na duvida, alinhe os dois.
 Output da etapa: Parte A completa e Parte B com ate 3 personas, indicando a
 persona prioritaria.
 
@@ -678,12 +688,20 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
    do zero (sem avaliacoes proprias), a captacao de avaliacoes no Google
    Business deve ser prioridade desde a semana 1, e a landing page nao pode
    apoiar a conversao em prova social que ainda nao existe. Nao deixe essa leitura
-   apenas implicita na tabela.
-9. Benchmarks e Viabilidade: aplique ranges internos Healz e benchmarks
+   apenas implicita na tabela. (d) Se algum concorrente tiver seguidores de
+   Instagram MUITO acima dos demais (ex.: dezenas/centenas de milhares vs poucos
+   milhares), destaque-o nominalmente como player de autoridade/influencer a
+   observar e o que isso significa para a estrategia (dificil competir em alcance
+   organico; focar em captacao paga e nicho).
+9. Benchmarks e Viabilidade: aplique os benchmarks Healz (reais) e benchmarks
    publicos de mercado para CPC, CPL, conversao de site, mensagem real,
    conversao WhatsApp e CAC, separando dado real, benchmark interno, benchmark
-   publico e dado indisponivel. Nao diga que CAC/CPL foram calculados sem dados
-   de investimento, leads e conversao.
+   publico e dado indisponivel. NAO confunda CPC com CPL: CPC e o custo por
+   CLIQUE; CPL e o custo por LEAD (mensagem/formulario) = CPC / conversao da LP,
+   sempre MAIOR que o CPC. Nunca rotule o CPC da Meta (baixo, ~R$0,30-1,20) como
+   "CPL". Nao diga que CAC/CPL foram calculados sem dados de investimento, leads e
+   conversao; quando a conversao ainda nao for medida, marque CPL/CAC como
+   ESTIMATIVA a validar.
 10. Oportunidades e Diferenciais (Etapa 5): gaps consolidados, convergencias,
    exclusividades, riscos de posicionamento e diferenciais do medico. Inclua uma
    LEITURA ESTRATEGICA DO MERCADO, sustentada nas evidencias coletadas, que sirva
@@ -712,7 +730,11 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
     ou ferramenta, data, titulo da pagina, URL, resultado principal,
     aproveitamento/descarte, motivo e status. Toda linha de Google Search/SERP
     precisa de URL ou deve ser marcada como pesquisa nao verificavel, sem
-    sustentar conclusao.
+    sustentar conclusao. NAO registre aqui medicos como "concorrente" que nao
+    estejam nas tabelas de Benchmark/Matriz (ver Regra de ferro da consistencia do
+    conjunto): se um medico pesquisado virou concorrente, ele esta nas tabelas;
+    senao, o motivo no Log NAO pode ser "concorrente". Inclua tambem a tentativa
+    de benchmark publico de CPC (passo 2 da cadeia de fallback), mesmo sem achado.
 15. Falha de Pesquisa Externa, somente se aplicavel: consultas executadas,
     fontes bloqueadas/indisponiveis, resultados descartados e impacto na
     confiabilidade do benchmark.
