@@ -250,32 +250,33 @@ export function OpsDashboard() {
       accessor: (row: ClientDashboard) => (
         <StatusBadge status={row.health_status} />
       ),
+      className: 'whitespace-nowrap',
     },
     {
       header: 'Tempo de casa',
       accessor: (row: ClientDashboard) =>
         row.client.tenure_months != null ? `${row.client.tenure_months} meses` : '-',
-      className: 'text-right text-muted',
+      className: 'text-right text-muted whitespace-nowrap',
     },
     {
       header: 'Faturamento',
       accessor: (row: ClientDashboard) => formatCurrency(row.current_week?.revenue),
-      className: 'text-right'
+      className: 'text-right whitespace-nowrap'
     },
     {
       header: 'Investimento',
       accessor: (row: ClientDashboard) => formatCurrency(row.current_week?.ad_spend),
-      className: 'text-right'
+      className: 'text-right whitespace-nowrap'
     },
     {
       header: 'ROI',
       accessor: (row: ClientDashboard) => row.roi ? `${row.roi.toFixed(1)}x` : '-',
-      className: 'text-right font-medium text-ink'
+      className: 'text-right font-medium text-ink whitespace-nowrap'
     },
     {
       header: 'Consultas',
       accessor: (row: ClientDashboard) => formatNumber(row.current_week?.bookings),
-      className: 'text-right'
+      className: 'text-right whitespace-nowrap'
     },
     {
       header: '',
@@ -297,7 +298,7 @@ export function OpsDashboard() {
           </button>
         </div>
       ),
-      className: 'text-right'
+      className: 'text-right whitespace-nowrap'
     }
   ];
 

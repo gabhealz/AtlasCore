@@ -29,7 +29,7 @@ export function DataTable<T>({
           <thead className="bg-elevated text-xs uppercase text-muted">
             <tr>
               {columns.map((col, idx) => (
-                <th key={idx} className={cn("px-6 py-4 font-semibold", col.className)}>
+                <th key={idx} className={cn("px-4 py-3 font-semibold", col.className)}>
                   {col.header}
                 </th>
               ))}
@@ -50,9 +50,9 @@ export function DataTable<T>({
                   className={cn("hover:bg-elevated transition-colors", onRowClick && "cursor-pointer")}
                 >
                   {columns.map((col, idx) => (
-                    <td key={idx} className={cn("px-6 py-4 whitespace-nowrap", col.className)}>
-                      {typeof col.accessor === 'function' 
-                        ? col.accessor(row) 
+                    <td key={idx} className={cn("px-4 py-3 align-middle", col.className)}>
+                      {typeof col.accessor === 'function'
+                        ? col.accessor(row)
                         : (row[col.accessor] as ReactNode)}
                     </td>
                   ))}
