@@ -85,14 +85,23 @@ FORMATO DO OUTPUT (markdown_content) — headings `##`
 ============================================================
 ## Direcionamento de Design
 Tipo de LP escolhido e por que (cite o tipo de campanha do Doc 2), tom de voz,
-variacao de especialidade aplicada e qualquer referencia visual. Mantenha a
+variacao de especialidade aplicada e qualquer referencia visual.
+FOCO NO NICHO: quando houver subespecialidade/foco declarado (ex.: epilepsia
+dentro de neurologia), a headline, a subheadline e o posicionamento devem girar em
+torno do FOCO, nao da especialidade ampla. Nao dilua no termo generico.
+ROTULAGEM EXPLICITA (obrigatoria, para o designer e o agente de HTML nao
+confundirem): em CADA secao, rotule cada elemento com seu papel, em negrito e em
+linha propria — **Headline:**, **Subheadline:**, **CTA:**, e nos blocos de cards
+**Titulo do card:** / **Descricao:** / **CTA do card:**. Nunca entregue um texto
+solto sem dizer se e headline, subheadline ou corpo. Mantenha a
 paleta dentro de uma identidade medica sobria e confiavel; se o medico declarou
 preferencia de cores nas reunioes, respeite-a.
 
 ## Secao 1 - Hero (Acima da Dobra)
 Barra de identificacao ("[Especialidade] em [Cidade/Regiao]" + "CRM: [n] | RQE:
 [n]"), headline (conforme o tipo de LP), subheadline (expande e integra os
-pilares) e CTA principal ("Agendar sua consulta" ou "Conversar no WhatsApp").
+pilares) e CTA principal. O texto PADRAO do CTA e "Agendar consulta" (neutro — nao
+"sua" nem "minha"), salvo instrucao diferente do Doc 2/matriz de CTAs.
 
 ## Secao 2 - Areas de Atuacao e Procedimentos
 Titulo em pergunta direcionada ao paciente ("Como posso ajudar voce?"),
@@ -112,7 +121,9 @@ sociedades, dominio de tecnologias. Profissional mas humano.
 
 ## Secao 5 - Prova Social (Depoimentos)
 Selecione 3 a 5 depoimentos reais e especificos extraidos do Google Meu
-Negocio/Doctoralia (vindos do Doc 1). SE o medico nao tiver depoimentos (comum
+Negocio/Doctoralia (vindos do Doc 1). Indique no direcionamento que esses
+depoimentos aparecem como um CARROSSEL dinamico de cards (que rolam), e que os
+textos vem das avaliacoes reais do Google/Doctoralia coletadas no Doc 1. SE o medico nao tiver depoimentos (comum
 em iniciantes), OMITA esta secao e a substitua por um reforco de formacao e
 abordagem. NUNCA invente depoimentos.
 
@@ -139,7 +150,9 @@ referencia a CRM/CFM.
 
 ## CTAs da Pagina
 Liste TODOS os CTAs (principal e secundarios) com o texto exato de cada botao.
-Se o time tiver definido uma matriz de CTAs com IDs, respeite os nomes/IDs.
+O texto padrao Healz e "Agendar consulta" (neutro) — use-o de forma consistente na
+pagina, salvo se a matriz de CTAs definir outro. Se o time tiver definido uma
+matriz de CTAs com IDs, respeite os nomes/IDs.
 
 ## Pendencias para o Cliente
 Lacunas de curriculo, depoimentos, enderecos, telefones, politicas ou precos que

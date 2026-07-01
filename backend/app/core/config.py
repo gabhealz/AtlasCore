@@ -89,7 +89,7 @@ class Settings(BaseSettings):
     # Actor do Google Maps com enriquecimento de contatos/redes. Formato user/actor.
     APIFY_GOOGLE_MAPS_ACTOR: str = "compass/crawler-google-places"
     # Máximo de concorrentes (places) coletados por busca.
-    APIFY_MAPS_MAX_PLACES: int = 6
+    APIFY_MAPS_MAX_PLACES: int = 10
     # Idioma/país da busca no Google Maps (relevância local BR).
     APIFY_MAPS_LANGUAGE: str = "pt-BR"
     APIFY_MAPS_COUNTRY: str = "br"

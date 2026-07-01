@@ -60,7 +60,7 @@ Postura de pesquisa (prioridade maxima, leia antes das regras anti-alucinacao):
   concorrentes. Voce DEVE:
   (a) ANCORAR a lista de concorrentes nesses nomes. Eles sao os concorrentes
       reais locais coletados do Google Maps da cidade do cliente. Use TODOS eles
-      (ate o limite de 5-6) como a base de Benchmark de Concorrentes, Matriz,
+      (ate o limite de 10) como a base de Benchmark de Concorrentes, Matriz,
       Analise Meta e Conteudo Organico. So adicione um concorrente de fora dessa
       tabela se ele aparecer com URL valida na sua propria web_search E for
       claramente local; nunca substitua os concorrentes reais do Maps por nomes
@@ -279,11 +279,12 @@ Pesquisa web obrigatoria quando a ferramenta estiver disponivel:
      carro-chefe + cidade; dor/condicao + cidade; "[especialidade] perto de
      mim"; "melhores [especialidade] [cidade]"; Doctoralia [especialidade]
      [cidade]; e o nome do medico/clinica quando existir.
-  2) pelo menos 5 concorrentes locais reais com URL valida. Se a primeira leva
-     de buscas trouxer menos de 5, FACA MAIS BUSCAS (por procedimento, por
-     bairro/regiao, por "clinica [especialidade] [cidade]", por Doctoralia)
-     antes de desistir. So registre menos de 5 depois de esgotar as consultas, e
-     liste as consultas que nao retornaram concorrentes.
+  2) pelo menos 8 concorrentes locais reais com URL valida (idealmente 10, que e o
+     teto coletado do Google Maps). Se a primeira leva de buscas trouxer menos de 8,
+     FACA MAIS BUSCAS (por procedimento, por bairro/regiao, por "clinica
+     [especialidade] [cidade]", por Doctoralia) antes de desistir. So registre menos
+     de 8 depois de esgotar as consultas, e liste as consultas que nao retornaram
+     concorrentes.
   2b) POSICIONAMENTO DE CADA CONCORRENTE (OBRIGATORIO, sem excecao): preencha
      oferta, promessa/copy, CTA, funil e pontos fortes/lacunas de CADA
      concorrente. Quando o bloco de DADOS DE MERCADO trouxer a coluna "Sinal do
@@ -616,6 +617,22 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
    intencoes de preco/valor, localizacao "perto de mim"/cidade, "consulta",
    "clinica" e agendamento) para que o benchmark tenha base conclusiva. Quando
    houver especialidade definida, nunca entregue menos de 8 linhas de keyword.
+   FOCO NA SUBESPECIALIDADE (regra critica): quando o briefing indicar uma
+   subespecialidade/foco (ex.: epilepsia dentro de neurologia), o paciente e o
+   mercado a servir sao os da SUBESPECIALIDADE, nao os da especialidade ampla — que
+   e mais saturada. O nicho costuma ter MENOS concorrencia e prova social (a
+   oportunidade real). Entao: (a) dedique NO MINIMO 2 a 3 keywords ao foco (ex.:
+   "neurologista epilepsia [cidade]", "tratamento epilepsia [cidade]", "medico
+   epilepsia"); (b) trate a especialidade ampla como grupo SECUNDARIO/suporte,
+   nunca como o unico foco; (c) a Recomendacao Preliminar deve posicionar no nicho.
+   SEMANTICA DAS KEYWORDS (corrige erros comuns): (1) em termos de intencao
+   "consulta", use a forma do ESPECIALISTA — "consulta neurologista", "consulta
+   ortopedista" — NAO "consulta neurologia"; (2) evite termos genericos sem
+   intencao real de busca como "quanto custa [especialidade]" ou "melhor
+   [especialidade]" salvo se tiverem volume/intencao comprovados; prefira o que
+   pacientes de fato pesquisam; (3) rotule o Tipo com criterio: um termo de 2
+   palavras (ex.: "neurologia preco") NAO e long tail — long tail sao buscas de
+   3+ palavras / alta especificidade.
    ORGANIZE as keywords em 2 a 3 GRUPOS DE ANUNCIO por intencao, usando a coluna
    Tipo como rotulo do grupo (ex.: "Grupo Clinico/Consulta", "Grupo
    Procedimento/Cirurgia", "Grupo Condicao/Dor"), como faria um gestor de
@@ -651,6 +668,11 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
    injetada (transcreva verbatim) ou, na ausencia dela, da ficha do Google Maps
    via web_search. Quando houver Google Search/SERP, analise os 5 primeiros
    resultados encontrados ou explique com URLs por que foram descartados.
+   AUDITORIA DA BUSCA (obrigatorio): declare explicitamente a consulta usada para
+   encontrar os concorrentes — numa nota logo abaixo do heading, ex.: "Busca usada:
+   '[especialidade] [cidade]' (Google Maps via Apify)" — para que a equipe possa
+   reproduzir a pesquisa. Se usou consultas diferentes por concorrente, registre a
+   consulta na coluna URL/consulta de cada linha.
 6. Matriz de Benchmark Competitivo: tabela comparativa obrigatoria com
    concorrente, URL, palavra-chave que encontrou (a keyword/consulta exata que
    fez esse concorrente aparecer na pesquisa), especialidade/foco, oferta,
@@ -664,7 +686,14 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
    duracao quando video, presenca do medico, tom, roteiro, CTA, destino, formato,
    promessa, funil, oportunidade comprovada e status da fonte. Faca duas coisas:
    (a) tente a Meta Ads Library publica por termo/procedimento e por nome dos
-   concorrentes, registrando contagem de anuncios observada e padrao de criativo;
+   concorrentes, registrando contagem de anuncios observada e padrao de criativo.
+   LIMITACAO CONHECIDA: o scrape da Meta Ads Library normalmente NAO esta
+   disponivel neste ambiente. Nesse caso, esta secao deve ser uma leitura da
+   presenca do concorrente no INSTAGRAM/site (tipo de conteudo, se parece impulsionar
+   posts, CTA do perfil) — e a coluna Fonte deve refletir isso ("Instagram/site do
+   concorrente" ou "Meta Ads Library: indisponivel"), NUNCA "Google Maps" (rotular
+   a analise de Meta como vinda do Google Maps e um erro — corrija). Nao invente
+   contagem de anuncios; se nao ha sinal, marque a celula como pendencia honesta;
    (b) REGRA RIGIDA: a tabela Analise Meta DEVE conter UMA LINHA PARA CADA
    concorrente listado em Benchmark de Concorrentes - mesmo nome, mesma ordem -
    classificando, na coluna Captacao e na coluna Autoridade, o sinal observado na

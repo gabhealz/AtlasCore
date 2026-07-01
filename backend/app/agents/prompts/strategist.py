@@ -135,15 +135,25 @@ Posicionamento de mercado, proposta unica de valor e prova de autoridade (com
 ## Personas Prioritarias e Nivel de Consciencia
 2 a 4 personas (vindas do Doc 1), cada uma com dor central, objecoes e nivel de
 consciencia (Eugene Schwartz) — isso guia copy e canais. Indique a persona 1.
+FOCO NO NICHO (quando houver subespecialidade/foco, ex.: epilepsia): a persona 1 e
+as principais devem ser do FOCO declarado; a especialidade ampla entra como
+persona SECUNDARIA/de suporte, nao como principal. NAO crie como persona
+prioritaria um publico que foge do foco (ex.: idoso com demencia quando o foco e
+epilepsia) — e cuidado para esse publico off-focus NAO vazar depois para os
+anuncios, a copy da LP e o script.
 
 ## Oferta e Ancoragem
 Oferta de entrada (consulta/avaliacao), ofertas de valor agregado e como ancorar
 valor sem ferir o CFM.
 
 ## Mapa de Campanhas
-Tabela: Nome da campanha | Plataforma | Tipo (consultas/servico/audiencia/
-remarketing) | Objetivo | Orcamento diario (R$) | Orcamento mensal (R$ = diario x
-30). Os nomes devem seguir um padrao de nomenclatura consistente; se a
+Tabela: Nome da campanha | Plataforma | Tipo de campanha na plataforma | Papel
+(consultas/servico/audiencia/remarketing) | Objetivo | Orcamento diario (R$) |
+Orcamento mensal (R$ = diario x 30). A coluna "Tipo de campanha na plataforma"
+deve usar o NOME REAL do tipo de campanha da plataforma (Google: Rede de Pesquisa/
+Search, Performance Max, Display, Video; Meta: Trafego, Leads, Reconhecimento,
+Engajamento) — nao use rotulos internos genericos ali. O "Papel" e a funcao no
+funil (consultas/servico/audiencia/remarketing). Os nomes devem seguir um padrao de nomenclatura consistente; se a
 nomenclatura oficial Healz nao estiver no contexto, proponha um padrao claro e
 rotule como "padrao sugerido — validar".
 RESTRICAO DE CONSISTENCIA (obrigatoria): a SOMA dos orcamentos mensais de TODAS
@@ -159,15 +169,33 @@ Para cada campanha, detalhe os conjuntos/grupos de anuncio em tabela:
 Nome do grupo/conjunto | Segmentacao (regiao/raio, faixa etaria, genero,
 interesses na Meta; palavras-chave no Google) | Tipo de correspondencia das
 keywords (ampla/frase/exata, no Google) | Estrategia de lance (maximizar
-cliques/conversoes, CPA-alvo). No Google liste as palavras-chave reais (use as
+cliques/conversoes, CPA-alvo).
+REGRA DE GRUPOS DE ANUNCIO (Google): cada grupo deve ter NO MINIMO 5 palavras-chave
+reais. E PROIBIDO criar um grupo com uma unica keyword em correspondencia exata
+(ex.: grupo so com [epilepsia]) — isso praticamente zera o alcance, pois so
+dispara para essa busca literal. Um termo amplo/nichado deve virar um grupo com
+varias variacoes (frase e ampla modificada), nao uma unica exata. Use uma
+combinacao de correspondencias (frase + ampla) para ter volume, com as negativas
+controlando o desperdicio.
+No Google liste as palavras-chave reais (use as
 keywords/volume/CPC do Doc 1) e as palavras-chave NEGATIVAS obrigatorias
 (ex.: gratuito, SUS, convenio, curso, emprego, vaga, "o que e", "como
 funciona"). Aplique SKAG vs. agrupamento conforme as regras acima.
 
 ## Ativos Criativos por Anuncio
-Para cada anuncio: Nome do anuncio | (Google) todos os titulos e descricoes do
-anuncio responsivo | (Meta) texto principal, titulo, descricao, CTA, formato
-(imagem/video/carrossel) e destino (LP ou WhatsApp). Copy alinhada a abordagem
+Para cada anuncio: Nome do anuncio | (Google) titulos e descricoes do anuncio
+responsivo | (Meta) texto principal, titulo, descricao, CTA, formato
+(imagem/video/carrossel) e destino (LP ou WhatsApp).
+LIMITES OBRIGATORIOS DO GOOGLE ADS (anuncio responsivo de pesquisa) — respeite
+exatamente, pois o Ueda copia direto na plataforma:
+- Entregue EXATAMENTE 15 TITULOS, cada um com NO MAXIMO 30 caracteres (conte os
+  caracteres; titulo com mais de 30 e invalido e sera rejeitado pelo Google).
+- Entregue EXATAMENTE 4 DESCRICOES, cada uma com NO MAXIMO 90 caracteres.
+- Esse conjunto (15 titulos + 4 descricoes) e POR GRUPO DE ANUNCIO. Se a campanha
+  tiver mais de um grupo de anuncio (ou houver mais de uma campanha), gere um
+  conjunto completo de 15+4 para CADA grupo, rotulado com o nome do grupo.
+- Varie os angulos entre os titulos (especializacao, localizacao, acolhimento,
+  CTA) para o algoritmo testar combinacoes; nao repita o mesmo titulo. Copy alinhada a abordagem
 de posicionamento e dentro do CFM. Quando o perfil do medico ainda for fraco em
 prova social, os criativos devem ser autossuficientes (credencial + abordagem
 direta), sem depender de depoimentos inexistentes.
@@ -201,8 +229,9 @@ obrigatorios, em ordem, com cada numero rotulado pela fonte:
    CPC x (1 / taxa de conversao de LP) = CPL implicado). Mostre a faixa e o
    numero central.
 3. Leads/mes = orcamento mensal / CPL central. Mostre a conta.
-4. Pacientes/mes = leads x taxa de conversao WhatsApp->consulta do secretariado
-   (use o benchmark interno; deixe claro qual taxa usou). Mostre a conta.
+4. Pacientes/mes = leads x taxa de conversao WhatsApp->consulta do secretariado.
+   Use ~20% como taxa CENTRAL/conservadora (nao infle para 30%+); deixe claro a
+   taxa usada. Mostre a conta.
 5. Apresente o resultado como FAIXA realista (cenario conservador e otimista),
    NUNCA como numero garantido.
 6. Reconciliacao com a meta do cliente: compare o resultado da conta com a META
@@ -223,6 +252,11 @@ sao reprovacao.
 Tabela: Periodo | O que validar | Por que (qual fator/risco do diagnostico) |
 Acao se desviar. Cubra CTR/CPC por grupo, CPL consolidado vs. meta, conversao do
 secretariado e volume de agendamento vs. meta.
+REGRA DO CHECKPOINT DA SEMANA 1: o primeiro checkpoint NAO e "validar engajamento"
+— e validar se JA ESTA ENTRANDO LEAD/AGENDAMENTO (o funil esta girando?). So se
+os leads estiverem entrando mas as consultas nao, ai sim investigar o resto do
+funil (pagina -> WhatsApp -> secretariado). Redija a linha da semana 1 com esse
+foco em volume real de lead/agendamento, nao em metricas de vaidade.
 
 ## Riscos e Proximos Passos
 Riscos de execucao (gaps de posicionamento, prova social, endereco/raio nao

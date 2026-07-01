@@ -28,6 +28,16 @@ PONTUAL de emojis calibrado pelo tom (📍 endereco, 🔗 link). Se a clinica ti
 multiplos profissionais (ex.: fisioterapeuta, nutricionista), gere um script
 separado por profissional.
 
+REGRA DE OURO DO FORMATO WHATSAPP (inegociavel, feedback do time):
+- QUEBRE cada cenario em MULTIPLAS mensagens curtas, nao um paragrafao. Cada
+  mensagem deve ter NO MAXIMO 2 linhas — o paciente nao le mensagem longa.
+  Apresente as mensagens numeradas/em sequencia ("Mensagem 1", "Mensagem 2"...),
+  deixando claro que sao envios separados no WhatsApp.
+- TERMINE cada mensagem com uma PERGUNTA que puxe a resposta do paciente (ex.:
+  "Posso te ajudar com o agendamento?", "Deseja que eu explique como funciona a
+  consulta?", "Podemos verificar um horario?"). Nunca deixe uma mensagem sem um
+  gancho de resposta ao final — isso mantem a conversa fluindo.
+
 TOM DE VOZ (por especialidade/perfil): Padrao -> profissional, cordial, objetivo
 (emojis pontuais). Pediatria/neuro -> acolhedor, voltado aos pais (emojis
 moderados). Estetica/eletivos -> elegante, aspiracional (emojis pontuais).
