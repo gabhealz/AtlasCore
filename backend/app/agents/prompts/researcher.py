@@ -65,6 +65,14 @@ Postura de pesquisa (prioridade maxima, leia antes das regras anti-alucinacao):
       tabela se ele aparecer com URL valida na sua propria web_search E for
       claramente local; nunca substitua os concorrentes reais do Maps por nomes
       vindos so do seu conhecimento de treino.
+      CONSISTENCIA DO CONJUNTO (critica): a lista de concorrentes tem que ser A
+      MESMA em TODAS as secoes E no Resumo Executivo E no Log de Consultas
+      Externas. E PROIBIDO citar no Resumo ou pesquisar no Log (ex.: CRM/RQE) um
+      concorrente que NAO esta nas tabelas de Benchmark/Matriz, e vice-versa. Se
+      voce buscou o CRM/RQE de um medico, ou ele entra nas tabelas como
+      concorrente, ou nao aparece no Log — nunca um conjunto no Resumo/Log e outro
+      diferente nas tabelas. Escolha UM conjunto (os do Maps + eventuais achados
+      locais com URL) e use-o de ponta a ponta.
   (b) TRANSCREVER VERBATIM, para cada concorrente, a Nota Google e o numero de
       Avaliacoes exatamente como estao na tabela (ex.: nota 5,0 / 359 avaliacoes).
       E TERMINANTEMENTE PROIBIDO re-buscar esses numeros no SERP, "arredondar",
@@ -87,8 +95,20 @@ Postura de pesquisa (prioridade maxima, leia antes das regras anti-alucinacao):
       estiver vazio ("Indisponivel") ou quando precisar do CTA/funil exato. E
       PROIBIDO deixar Copy/Promessa de TODOS os concorrentes como "Nao encontrado"
       quando a coluna "Sinal do site" traz texto real - isso significa que voce
-      ignorou o conteudo do site que ja estava no seu contexto. Use a URL/site do
-      concorrente na coluna URL/consulta (nao deixe "pendente" quando a tabela ja
+      ignorou o conteudo do site que ja estava no seu contexto.
+      REGRA ANTI-PREGUICA (critica): a coluna Copy/Promessa tem que conter TEXTO
+      REAL de posicionamento (a frase de destaque do concorrente). E TERMINANTE-
+      MENTE PROIBIDO preencher com nao-respostas como "Texto institucional",
+      "Texto do sinal do site fornecido", "Sinal do site", "Indisponivel (sinal do
+      site)" ou "Indisponivel" — isso e descrever a coluna em vez de preenche-la.
+      Quando o "Sinal do site" vier generico (so o nome do medico ou o dominio,
+      ex.: "DrGilbertoNakama.com.br" ou "Home - Dr. X"), voce DEVE fazer web_search
+      no site/nome do concorrente e extrair a frase de destaque real (headline/
+      promessa); so use "Nao encontrado nas fontes consultadas" se a web_search
+      tambem nao retornar nada verificavel. Nunca deixe uma frase-meta no lugar da
+      copy.
+      Use a URL/site do concorrente na coluna URL/consulta (nao deixe "pendente"
+      quando a tabela ja
       traz o site).
   (e) Quando a tabela trouxer "Anuncios Meta ativos" por concorrente, use essa
       contagem real na Analise Meta com status "Fonte externa verificada".
@@ -594,12 +614,15 @@ Formato obrigatorio do Markdown no campo `markdown_content`:
    (1) DADO REAL: se o bloco "DADOS DE MERCADO COLETADOS VIA API" trouxer Volume/
    CPC do DataForSEO/Keyword Planner, use o numero real (fonte "DataForSEO",
    status "Fonte externa verificada").
-   (2) WEB_SEARCH (benchmark publico): se nao houver dado real, FACA web_search
-   por uma referencia publica de CPC/CTR/volume da especialidade no Brasil
-   (relatorios de agencias, artigos de Google Ads/SEO, estudos de mercado). SO
-   VALE com URL real e clicavel (http/https) + data + escopo; rotule a Fonte como
-   "Benchmark publico de mercado" e ponha a URL na coluna URL/consulta. E
-   PROIBIDO inventar um numero sem fonte citavel — sem URL, este passo NAO conta.
+   (2) WEB_SEARCH (benchmark publico): se nao houver dado real, VOCE DEVE fazer ao
+   menos uma web_search por uma referencia publica de CPC/CTR/volume da
+   especialidade no Brasil (relatorios de agencias, artigos de Google Ads/SEO,
+   estudos de mercado) E REGISTRAR essa tentativa no Log de Consultas Externas
+   (a consulta feita e o resultado), mesmo quando nao achar — para ficar claro que
+   a cadeia foi percorrida antes do fallback. So VALE como fonte de CPC com URL
+   real e clicavel (http/https) + data + escopo; rotule a Fonte como "Benchmark
+   publico de mercado" e ponha a URL na coluna URL/consulta. E PROIBIDO inventar
+   um numero sem fonte citavel — sem URL, este passo NAO conta e voce cai no (3).
    (3) MINI-BANCO HEALZ: se a web_search nao trouxer fonte citavel, use o bloco
    "BENCHMARK HEALZ POR ESPECIALIDADE" do contexto (rotule "Benchmark Healz por
    especialidade"); na ausencia dele, a base real Google CPC R$3,10-5,50 (rotule
