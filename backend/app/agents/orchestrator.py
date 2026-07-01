@@ -2032,6 +2032,26 @@ async def bootstrap_pipeline(
                         runner=agent_runner,
                     )
                 )
+                # Fallback pelo intake (AQF): quando nao ha transcricao — ou o
+                # extrator nao achou a especialidade/cidade no texto — a coleta
+                # de mercado (Apify + DataForSEO) ficaria sem semente e o
+                # benchmark sairia sem concorrentes. O formulario ja tem esses
+                # dados com alta confianca; usa-os como ancora.
+                intake_fields_for_market = load_intake_fields(onboarding.intake_data)
+                if not (onboarding.specialty or "").strip():
+                    esp = (
+                        intake_fields_for_market.get("especialidade") or ""
+                    ).strip()
+                    if esp:
+                        onboarding.specialty = esp
+                        try:
+                            await db.commit()
+                        except Exception:  # noqa: BLE001
+                            await db.rollback()
+                if not detected_city:
+                    detected_city = (
+                        intake_fields_for_market.get("cidade") or ""
+                    ).strip() or None
                 step_specific_context = await _build_market_data_context(
                     onboarding,
                     city=detected_city,
