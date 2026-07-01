@@ -6,6 +6,8 @@ from app.api import deps
 from app.models.client import Client
 from app.models.user import User
 from app.schemas.client import (
+    ClientBulkDeleteRequest,
+    ClientBulkDeleteResponse,
     ClientCreate,
     ClientEnvelope,
     ClientListEnvelope,
@@ -105,12 +107,42 @@ async def update_client(
     return {"data": client}
 
 
+@router.post("/bulk-delete", response_model=ClientBulkDeleteResponse)
+async def bulk_delete_clients(
+    payload: ClientBulkDeleteRequest,
+    current_user: User = Depends(allow_write),
+    db: AsyncSession = Depends(deps.get_db),
+):
+    """Exclui definitivamente varios clientes de uma vez.
+
+    As metricas, campanhas, integracoes e logs vinculados sao removidos em
+    cascata (FK ondelete=CASCADE). Onboardings ligados tem o vinculo zerado
+    (ondelete=SET NULL), preservando os entregaveis do onboarding.
+    """
+    ids = list(dict.fromkeys(payload.ids))  # dedup preservando ordem
+    if not ids:
+        return {"deleted": 0, "requested": 0}
+
+    result = await db.execute(select(Client).where(Client.id.in_(ids)))
+    clients = result.scalars().all()
+    for client in clients:
+        await db.delete(client)
+    await db.commit()
+    return {"deleted": len(clients), "requested": len(ids)}
+
+
 @router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_client(
     client_id: int,
     current_user: User = Depends(allow_write),
     db: AsyncSession = Depends(deps.get_db),
 ):
+    """Exclui definitivamente o cliente (hard delete).
+
+    Dependentes (metricas/campanhas/integracoes/logs) caem em cascata; o
+    onboarding vinculado fica preservado com onboarding_id=NULL. Para apenas
+    pausar sem excluir, use PATCH is_active=false (fica como "Suspenso").
+    """
     client = await _get_client_or_404(db=db, client_id=client_id, for_update=True)
-    client.is_active = False
+    await db.delete(client)
     await db.commit()

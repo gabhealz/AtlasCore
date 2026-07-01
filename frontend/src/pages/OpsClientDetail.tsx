@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Settings, PlusCircle, Pencil, Calendar, FileText } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, ChevronDown, ChevronUp, Settings, PlusCircle, Pencil, Calendar, FileText, Trash2, Loader2, X } from 'lucide-react';
 
 function generateWeekOptions(count: number): Array<{ label: string; value: string }> {
   const today = new Date();
@@ -19,7 +19,7 @@ function generateWeekOptions(count: number): Array<{ label: string; value: strin
   }
   return options;
 }
-import { fetchClientDashboard } from '../lib/opsApi';
+import { fetchClientDashboard, deleteClient } from '../lib/opsApi';
 import type { ClientDashboard, CampaignSnapshot } from '../types/ops';
 import { formatCurrency, formatNumber, formatPct } from '../lib/formatters';
 import { KPICard } from '../components/ui/KPICard';
@@ -43,13 +43,29 @@ import {
 
 export function OpsClientDetail() {
   const { clientId } = useParams<{ clientId: string }>();
+  const navigate = useNavigate();
   const [data, setData] = useState<ClientDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showCampaigns, setShowCampaigns] = useState(false);
   const [showManual, setShowManual] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState<string>('');
+
+  const handleDelete = async () => {
+    if (!clientId) return;
+    setDeleting(true);
+    try {
+      await deleteClient(parseInt(clientId, 10));
+      navigate('/ops');
+    } catch {
+      setErrorMsg('Erro ao excluir o cliente. Tente novamente.');
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
 
   const weekOptions = useMemo(() => generateWeekOptions(16), []);
 
@@ -180,8 +196,58 @@ export function OpsClientDetail() {
             <Settings className="w-4 h-4 mr-2 text-subtle" />
             Integrações
           </Link>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            title="Excluir cliente"
+            className="inline-flex items-center px-4 py-2 border border-line rounded-md shadow-sm text-sm font-medium text-rose-600 bg-card hover:bg-rose-50 hover:border-rose-200 transition-colors"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Excluir
+          </button>
         </div>
       </div>
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-card border border-line rounded-2xl shadow-xl w-full max-w-md p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-rose-50">
+                  <Trash2 className="w-5 h-5 text-rose-600" />
+                </div>
+                <h3 className="text-lg font-bold text-ink">Excluir {client.name}?</h3>
+              </div>
+              <button
+                onClick={() => !deleting && setShowDeleteConfirm(false)}
+                className="text-subtle hover:text-ink"
+                aria-label="Fechar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="mt-4 text-sm text-muted">
+              Esta ação é <strong>permanente</strong> e remove também métricas, campanhas, integrações e logs vinculados. Os entregáveis do onboarding são preservados.
+            </p>
+            <div className="mt-6 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-line bg-card text-muted hover:bg-elevated disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50"
+              >
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {deleting ? 'Excluindo...' : 'Excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Week selector */}
       <div className="flex items-center gap-3">

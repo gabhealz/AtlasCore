@@ -83,6 +83,15 @@ class ClientResponse(ClientBase):
         return max(months, 0)
 
 
+class ClientBulkDeleteRequest(BaseModel):
+    ids: list[int]
+
+
+class ClientBulkDeleteResponse(BaseModel):
+    deleted: int
+    requested: int
+
+
 class ClientListEnvelope(BaseModel):
     data: list[ClientResponse]
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, DollarSign, Calendar, Activity, ChevronRight, TrendingUp, Plus, Download } from 'lucide-react';
-import { fetchOpsDashboard } from '../lib/opsApi';
+import { Search, DollarSign, Calendar, Activity, ChevronRight, TrendingUp, Plus, Download, Trash2, Loader2, X } from 'lucide-react';
+import { fetchOpsDashboard, deleteClient, bulkDeleteClients } from '../lib/opsApi';
 import type { ClientDashboard } from '../types/ops';
 import { formatCurrency, formatNumber } from '../lib/formatters';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -71,6 +71,9 @@ export function OpsDashboard() {
   const [sortField, setSortField] = useState<string>('activity');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selectedWeek, setSelectedWeek] = useState<string>('');
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [confirmDelete, setConfirmDelete] = useState<{ ids: number[]; names: string[] } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const weekOptions = useMemo(() => generateWeekOptions(12), []);
 
@@ -155,7 +158,75 @@ export function OpsDashboard() {
   const totalBookings = filteredData.reduce((acc, curr) => acc + (curr.current_week?.bookings || 0), 0);
   const averageRoi = totalSpend > 0 ? totalRevenue / totalSpend : 0;
 
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const filteredIds = filteredData.map((d) => d.client.id);
+  const allFilteredSelected = filteredIds.length > 0 && filteredIds.every((id) => selectedIds.has(id));
+
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allFilteredSelected) {
+        filteredIds.forEach((id) => next.delete(id));
+      } else {
+        filteredIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  const performDelete = async () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    try {
+      if (confirmDelete.ids.length === 1) {
+        await deleteClient(confirmDelete.ids[0]);
+      } else {
+        await bulkDeleteClients(confirmDelete.ids);
+      }
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        confirmDelete.ids.forEach((id) => next.delete(id));
+        return next;
+      });
+      setConfirmDelete(null);
+      load(selectedWeek || undefined);
+    } catch (err) {
+      setErrorMsg((err as { message?: string })?.message || String(err));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const columns = [
+    {
+      header: (
+        <input
+          type="checkbox"
+          aria-label="Selecionar todos"
+          checked={allFilteredSelected}
+          onChange={toggleSelectAll}
+          className="h-4 w-4 rounded border-line text-brand focus:ring-brand cursor-pointer"
+        />
+      ),
+      accessor: (row: ClientDashboard) => (
+        <input
+          type="checkbox"
+          aria-label={`Selecionar ${row.client.name}`}
+          checked={selectedIds.has(row.client.id)}
+          onChange={() => toggleSelect(row.client.id)}
+          className="h-4 w-4 rounded border-line text-brand focus:ring-brand cursor-pointer"
+        />
+      ),
+      className: 'w-10',
+    },
     {
       header: 'Cliente',
       accessor: (row: ClientDashboard) => (
@@ -209,12 +280,22 @@ export function OpsDashboard() {
     {
       header: '',
       accessor: (row: ClientDashboard) => (
-        <Link
-          to={`/ops/${row.client.id}`}
-          className="inline-flex items-center text-sm font-medium text-brand hover:text-brand-soft"
-        >
-          Detalhes <ChevronRight className="ml-1 w-4 h-4" />
-        </Link>
+        <div className="flex items-center justify-end gap-3">
+          <Link
+            to={`/ops/${row.client.id}`}
+            className="inline-flex items-center text-sm font-medium text-brand hover:text-brand-soft"
+          >
+            Detalhes <ChevronRight className="ml-1 w-4 h-4" />
+          </Link>
+          <button
+            onClick={() => setConfirmDelete({ ids: [row.client.id], names: [row.client.name] })}
+            title="Excluir cliente"
+            aria-label={`Excluir ${row.client.name}`}
+            className="p-1.5 rounded-lg text-subtle hover:text-rose-600 hover:bg-rose-50 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
       ),
       className: 'text-right'
     }
@@ -346,6 +427,34 @@ export function OpsDashboard() {
         </div>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between gap-3 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3">
+          <span className="text-sm font-medium text-rose-700">
+            {selectedIds.size} {selectedIds.size === 1 ? 'cliente selecionado' : 'clientes selecionados'}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="px-3 py-1.5 rounded-lg text-sm font-medium border border-line bg-card text-muted hover:bg-elevated"
+            >
+              Limpar seleção
+            </button>
+            <button
+              onClick={() => {
+                const rows = filteredData.filter((d) => selectedIds.has(d.client.id));
+                setConfirmDelete({
+                  ids: rows.map((d) => d.client.id),
+                  names: rows.map((d) => d.client.name),
+                });
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium bg-rose-600 text-white hover:bg-rose-700"
+            >
+              <Trash2 className="w-4 h-4" /> Excluir selecionados
+            </button>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="animate-pulse space-y-4">
           <div className="h-12 bg-elevated rounded-xl w-full"></div>
@@ -357,6 +466,57 @@ export function OpsDashboard() {
           columns={columns}
           keyExtractor={(row) => row.client.id}
         />
+      )}
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-card border border-line rounded-2xl shadow-xl w-full max-w-md p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-rose-50">
+                  <Trash2 className="w-5 h-5 text-rose-600" />
+                </div>
+                <h3 className="text-lg font-bold text-ink">
+                  Excluir {confirmDelete.ids.length === 1 ? 'cliente' : `${confirmDelete.ids.length} clientes`}?
+                </h3>
+              </div>
+              <button
+                onClick={() => !deleting && setConfirmDelete(null)}
+                className="text-subtle hover:text-ink"
+                aria-label="Fechar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="mt-4 text-sm text-muted">
+              Esta ação é <strong>permanente</strong> e remove também métricas, campanhas, integrações e logs vinculados. Os entregáveis do onboarding são preservados.
+            </p>
+            {confirmDelete.names.length > 0 && (
+              <div className="mt-3 max-h-32 overflow-y-auto rounded-lg bg-elevated border border-line px-3 py-2 text-sm text-ink">
+                {confirmDelete.names.map((n, i) => (
+                  <div key={i} className="truncate">• {n}</div>
+                ))}
+              </div>
+            )}
+            <div className="mt-6 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                disabled={deleting}
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-line bg-card text-muted hover:bg-elevated disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={performDelete}
+                disabled={deleting}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50"
+              >
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {deleting ? 'Excluindo...' : 'Excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

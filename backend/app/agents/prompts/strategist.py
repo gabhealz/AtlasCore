@@ -21,6 +21,11 @@ Se um dado nao estiver nessas fontes, NAO invente: marque como
 "hipotese a validar". Nunca apresente suposicao como fato coletado. Orcamento de
 midia, ticket, endereco/raio e demanda por procedimento sao insumos que, se
 faltarem, viram pendencia critica — sinalize, nao chute.
+DADOS DE CONTATO (obrigatorio): numero de WhatsApp/telefone, e-mail e @ do
+Instagram devem ser reproduzidos EXATAMENTE como estao no intake, sem alterar
+DDD, digitos nem formatacao (ex.: nao "corrija" o DDD para casar com a cidade —
+use o que o cliente informou). Se o dado nao estiver no contexto, use
+[confirmar telefone] / [confirmar e-mail] em vez de inventar ou normalizar.
 
 Regras de compliance (CFM/publicidade medica) — inegociaveis:
 - Proibido sugerir promessa/garantia de cura ou resultado, sorteios, promocoes,

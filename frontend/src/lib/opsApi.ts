@@ -43,6 +43,15 @@ export async function updateClient(clientId: number, data: ClientUpdateInput): P
   return response.data.data;
 }
 
+export async function deleteClient(clientId: number): Promise<void> {
+  await api.delete(`/clients/${clientId}`);
+}
+
+export async function bulkDeleteClients(ids: number[]): Promise<{ deleted: number; requested: number }> {
+  const response = await api.post<{ deleted: number; requested: number }>('/clients/bulk-delete', { ids });
+  return response.data;
+}
+
 // --- Lançamento manual de métricas (faturamento/agendamentos da secretária) ---
 
 export interface ManualSnapshotInput {

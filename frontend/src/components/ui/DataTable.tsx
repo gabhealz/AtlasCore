@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { cn } from './kpiUtils';
 
 export interface Column<T> {
-  header: string;
+  header: ReactNode;
   accessor: keyof T | ((row: T) => ReactNode);
   className?: string;
 }
