@@ -18,6 +18,11 @@ class IntakeField(BaseModel):
     multiline: bool = False
     # Campo critico para o metodo AQF (ex.: orcamento de midia) — destacado na UI.
     critical: bool = False
+    # Quando preenchido, o frontend renderiza um <select> (multipla escolha).
+    options: list[str] | None = None
+    # optional=True: campo que pode nao existir (ex.: CNPJ de pessoa fisica) —
+    # o frontend NAO marca como "lacuna" nem entra na contagem de pendencias.
+    optional: bool = False
 
 
 class IntakeGroup(BaseModel):
@@ -33,7 +38,11 @@ INTAKE_GROUPS: list[IntakeGroup] = [
         fields=[
             IntakeField(key="nome_completo", label="Nome completo"),
             IntakeField(key="crm", label="CRM", hint="numero do CRM com UF"),
-            IntakeField(key="rqe", label="RQE", hint="RQE da especialidade"),
+            IntakeField(
+                key="rqe",
+                label="RQE",
+                hint="RQE da especialidade — um ou mais, separe por virgula",
+            ),
             IntakeField(key="especialidade", label="Especialidade"),
             IntakeField(key="subespecialidade", label="Subespecialidade / foco"),
             IntakeField(key="email", label="E-mail"),
@@ -45,11 +54,13 @@ INTAKE_GROUPS: list[IntakeGroup] = [
         key="negocio",
         title="Dados do negocio / pessoa (secao 8)",
         fields=[
-            IntakeField(key="razao_social", label="Razao social"),
-            IntakeField(key="cnpj", label="CNPJ"),
-            IntakeField(key="cpf", label="CPF"),
-            IntakeField(key="rg", label="RG"),
-            IntakeField(key="data_nascimento", label="Data de nascimento"),
+            IntakeField(key="razao_social", label="Razao social", optional=True),
+            IntakeField(key="cnpj", label="CNPJ", optional=True),
+            IntakeField(key="cpf", label="CPF", optional=True),
+            IntakeField(key="rg", label="RG", optional=True),
+            IntakeField(
+                key="data_nascimento", label="Data de nascimento", optional=True
+            ),
         ],
     ),
     IntakeGroup(
@@ -75,8 +86,16 @@ INTAKE_GROUPS: list[IntakeGroup] = [
                 hint="bairros/regiao que pretende atingir; critico para segmentacao geo",
                 critical=True,
             ),
-            IntakeField(key="telemedicina", label="Faz teleconsulta?", hint="sim / nao"),
-            IntakeField(key="secretaria", label="Tem secretaria?", hint="sim / nao / Healz"),
+            IntakeField(
+                key="telemedicina",
+                label="Faz teleconsulta?",
+                options=["Sim", "Nao"],
+            ),
+            IntakeField(
+                key="secretaria",
+                label="Tem secretaria?",
+                options=["Sim", "Nao", "Healz"],
+            ),
         ],
     ),
     IntakeGroup(
@@ -112,7 +131,7 @@ INTAKE_GROUPS: list[IntakeGroup] = [
             IntakeField(
                 key="ficha_cadastral",
                 label="Exige ficha cadastral completa?",
-                hint="sim / nao / quais dados",
+                options=["Sim", "Nao"],
             ),
         ],
     ),
@@ -144,7 +163,7 @@ INTAKE_GROUPS: list[IntakeGroup] = [
             IntakeField(
                 key="foco_projeto",
                 label="Foco do projeto",
-                hint="captacao / autoridade / misto",
+                options=["Captacao", "Autoridade", "Misto"],
             ),
             IntakeField(key="meta_pacientes", label="Meta de pacientes/procedimentos por mes"),
             IntakeField(key="meta_faturamento", label="Meta de faturamento"),

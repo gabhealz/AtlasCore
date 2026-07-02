@@ -10,6 +10,8 @@ type IntakeField = {
   hint?: string;
   multiline?: boolean;
   critical?: boolean;
+  options?: string[];
+  optional?: boolean;
 };
 
 type IntakeGroup = {
@@ -64,7 +66,10 @@ export default function IntakeForm({ onboardingId, onChanged }: Props) {
   }, [load]);
 
   const missingCount = useMemo(() => {
-    const allKeys = groups.flatMap((group) => group.fields.map((field) => field.key));
+    // Campos opcionais (ex.: CNPJ de pessoa fisica) nao contam como lacuna.
+    const allKeys = groups.flatMap((group) =>
+      group.fields.filter((field) => !field.optional).map((field) => field.key),
+    );
     return allKeys.filter((key) => !(fields[key] ?? '').toString().trim()).length;
   }, [groups, fields]);
 
@@ -179,6 +184,11 @@ export default function IntakeForm({ onboardingId, onChanged }: Props) {
                 {group.fields.map((field) => {
                   const value = (fields[field.key] ?? '').toString();
                   const isEmpty = !value.trim();
+                  // Lacuna so para campos NAO opcionais.
+                  const showGap = isEmpty && !field.optional;
+                  const borderClass = showGap
+                    ? 'border-amber-300 bg-amber-50/40'
+                    : 'border-gray-300';
                   return (
                     <div
                       key={field.key}
@@ -191,21 +201,41 @@ export default function IntakeForm({ onboardingId, onChanged }: Props) {
                             critico
                           </span>
                         ) : null}
-                        {isEmpty ? (
+                        {field.optional ? (
+                          <span className="text-[10px] font-semibold uppercase text-gray-400">
+                            opcional
+                          </span>
+                        ) : null}
+                        {showGap ? (
                           <span className="text-[10px] font-semibold uppercase text-amber-600">
                             lacuna
                           </span>
                         ) : null}
                       </label>
-                      {field.multiline ? (
+                      {field.options && field.options.length > 0 ? (
+                        <select
+                          value={value}
+                          onChange={(event) => handleField(field.key)(event.target.value)}
+                          className={`mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:border-brand focus:ring-brand ${borderClass}`}
+                        >
+                          <option value="">Selecione...</option>
+                          {/* valor extraido que nao esta na lista de opcoes ainda aparece */}
+                          {value && !field.options.includes(value) ? (
+                            <option value={value}>{value}</option>
+                          ) : null}
+                          {field.options.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      ) : field.multiline ? (
                         <textarea
                           value={value}
                           onChange={(event) => handleField(field.key)(event.target.value)}
                           rows={2}
                           placeholder={field.hint}
-                          className={`mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:border-brand focus:ring-brand ${
-                            isEmpty ? 'border-amber-300 bg-amber-50/40' : 'border-gray-300'
-                          }`}
+                          className={`mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:border-brand focus:ring-brand ${borderClass}`}
                         />
                       ) : (
                         <input
@@ -213,9 +243,7 @@ export default function IntakeForm({ onboardingId, onChanged }: Props) {
                           value={value}
                           onChange={(event) => handleField(field.key)(event.target.value)}
                           placeholder={field.hint}
-                          className={`mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:border-brand focus:ring-brand ${
-                            isEmpty ? 'border-amber-300 bg-amber-50/40' : 'border-gray-300'
-                          }`}
+                          className={`mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:border-brand focus:ring-brand ${borderClass}`}
                         />
                       )}
                     </div>
@@ -225,7 +253,16 @@ export default function IntakeForm({ onboardingId, onChanged }: Props) {
             </fieldset>
           ))}
 
-          <div className="flex justify-end border-t border-gray-200 pt-5">
+          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 pt-5">
+            {message ? (
+              <span
+                className={`text-sm ${
+                  message.kind === 'ok' ? 'text-green-700' : 'text-red-700'
+                }`}
+              >
+                {message.text}
+              </span>
+            ) : null}
             <button
               type="button"
               onClick={handleSave}

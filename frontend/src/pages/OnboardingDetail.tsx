@@ -295,7 +295,7 @@ function getOnboardingStatusBadgeColor(status: string) {
     case 'PENDING':
       return 'bg-yellow-100 text-yellow-800';
     case 'RUNNING':
-      return 'bg-brand/10 text-brand-soft';
+      return 'bg-sky-100 text-sky-700';
     case 'AWAITING_REVIEW':
       return 'bg-amber-100 text-amber-800';
     case 'APPROVED':
@@ -1485,6 +1485,10 @@ export default function OnboardingDetail() {
         ? 'Tentar novamente'
         : resolvedPipelineStatus === 'PENDING'
         ? 'Gerar Benchmark'
+        : resolvedPipelineStatus === 'RUNNING'
+        ? 'Em execucao...'
+        : resolvedPipelineStatus === 'AWAITING_REVIEW'
+        ? 'Aguardando sua revisao'
         : 'Pipeline indisponivel neste estado';
   const pipelineConnectionLabel =
     getStreamConnectionLabel(pipelineConnectionStatus);
@@ -1493,7 +1497,10 @@ export default function OnboardingDetail() {
   const pipelineLastStepLabel = formatPipelineStepLabel(
     latestPipelineEvent?.step_name,
   );
-  const pipelineActivityLabel = getPipelineActivityLabel(latestPipelineEvent);
+  const pipelineActivityLabel =
+    resolvedPipelineStatus === 'RUNNING' && !latestPipelineEvent
+      ? 'A IA esta trabalhando...'
+      : getPipelineActivityLabel(latestPipelineEvent);
   const pipelineTriggerLabel = getPipelineTriggerLabel(latestPipelineEvent?.trigger);
   const pipelineLastUpdateLabel = formatDateTimeLabel(
     latestPipelineEvent?.created_at,
@@ -2038,8 +2045,11 @@ export default function OnboardingDetail() {
               </p>
             </div>
             <span
-              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${pipelineBadgeColor}`}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${pipelineBadgeColor}`}
             >
+              {resolvedPipelineStatus === 'RUNNING' ? (
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-sky-600 border-t-transparent" />
+              ) : null}
               {pipelineStatusLabel}
             </span>
           </div>
