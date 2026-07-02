@@ -10,7 +10,13 @@ interface OpsLtvPanelProps {
 
 function parseDate(str: string | undefined): Date | null {
   if (!str) return null;
-  const d = new Date(str);
+  // "YYYY-MM-DD" no construtor Date é interpretado como UTC e, no fuso do
+  // Brasil, volta um dia (01/06 virava 31/05 — junho sumia do gráfico).
+  // Parse manual em horário local resolve.
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(str);
+  const d = m
+    ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+    : new Date(str);
   return isNaN(d.getTime()) ? null : d;
 }
 
@@ -74,9 +80,8 @@ function ChurnChart({ clients, today }: { clients: ClientDashboard[]; today: Dat
     }
     for (const c of clients) {
       if (c.client.is_active) continue;
-      const endStr = c.client.contract_end_date || c.client.updated_at;
-      if (!endStr) continue;
-      const end = new Date(endStr);
+      const end = parseDate(c.client.contract_end_date || c.client.updated_at);
+      if (!end) continue;
       const key = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}`;
       const m = months.find((x) => x.key === key);
       if (m) m.churns += 1;

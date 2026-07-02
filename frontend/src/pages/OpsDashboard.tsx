@@ -39,7 +39,7 @@ function exportToCSV(rows: ClientDashboard[], weekLabel: string) {
   const csvRows = rows.map(r => [
     r.client.name,
     r.client.plan_name || '',
-    r.client.is_draft ? 'Rascunho' : r.client.is_active ? 'Ativo' : 'Suspenso',
+    r.client.is_draft ? 'Rascunho' : r.client.is_active ? 'Ativo' : r.client.contract_end_date ? 'Encerrado' : 'Suspenso',
     r.health_status,
     r.client.tenure_months ?? '',
     r.client.monthly_fee ?? '',
@@ -238,6 +238,11 @@ export function OpsDashboard() {
                 Rascunho
               </span>
             )}
+            {!row.client.is_active && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                {row.client.contract_end_date ? 'Encerrado' : 'Suspenso'}
+              </span>
+            )}
           </div>
           <div className="text-xs text-subtle">
             {row.client.specialty || row.client.plan_name || '—'}
@@ -395,7 +400,7 @@ export function OpsDashboard() {
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className="border border-line rounded-lg bg-card text-ink text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand">
           <option value="all">Todos os status</option>
           <option value="active">Ativos</option>
-          <option value="suspended">Suspensos</option>
+          <option value="suspended">Encerrados / Suspensos</option>
           <option value="draft">Rascunhos</option>
         </select>
         <select value={healthFilter} onChange={(e) => setHealthFilter(e.target.value as typeof healthFilter)} className="border border-line rounded-lg bg-card text-ink text-sm px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand">

@@ -133,16 +133,55 @@ async def _load_metrics_for_clients(
     return grouped
 
 
+async def _sync_contract_status(db: AsyncSession) -> None:
+    """Sincroniza is_active com o fim de contrato registrado no cadastro.
+
+    - Contrato vencido (contract_end_date < hoje) -> inativo (churn). Sem
+      isso, o cliente ficava "Ativo" para sempre mesmo apos o encerramento.
+    - Contrato renovado (contract_end_date volta para o futuro) -> reativa.
+      Suspensoes manuais (sem contract_end_date) nao sao tocadas.
+    """
+    today = date.today()
+    changed = False
+
+    expired_result = await db.execute(
+        select(Client).where(
+            Client.is_active == True,  # noqa: E712
+            Client.contract_end_date.is_not(None),
+            Client.contract_end_date < today,
+        )
+    )
+    for client in expired_result.scalars().all():
+        client.is_active = False
+        changed = True
+
+    renewed_result = await db.execute(
+        select(Client).where(
+            Client.is_active == False,  # noqa: E712
+            Client.contract_end_date.is_not(None),
+            Client.contract_end_date >= today,
+        )
+    )
+    for client in renewed_result.scalars().all():
+        client.is_active = True
+        changed = True
+
+    if changed:
+        await db.commit()
+
+
 @router.get("/dashboard", response_model=OpsDashboardEnvelope)
 async def get_ops_dashboard(
     week_start: Optional[date] = Query(default=None),
     current_user: User = Depends(allow_read),
     db: AsyncSession = Depends(deps.get_db),
 ):
-    # Load all active clients
-    clients_result = await db.execute(
-        select(Client).where(Client.is_active == True)  # noqa: E712
-    )
+    # Contratos vencidos viram churn / renovados reativam antes do painel
+    await _sync_contract_status(db)
+
+    # Load ALL clients (ativos e encerrados) — churn/retencao precisam dos
+    # encerrados; o frontend filtra por status na tabela.
+    clients_result = await db.execute(select(Client))
     clients = clients_result.scalars().all()
 
     if not clients:

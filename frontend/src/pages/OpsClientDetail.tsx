@@ -312,7 +312,9 @@ export function OpsClientDetail() {
         </div>
         <div>
           <div className="text-subtle">Situação</div>
-          <div className="text-ink font-medium">{client.is_active ? 'Ativo' : 'Suspenso'}</div>
+          <div className={`font-medium ${client.is_active ? 'text-ink' : 'text-rose-600'}`}>
+            {client.is_active ? 'Ativo' : client.contract_end_date ? `Encerrado em ${new Date(client.contract_end_date + 'T00:00:00').toLocaleDateString('pt-BR')}` : 'Suspenso'}
+          </div>
         </div>
       </div>
 

@@ -61,13 +61,21 @@ class ClientResponse(ClientBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+    def _tenure_end(self) -> date:
+        """Data de referência do tempo de casa: hoje, ou o fim do contrato
+        se já passou (cliente encerrado não acumula mais tenure/LTV)."""
+        today = date.today()
+        if self.contract_end_date and self.contract_end_date < today:
+            return self.contract_end_date
+        return today
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def tenure_days(self) -> int | None:
         """Dias desde o início do contrato (tempo de casa). Usado para LTV."""
         if not self.contract_start_date:
             return None
-        return (date.today() - self.contract_start_date).days
+        return max((self._tenure_end() - self.contract_start_date).days, 0)
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -75,10 +83,10 @@ class ClientResponse(ClientBase):
         """Meses completos desde o início do contrato (tempo de casa)."""
         if not self.contract_start_date:
             return None
-        today = date.today()
+        end = self._tenure_end()
         start = self.contract_start_date
-        months = (today.year - start.year) * 12 + (today.month - start.month)
-        if today.day < start.day:
+        months = (end.year - start.year) * 12 + (end.month - start.month)
+        if end.day < start.day:
             months -= 1
         return max(months, 0)
 
