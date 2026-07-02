@@ -656,14 +656,30 @@ def _build_market_seed_keywords(onboarding: Onboarding) -> list[str]:
     if not specialty:
         return []
 
-    return [
+    # Forma do ESPECIALISTA para termos de consulta (ex.: "neurologia" ->
+    # "neurologista"), que e como o paciente pesquisa; heuristica simples PT-BR.
+    prof = specialty
+    low = specialty.lower()
+    if low.endswith("logia"):
+        prof = specialty[: -len("logia")] + "logista"  # neurologia -> neurologista
+    elif low.endswith("ia") and not low.endswith("pediatria"):
+        prof = specialty[:-2] + "ista"  # cardiologia ja coberto acima; fallback
+
+    seeds = [
         specialty,
+        f"consulta {prof}",
+        f"{prof} particular",
         f"{specialty} preço",
-        f"consulta {specialty}",
-        f"{specialty} particular",
-        f"quanto custa {specialty}",
-        f"melhor {specialty}",
     ]
+    # Dedup preservando ordem (specialty e prof podem coincidir).
+    seen: set[str] = set()
+    out: list[str] = []
+    for s in seeds:
+        k = s.lower().strip()
+        if k and k not in seen:
+            seen.add(k)
+            out.append(s)
+    return out
 
 
 async def _build_market_data_context(
