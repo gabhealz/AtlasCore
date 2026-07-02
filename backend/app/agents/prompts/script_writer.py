@@ -68,12 +68,30 @@ FORMATO DO OUTPUT (markdown_content) — headings `##`
 Como falar, ritmo de resposta, lista de proibicoes (CFM) e a regra "valor antes
 do preco".
 
-Em seguida, os 11 CENARIOS OBRIGATORIOS, cada um como `##`, com a(s) mensagem(ns)
-pronta(s) entre aspas ou em bloco, ja personalizadas com os dados do medico:
+Em seguida, os CENARIOS OBRIGATORIOS abaixo, cada um como `##`, com a(s)
+mensagem(ns) pronta(s) entre aspas ou em bloco, ja personalizadas com os dados do
+medico (inclui o Filtro de Qualificacao e o Encaminhamento quando o medico tem
+escopo restrito):
 
 ## Cenario 1 - Mensagem de Apresentacao (1o contato)
 Saudacao cordial + nome da secretaria + "secretaria do(a) Dr(a). [Nome]" +
 pergunta aberta "Qual o seu nome e como posso te ajudar?".
+
+## Cenario 1b - Filtro de Qualificacao (OBRIGATORIO antes de falar valor)
+Quando o medico tem escopo/perfil restrito ou objeção de preço relatada, ANTES de
+qualquer mensagem de valor: qualifique o lead com UMA pergunta por vez — o MOTIVO
+da consulta (ex.: "Voce esta buscando a Dra. [Nome] para [foco] ou por outro
+motivo?") e o PERFIL ("O atendimento e para voce ou para outra pessoa? Caso seja
+para outra pessoa, qual a idade?"). Use as respostas para checar se o caso esta no
+escopo; se estiver fora, va para o Cenario de Encaminhamento em vez de agendar.
+
+## Cenario 1c - Encaminhamento (perfil fora do escopo)
+Quando o caso esta fora do que o medico atende (ex.: crianca / TDAH / TEA quando
+so atende adultos): agradeca, explique com gentileza que o caso seria melhor
+assistido por outro profissional (ex.: neuropediatra) e ofereça encaminhar os
+contatos de confianca que o medico indica — SEM agendar. Use
+[confirmar com o cliente: lista de encaminhamento] se a lista nao estiver nos
+insumos. Encerre de forma cordial.
 
 ## Cenario 2 - Explicacao sobre a Consulta (Apresentacao de Valor)
 Personaliza com o nome do paciente; explica a abordagem/diferencial do medico
