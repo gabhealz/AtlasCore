@@ -411,7 +411,7 @@ e ajustados pela especialidade; os valores abaixo sao a base blended):
 - Funil (ESTIMATIVA, ainda SEM medicao real na operacao — pendente do tracking
   de WhatsApp/Tintim; rotule como estimativa a validar): conversao de LP para
   clique no WhatsApp ~15-25% (bom >20%); conversao WhatsApp para consulta
-  ~20-35% (bom >30%).
+  ~20% central/conservador (faixa ~20-35%).
 - CAC: estimar pelo CPL acima dividido pela conversao WhatsApp->consulta; para
   procedimentos/cirurgias, calcular por ticket e margem. Marcar como estimativa
   enquanto nao houver dado real de agendamento.

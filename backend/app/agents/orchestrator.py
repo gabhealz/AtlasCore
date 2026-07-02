@@ -671,6 +671,7 @@ async def _build_market_data_context(
     *,
     city: str | None = None,
     keywords: list[str] | None = None,
+    focus: str | None = None,
     db: AsyncSession | None = None,
 ) -> str | None:
     """Coleta dados de mercado reais e os renderiza para injetar no prompt.
@@ -682,11 +683,22 @@ async def _build_market_data_context(
     (pay-per-result) na telemetria para somar ao custo do onboarding.
     """
     seed_keywords = keywords if keywords else _build_market_seed_keywords(onboarding)
+    # Query de concorrentes (Apify Maps) e termos Meta usam a ESPECIALIDADE + FOCO
+    # (subespecialidade), para achar os concorrentes do NICHO (ex.: "neurologia
+    # epilepsia") em vez dos da especialidade ampla. As seeds do DataForSEO e o
+    # lookup de benchmark seguem na especialidade ampla (volume/CPC mais limpos).
+    base_specialty = (onboarding.specialty or "").strip()
+    focus_clean = (focus or "").strip()
+    market_specialty = (
+        f"{base_specialty} {focus_clean}".strip()
+        if focus_clean and focus_clean.lower() not in base_specialty.lower()
+        else base_specialty
+    ) or None
     try:
         collected = await collect_market_data(
-            specialty=onboarding.specialty,
+            specialty=market_specialty,
             keywords=seed_keywords,
-            meta_search_terms=onboarding.specialty,
+            meta_search_terms=market_specialty,
             city=city,
         )
     except Exception:  # noqa: BLE001 - coleta e best-effort, nunca bloqueia
@@ -2052,10 +2064,16 @@ async def bootstrap_pipeline(
                     detected_city = (
                         intake_fields_for_market.get("cidade") or ""
                     ).strip() or None
+                # Foco/subespecialidade (ex.: epilepsia) direciona a busca de
+                # concorrentes para o NICHO — a cliente disse que o foco era esse.
+                market_focus = (
+                    intake_fields_for_market.get("subespecialidade") or ""
+                ).strip() or None
                 step_specific_context = await _build_market_data_context(
                     onboarding,
                     city=detected_city,
                     keywords=detected_keywords,
+                    focus=market_focus,
                     db=db,
                 )
             elif current_step.output_kind == "html":
