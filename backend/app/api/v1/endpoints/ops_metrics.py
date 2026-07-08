@@ -296,6 +296,9 @@ async def get_client_dashboard(
     current_user: User = Depends(allow_read),
     db: AsyncSession = Depends(deps.get_db),
 ):
+    # Mesma sincronizacao da lista: contrato vencido -> inativo, renovado -> reativa
+    await _sync_contract_status(db)
+
     client_result = await db.execute(select(Client).where(Client.id == client_id))
     client = client_result.scalars().first()
     if not client:
