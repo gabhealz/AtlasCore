@@ -119,6 +119,8 @@ class Settings(BaseSettings):
 
     # Email (Brevo transactional API)
     BREVO_API_KEY: str = ""
+    # Segredo compartilhado com o Vendly CRM: negócio ganho lá vira cliente aqui.
+    CRM_WEBHOOK_SECRET: str = ""
     # URL base da aplicação frontend (usada em links de email)
     APP_BASE_URL: str = "https://atlas.healz.com.br"
 

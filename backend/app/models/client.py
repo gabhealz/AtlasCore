@@ -1,4 +1,5 @@
 from sqlalchemy import Boolean, Column, Date, DateTime, Integer, Numeric, String, ForeignKey
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -28,6 +29,11 @@ class Client(Base):
     ga4_measurement_id = Column(String, nullable=True)  # GA4 Measurement ID (G-...) referência
     tintim_id = Column(String, nullable=True)
     onboarding_id = Column(Integer, ForeignKey("onboardings.id", ondelete="SET NULL"), nullable=True, unique=True)
+    # Cliente que nasceu de um negócio ganho no CRM. O id do negócio é único
+    # pra reentrega do webhook não duplicar cadastro; o payload guarda o que
+    # veio junto (etapas, comunicações, produto).
+    crm_deal_id = Column(String, nullable=True, unique=True)
+    crm_payload = Column(JSONB, nullable=True)
     active_platforms = Column(String, default="meta,google")
     is_active = Column(Boolean, default=True)
     # Rascunho criado automaticamente ao finalizar um onboarding (faltam dados/integrações).

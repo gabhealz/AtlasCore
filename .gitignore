@@ -67,3 +67,6 @@ backend/*_test.py
 crm-integrations-*.json
 *gserviceaccount*.json
 *-service-account*.json
+
+# Override de portas da maquina local
+docker-compose.override.yml
