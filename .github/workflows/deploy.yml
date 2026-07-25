@@ -56,8 +56,31 @@ jobs:
         env:
           PRODUCTION_ENV: ${{ secrets.PRODUCTION_ENV }}
         run: |
+          # O .env da VPS foi montado na mao e tem tudo que o Atlas precisa pra
+          # subir. Se o secret vier vazio, sobrescrever apagaria o arquivo
+          # inteiro e derrubaria a aplicacao. Nesse caso e melhor manter o que
+          # ja esta la e deixar o deploy seguir.
+          if [ -z "$(printf '%s' "$PRODUCTION_ENV" | tr -d '[:space:]')" ]; then
+            echo "PRODUCTION_ENV vazio. Mantendo o .env que ja existe na VPS."
+            exit 0
+          fi
           printf '%s\n' "$PRODUCTION_ENV" | ssh -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
             "cd '${{ secrets.DEPLOY_PATH }}' && umask 077 && cat > .env"
+
+      - name: Ensure CRM webhook secret
+        env:
+          CRM_WEBHOOK_SECRET: ${{ secrets.CRM_WEBHOOK_SECRET }}
+        run: |
+          # Integracao com o Vendly CRM: negocio ganho la vira cliente aqui.
+          # Fica em secret proprio, e nao dentro do PRODUCTION_ENV, pra
+          # sobreviver a qualquer reescrita do .env feita acima. O valor vai
+          # por stdin pra nao aparecer na lista de processos da VPS.
+          if [ -z "$CRM_WEBHOOK_SECRET" ]; then
+            echo "CRM_WEBHOOK_SECRET nao configurado. Integracao com o CRM fica desligada."
+            exit 0
+          fi
+          printf 'CRM_WEBHOOK_SECRET=%s\n' "$CRM_WEBHOOK_SECRET" | ssh -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "cd '${{ secrets.DEPLOY_PATH }}' && umask 077 && sed -i '/^CRM_WEBHOOK_SECRET=/d' .env && cat >> .env"
 
       - name: Deploy containers
         run: |
